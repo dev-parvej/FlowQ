@@ -134,18 +134,27 @@ $form_action = $is_editing ? 'update_question' : 'create_question';
                                     </select>
                                 </div>
 
-                                <div class="form-field">
-                                    <label class="field-label">
-                                        <?php echo esc_html__('Redirect URL', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
-                                        <span class="help-tooltip" data-tooltip="<?php echo esc_attr__('Optional: Redirect to an external URL when this answer is selected (instead of continuing the survey).', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
-                                            <span class="dashicons dashicons-editor-help"></span>
-                                        </span>
-                                    </label>
-                                    <input type="url"
-                                           name="answer_redirect_url[]"
-                                           class="full-width-input"
-                                           value="<?php echo esc_attr($answer['redirect_url']); ?>"
-                                           placeholder="<?php echo esc_attr__('https://example.com/thank-you', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
+                                <!-- Advanced Options Toggle -->
+                                <div class="advanced-options-section">
+                                    <button type="button" class="advanced-options-toggle" data-collapsed="true">
+                                        <span class="dashicons dashicons-arrow-right-alt2"></span>
+                                        <?php echo esc_html__('Advanced Options', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                    </button>
+                                    <div class="advanced-options-content" style="display: none;">
+                                        <div class="form-field">
+                                            <label class="field-label">
+                                                <?php echo esc_html__('Redirect URL', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                                <span class="help-tooltip" data-tooltip="<?php echo esc_attr__('Optional: Redirect to an external URL when this answer is selected (instead of continuing the survey).', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
+                                                    <span class="dashicons dashicons-editor-help"></span>
+                                                </span>
+                                            </label>
+                                            <input type="url"
+                                                   name="answer_redirect_url[]"
+                                                   class="full-width-input"
+                                                   value="<?php echo esc_attr($answer['redirect_url']); ?>"
+                                                   placeholder="<?php echo esc_attr__('https://example.com/thank-you', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -215,17 +224,26 @@ $form_action = $is_editing ? 'update_question' : 'create_question';
                 </select>
             </div>
 
-            <div class="form-field">
-                <label class="field-label">
-                    <?php echo esc_html__('Redirect URL', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
-                    <span class="help-tooltip" data-tooltip="<?php echo esc_attr__('Optional: Redirect to an external URL when this answer is selected (instead of continuing the survey).', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
-                        <span class="dashicons dashicons-editor-help"></span>
-                    </span>
-                </label>
-                <input type="url"
-                       name="answer_redirect_url[]"
-                       class="full-width-input"
-                       placeholder="<?php echo esc_attr__('https://example.com/thank-you', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
+            <!-- Advanced Options Toggle -->
+            <div class="advanced-options-section">
+                <button type="button" class="advanced-options-toggle" data-collapsed="true">
+                    <span class="dashicons dashicons-arrow-right-alt2"></span>
+                    <?php echo esc_html__('Advanced Options', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                </button>
+                <div class="advanced-options-content" style="display: none;">
+                    <div class="form-field">
+                        <label class="field-label">
+                            <?php echo esc_html__('Redirect URL', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                            <span class="help-tooltip" data-tooltip="<?php echo esc_attr__('Optional: Redirect to an external URL when this answer is selected (instead of continuing the survey).', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
+                                <span class="dashicons dashicons-editor-help"></span>
+                            </span>
+                        </label>
+                        <input type="url"
+                               name="answer_redirect_url[]"
+                               class="full-width-input"
+                               placeholder="<?php echo esc_attr__('https://example.com/thank-you', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -288,6 +306,27 @@ jQuery(document).ready(function($) {
             $preview.text(text);
         } else {
             $preview.text('<?php echo esc_js(__('New Answer Option', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>');
+        }
+    });
+
+    // Advanced Options Toggle
+    $(document).on('click', '.advanced-options-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var $toggle = $(this);
+        var $content = $toggle.siblings('.advanced-options-content');
+        var $icon = $toggle.find('.dashicons');
+        var isCollapsed = $toggle.data('collapsed');
+
+        if (isCollapsed) {
+            $content.slideDown(200);
+            $icon.removeClass('dashicons-arrow-right-alt2').addClass('dashicons-arrow-down-alt2');
+            $toggle.data('collapsed', false);
+        } else {
+            $content.slideUp(200);
+            $icon.removeClass('dashicons-arrow-down-alt2').addClass('dashicons-arrow-right-alt2');
+            $toggle.data('collapsed', true);
         }
     });
 
@@ -402,6 +441,10 @@ jQuery(document).ready(function($) {
     font-size: 16px;
     color: #646970;
     transition: color 0.2s ease;
+}
+
+.dashicons-arrow-right-alt2 {
+    margin-top: 6px;
 }
 
 .help-tooltip:hover .dashicons {
@@ -563,6 +606,40 @@ jQuery(document).ready(function($) {
 
 .collapse-toggle .dashicons {
     transition: transform 0.2s ease;
+}
+
+/* Advanced Options */
+.advanced-options-section {
+    margin-top: 12px;
+    border-top: 1px solid #f0f0f1;
+    padding-top: 12px;
+}
+
+.advanced-options-toggle {
+    background: none;
+    border: none;
+    color: #646970;
+    font-size: 13px;
+    padding: 4px 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s ease;
+}
+
+.advanced-options-toggle:hover {
+    color: #2271b1;
+}
+
+.advanced-options-toggle .dashicons {
+    font-size: 16px;
+    transition: transform 0.2s ease;
+}
+
+.advanced-options-content {
+    margin-top: 8px;
+    padding-top: 8px;
 }
 
 /* Buttons */
