@@ -13,7 +13,22 @@ $is_editing = !empty($question_data);
 $page_title = $is_editing ? __('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('Manage Questions', WP_DYNAMIC_SURVEY_TEXT_DOMAIN);
 ?>
 <div class="wrap">
-    <h1><?php echo esc_html($page_title); ?></h1>
+    <div class="page-header-with-back">
+        <h1><?php echo esc_html($page_title); ?></h1>
+        <?php
+        // Determine back button URL and text
+        if ($selected_survey_id && !empty($survey)) {
+            $back_url = admin_url('admin.php?page=wp-dynamic-surveys-add&survey_id=' . $selected_survey_id);
+            $back_text = sprintf(__('← Back to Edit "%s"', WP_DYNAMIC_SURVEY_TEXT_DOMAIN), esc_html($survey['title']));
+        } else {
+            $back_url = admin_url('admin.php?page=wp-dynamic-surveys');
+            $back_text = __('← Back to Surveys', WP_DYNAMIC_SURVEY_TEXT_DOMAIN);
+        }
+        ?>
+        <a href="<?php echo esc_url($back_url); ?>" class="page-title-action back-button">
+            <?php echo esc_html($back_text); ?>
+        </a>
+    </div>
 
     <?php if (empty($surveys)): ?>
         <div class="notice notice-warning">
@@ -52,15 +67,6 @@ $page_title = $is_editing ? __('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) :
         </div>
 
         <?php if ($survey): ?>
-            <hr>
-
-            <!-- Survey Info -->
-            <div class="survey-info-section">
-                <h2><?php echo esc_html__('Survey:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?> <?php echo esc_html($survey['title']); ?></h2>
-                <p class="description"><?php echo esc_html($survey['description']); ?></p>
-                <p><strong><?php echo esc_html__('Status:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></strong> <?php echo esc_html(ucfirst($survey['status'])); ?></p>
-            </div>
-
             <?php if ($is_editing): ?>
                 <!-- Edit Question Form -->
                 <div class="question-form-section">
@@ -323,6 +329,54 @@ jQuery(document).ready(function($) {
 </script>
 
 <style>
+/* Page header with back button */
+.page-header-with-back {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.page-header-with-back h1 {
+    margin: 0;
+    flex-grow: 1;
+}
+
+.back-button {
+    background: none !important;
+    border: none !important;
+    color: #2271b1 !important;
+    text-decoration: none !important;
+    padding: 0 !important;
+    font-size: 13px !important;
+    margin-left: 15px;
+    transition: color 0.2s ease;
+}
+
+.back-button:hover {
+    color: #135e96 !important;
+    text-decoration: underline !important;
+}
+
+.back-button:focus {
+    color: #135e96 !important;
+    text-decoration: underline !important;
+    outline: 1px dotted #2271b1 !important;
+}
+
+@media screen and (max-width: 782px) {
+    .page-header-with-back {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .back-button {
+        margin-left: 0;
+        align-self: flex-start;
+    }
+}
+
 .question-form-section {
     transition: all 0.3s ease;
 }

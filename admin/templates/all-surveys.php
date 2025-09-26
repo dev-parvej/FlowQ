@@ -73,18 +73,20 @@ if (!defined('ABSPATH')) {
                                 <span class="questions">
                                     <a href="<?php echo esc_url(admin_url('admin.php?page=wp-dynamic-surveys-questions&survey_id=' . $survey['id'])); ?>">
                                         <?php echo esc_html__('Manage Questions', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
-                                    </a> |
+                                    </a>
                                 </span>
 
+                                <?php if ($survey['status'] === 'published'): ?>
                                 <span class="view">
-                                    <a href="<?php echo esc_url(admin_url('admin.php?page=wp-dynamic-surveys-analytics&survey_id=' . $survey['id'])); ?>">
+                                    |<a href="<?php echo esc_url(admin_url('admin.php?page=wp-dynamic-surveys-analytics&survey_id=' . $survey['id'])); ?>">
                                         <?php echo esc_html__('Analytics', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
-                                    </a><?php if ($survey['status'] !== 'published'): ?> |<?php endif; ?>
+                                    </a>
                                 </span>
+                                <?php endif; ?>
 
                                 <?php if ($survey['status'] !== 'published'): ?>
                                 <span class="trash">
-                                    <a href="<?php echo esc_url(wp_nonce_url(admin_url('admin-post.php?action=wp_dynamic_survey_survey_action&survey_action=delete&survey_id=' . $survey['id']), 'survey_action')); ?>"
+                                     |<a href="<?php echo esc_url(wp_nonce_url(admin_url('admin-post.php?action=wp_dynamic_survey_survey_action&survey_action=delete&survey_id=' . $survey['id']), 'survey_action')); ?>"
                                        onclick="return confirm('<?php echo esc_html__('Are you sure you want to delete this survey? This action cannot be undone.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>')">
                                         <?php echo esc_html__('Delete', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
                                     </a>

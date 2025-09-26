@@ -15,7 +15,12 @@ $page_title = $is_edit ? __('Edit Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('
 ?>
 
 <div class="wrap">
-    <h1><?php echo esc_html($page_title); ?></h1>
+    <div class="page-header-with-back">
+        <h1><?php echo esc_html($page_title); ?></h1>
+        <a href="<?php echo esc_url(admin_url('admin.php?page=wp-dynamic-surveys')); ?>" class="page-title-action back-button">
+            <?php echo esc_html__('← Back to Surveys', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+        </a>
+    </div>
 
     <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
         <input type="hidden" name="action" value="wp_dynamic_survey_save_survey">
@@ -25,129 +30,594 @@ $page_title = $is_edit ? __('Edit Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('
             <input type="hidden" name="survey_id" value="<?php echo esc_attr($survey['id']); ?>">
         <?php endif; ?>
 
-        <table class="form-table" role="presentation">
-            <tbody>
-                <tr>
-                    <th scope="row">
-                        <label for="survey_title"><?php echo esc_html__('Survey Title', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></label>
-                    </th>
-                    <td>
-                        <input type="text"
-                               id="survey_title"
-                               name="survey_title"
-                               class="regular-text"
-                               value="<?php echo esc_attr($survey['title'] ?? ''); ?>"
-                               required>
-                        <p class="description">
-                            <?php echo esc_html__('Enter a descriptive title for your survey.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
-                        </p>
-                    </td>
-                </tr>
+        <!-- Survey Details Card -->
+        <div class="survey-card">
+            <h3 class="card-title"><?php echo esc_html__('Survey Details', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h3>
+            <div class="card-content">
+                <div class="form-field">
+                    <label for="survey_title" class="field-label">
+                        <?php echo esc_html__('Survey Title', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        <span class="help-tooltip" data-tooltip="<?php echo esc_attr__('Enter a descriptive title for your survey. This will be displayed to participants.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
+                            <span class="dashicons dashicons-editor-help"></span>
+                        </span>
+                    </label>
+                    <input type="text"
+                           id="survey_title"
+                           name="survey_title"
+                           class="full-width-input"
+                           value="<?php echo esc_attr($survey['title'] ?? ''); ?>"
+                           placeholder="<?php echo esc_attr__('Enter your survey title...', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>"
+                           required>
+                </div>
 
-                <tr>
-                    <th scope="row">
-                        <label for="survey_description"><?php echo esc_html__('Description', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></label>
-                    </th>
-                    <td>
-                        <textarea id="survey_description"
-                                  name="survey_description"
-                                  class="large-text"
-                                  rows="4"><?php echo esc_textarea($survey['description'] ?? ''); ?></textarea>
-                        <p class="description">
-                            <?php echo esc_html__('Optional description of what this survey is about.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
-                        </p>
-                    </td>
-                </tr>
+                <div class="form-field">
+                    <label for="survey_description" class="field-label">
+                        <?php echo esc_html__('Description', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        <span class="help-tooltip" data-tooltip="<?php echo esc_attr__('Optional description explaining what this survey is about. Participants will see this before starting.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
+                            <span class="dashicons dashicons-editor-help"></span>
+                        </span>
+                    </label>
+                    <textarea id="survey_description"
+                              name="survey_description"
+                              class="full-width-textarea"
+                              rows="4"
+                              placeholder="<?php echo esc_attr__('Describe what this survey is about...', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>"><?php echo esc_textarea($survey['description'] ?? ''); ?></textarea>
+                </div>
+            </div>
+        </div>
 
-                <tr>
-                    <th scope="row">
-                        <label for="thank_you_page_slug"><?php echo esc_html__('Thank You Page Slug', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></label>
-                    </th>
-                    <td>
+        <!-- Page Settings Card -->
+        <div class="survey-card">
+            <h3 class="card-title"><?php echo esc_html__('Page Settings', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h3>
+            <div class="card-content">
+                <div class="form-field">
+                    <label for="thank_you_page_slug" class="field-label">
+                        <?php echo esc_html__('Thank You Page Slug', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        <span class="help-tooltip" data-tooltip="<?php echo esc_attr__('Optional: Specify an existing published page slug. After completion, participants get a secure token to access this page (expires in 1 hour).', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
+                            <span class="dashicons dashicons-editor-help"></span>
+                        </span>
+                    </label>
+                    <div class="input-with-action">
                         <input type="text"
                                id="thank_you_page_slug"
                                name="thank_you_page_slug"
-                               class="regular-text"
+                               class="full-width-input"
                                value="<?php echo esc_attr($survey['thank_you_page_slug'] ?? ''); ?>"
-                               placeholder="my-custom-thank-you-page">
-                        <p class="description">
-                            <?php echo esc_html__('Optional: Create a published page with your thank you message. After a survey is completed, a unique token is generated. The user can only access the thank you page with that token, and it expires in 1 hour.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
-                        </p>
-                    </td>
-                </tr>
+                               placeholder="<?php echo esc_attr__('my-custom-thank-you-page', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
+                        <?php if (!empty($survey['thank_you_page_slug'])): ?>
+                            <?php
+                            $thank_you_page = get_page_by_path($survey['thank_you_page_slug']);
+                            $edit_url = $thank_you_page
+                                ? admin_url('post.php?post=' . $thank_you_page->ID . '&action=edit')
+                                : admin_url('edit.php?post_type=page&s=' . urlencode($survey['thank_you_page_slug']));
+                            ?>
+                            <a href="<?php echo esc_url($edit_url); ?>"
+                               class="button button-secondary edit-page-button"
+                               target="_blank">
+                                <span class="dashicons dashicons-edit"></span>
+                                <?php echo esc_html__('Edit Page', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                </div>
 
-                <tr>
-                    <th scope="row">
-                        <label for="survey_status"><?php echo esc_html__('Status', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></label>
-                    </th>
-                    <td>
-                        <select id="survey_status" name="survey_status">
-                            <option value="draft" <?php selected($survey['status'] ?? 'draft', 'draft'); ?>>
-                                <?php echo esc_html__('Draft', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
-                            </option>
-                            <option value="published" <?php selected($survey['status'] ?? '', 'published'); ?>>
-                                <?php echo esc_html__('Published', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
-                            </option>
-                            <option value="archived" <?php selected($survey['status'] ?? '', 'archived'); ?>>
-                                <?php echo esc_html__('Archived', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
-                            </option>
-                        </select>
-                        <p class="description">
-                            <?php echo esc_html__('Only published surveys are accessible to participants.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
-                        </p>
-                    </td>
-                </tr>
+                <div class="form-field">
+                    <label for="survey_status" class="field-label">
+                        <?php echo esc_html__('Status', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        <span class="help-tooltip" data-tooltip="<?php echo esc_attr__('Draft: Hidden from participants. Published: Live and accessible. Archived: No longer accepting responses.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
+                            <span class="dashicons dashicons-editor-help"></span>
+                        </span>
+                    </label>
+                    <select id="survey_status" name="survey_status" class="status-select">
+                        <option value="draft" <?php selected($survey['status'] ?? 'draft', 'draft'); ?>>
+                            <?php echo esc_html__('Draft', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        </option>
+                        <option value="published" <?php selected($survey['status'] ?? '', 'published'); ?>>
+                            <?php echo esc_html__('Published', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        </option>
+                        <option value="archived" <?php selected($survey['status'] ?? '', 'archived'); ?>>
+                            <?php echo esc_html__('Archived', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        </option>
+                    </select>
+                </div>
+            </div>
+        </div>
 
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <div class="primary-actions">
+                <button type="submit" name="submit" class="button button-primary-custom">
+                    <?php echo $is_edit ? __('Update Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('Create Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                </button>
                 <?php if ($is_edit): ?>
+                    <a href="<?php echo esc_url(admin_url('admin.php?page=wp-dynamic-surveys-questions&survey_id=' . $survey['id'])); ?>" class="button button-secondary-custom">
+                        <span class="dashicons dashicons-edit"></span>
+                        <?php echo esc_html__('Manage Questions', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                    </a>
                 <?php endif; ?>
-
-
-            </tbody>
-        </table>
-
-        <?php submit_button($is_edit ? __('Update Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('Create Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>
+            </div>
+        </div>
     </form>
 
     <?php if ($is_edit): ?>
-        <hr>
-        <h2><?php echo esc_html__('Manage Questions', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h2>
-        <p>
-            <a href="<?php echo esc_url(admin_url('admin.php?page=wp-dynamic-surveys-questions&survey_id=' . $survey['id'])); ?>" class="button button-primary">
-                <?php echo esc_html__('Manage Questions', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
-            </a>
-            <span class="description">
-                <?php echo sprintf(__('This survey has %d question(s). Use the questions manager to add, edit, or remove questions.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN), count($questions)); ?>
-            </span>
-        </p>
+        <!-- Survey Actions Card -->
+        <div class="survey-card actions-card">
+            <h3 class="card-title"><?php echo esc_html__('Survey Actions', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h3>
+            <div class="card-content">
+                <?php if ($survey['status'] === 'published'): ?>
+                    <!-- Analytics Section -->
+                    <div class="action-section">
+                        <div class="action-item">
+                            <a href="<?php echo esc_url(admin_url('admin.php?page=wp-dynamic-surveys-analytics&survey_id=' . $survey['id'])); ?>"
+                               class="button button-secondary-custom analytics-button">
+                                <span class="dashicons dashicons-chart-bar"></span>
+                                <?php echo esc_html__('View Analytics', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                            </a>
+                        </div>
+                    </div>
 
-        <hr>
+                    <!-- Shortcode Section -->
+                    <div class="action-section">
+                        <label class="field-label"><?php echo esc_html__('Shortcode', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></label>
+                        <div class="shortcode-container form-field">
+                            <input type="text"
+                                   id="shortcode-input"
+                                   class="shortcode-input"
+                                   value="<?php echo esc_attr('[wp_dynamic_survey id="' . $survey['id'] . '"]'); ?>"
+                                   readonly>
+                            <button type="button" class="button copy-button" onclick="copyShortcode()">
+                                <span class="dashicons dashicons-clipboard"></span>
+                                <?php echo esc_html__('Copy', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                            </button>
+                        </div>
+                        <p class="field-description">
+                            <?php echo esc_html__('Use this shortcode to embed the survey in any post or page.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        </p>
+                    </div>
+                <?php endif; ?>
 
-        <h2><?php echo esc_html__('Survey Actions', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h2>
-        <p>
-            <a href="<?php echo esc_url(admin_url('admin.php?page=wp-dynamic-surveys-analytics&survey_id=' . $survey['id'])); ?>"
-               class="button button-secondary">
-                <?php echo esc_html__('View Analytics', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
-            </a>
-
-            <?php if ($survey['status'] === 'published'): ?>
-                 &nbsp;Shortcode: &nbsp;
-                <input type="text" class="" style="width: 212px;" value="<?php echo esc_js('[wp_dynamic_survey id="' . $survey['id'] . '"]'); ?>" />
-            <?php endif; ?>
-
-            <a href="<?php echo esc_url(wp_nonce_url(admin_url('admin.php?page=wp-dynamic-surveys&action=delete&survey_id=' . $survey['id']), 'survey_action')); ?>"
-               class="button button-link-delete"
-               onclick="return confirm('<?php echo esc_html__('Are you sure you want to delete this survey? This action cannot be undone.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>')">
-                <?php echo esc_html__('Delete Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
-            </a>
-        </p>
+                <?php if ($survey['status'] !== 'published'): ?>
+                <!-- Danger Zone -->
+                <div class="action-section danger-zone">
+                    <label class="field-label danger-label"><?php echo esc_html__('Danger Zone', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></label>
+                    <div class="danger-actions">
+                        <a href="<?php echo esc_url(wp_nonce_url(admin_url('admin.php?page=wp-dynamic-surveys&action=delete&survey_id=' . $survey['id']), 'survey_action')); ?>"
+                           class="button button-danger"
+                           onclick="return confirm('<?php echo esc_html__('Are you sure you want to delete this survey? This action cannot be undone.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>')">
+                            <span class="dashicons dashicons-trash"></span>
+                            <?php echo esc_html__('Delete Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        </a>
+                        <span class="danger-description"><?php echo esc_html__('This action cannot be undone.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
+                    </div>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
     <?php endif; ?>
 </div>
 
+<style>
+/* Page header with back button */
+.page-header-with-back {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.page-header-with-back h1 {
+    margin: 0;
+    flex-grow: 1;
+}
+
+.back-button {
+    background: none !important;
+    border: none !important;
+    color: #2271b1 !important;
+    text-decoration: none !important;
+    padding: 0 !important;
+    font-size: 13px !important;
+    margin-left: 15px;
+    transition: color 0.2s ease;
+}
+
+.back-button:hover {
+    color: #135e96 !important;
+    text-decoration: underline !important;
+}
+
+.back-button:focus {
+    color: #135e96 !important;
+    text-decoration: underline !important;
+    outline: 1px dotted #2271b1 !important;
+}
+
+/* Card Layout */
+.survey-card {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    margin-bottom: 20px;
+    overflow: hidden;
+    transition: box-shadow 0.2s ease;
+}
+
+.survey-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.card-title {
+    background: #f6f7f7;
+    border-bottom: 1px solid #c3c4c7;
+    margin: 0;
+    padding: 15px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+.card-content {
+    padding: 20px;
+}
+
+/* Form Fields */
+.form-field {
+    margin-bottom: 24px;
+}
+
+.form-field:last-child {
+    margin-bottom: 0;
+}
+
+.field-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1d2327;
+    margin-bottom: 6px;
+}
+
+/* Help Tooltips */
+.help-tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: help;
+}
+
+.help-tooltip .dashicons {
+    font-size: 16px;
+    color: #646970;
+    transition: color 0.2s ease;
+}
+
+.help-tooltip:hover .dashicons {
+    color: #2271b1;
+}
+
+.help-tooltip:before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1d2327;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.4;
+    white-space: nowrap;
+    max-width: 250px;
+    white-space: normal;
+    width: max-content;
+    max-width: 300px;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    pointer-events: none;
+}
+
+.help-tooltip:after {
+    content: '';
+    position: absolute;
+    bottom: 115%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #1d2327;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.help-tooltip:hover:before,
+.help-tooltip:hover:after {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Input with Action Button */
+.input-with-action {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.input-with-action .full-width-input {
+    flex: 1;
+}
+
+.edit-page-button {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+    white-space: nowrap;
+    text-decoration: none !important;
+}
+
+.field-description {
+    margin: 6px 0 0 0 !important;
+    font-size: 13px;
+    color: #646970;
+    line-height: 1.5;
+}
+
+.full-width-input,
+.full-width-textarea {
+    width: 100%;
+    max-width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.5;
+    transition: border-color 0.2s ease;
+}
+
+.full-width-input:focus,
+.full-width-textarea:focus {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+    outline: none;
+}
+
+.status-select {
+    padding: 6px 8px;
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+    font-size: 14px;
+    min-width: 200px;
+}
+
+/* Action Buttons */
+.action-buttons {
+    margin: 20px 0;
+}
+
+.primary-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.button-primary-custom {
+    background: #2271b1 !important;
+    border-color: #2271b1 !important;
+    color: #fff !important;
+    padding: 8px 16px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    border-radius: 6px !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    transition: all 0.2s ease !important;
+}
+
+.button-primary-custom:hover {
+    background: #135e96 !important;
+    border-color: #135e96 !important;
+    transform: translateY(-1px);
+}
+
+.button-secondary-custom {
+    background: #fff !important;
+    border: 1px solid #2271b1 !important;
+    color: #2271b1 !important;
+    padding: 8px 16px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    border-radius: 6px !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    transition: all 0.2s ease !important;
+}
+
+.button-secondary-custom:hover {
+    background: #f0f6fc !important;
+    border-color: #135e96 !important;
+    color: #135e96 !important;
+}
+
+/* Actions Card */
+.actions-card .card-content {
+    padding-top: 16px;
+}
+
+.action-section {
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f0f0f1;
+}
+
+.action-section:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.action-item {
+    margin-bottom: 8px;
+}
+
+/* Shortcode Container */
+.shortcode-container {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.shortcode-input {
+    flex: 1;
+    background: #f6f7f7;
+    border: 1px solid #c3c4c7;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 13px;
+    color: #1d2327;
+}
+
+.copy-button {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+    white-space: nowrap;
+}
+
+/* Danger Zone */
+.danger-zone {
+    background: #fef7f7;
+    border: 1px solid #f87171;
+    border-radius: 6px;
+    padding: 16px;
+    margin-top: 8px;
+    margin-bottom: 10px;
+}
+
+.danger-label {
+    color: #dc2626 !important;
+    font-weight: 600 !important;
+}
+
+.danger-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.button-danger {
+    background: #dc2626 !important;
+    border-color: #dc2626 !important;
+    color: #fff !important;
+    padding: 6px 12px !important;
+    font-size: 13px !important;
+    border-radius: 4px !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    transition: all 0.2s ease !important;
+}
+
+.button-danger:hover {
+    background: #b91c1c !important;
+    border-color: #b91c1c !important;
+    transform: translateY(-1px);
+}
+
+.danger-description {
+    font-size: 12px;
+    color: #dc2626;
+    font-style: italic;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 782px) {
+    .page-header-with-back {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .back-button {
+        margin-left: 0;
+        align-self: flex-start;
+    }
+
+    .primary-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .shortcode-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .danger-actions {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}
+
+/* Animation for success feedback */
+.copy-success {
+    background: #00a32a !important;
+    border-color: #00a32a !important;
+    color: #fff !important;
+}
+
+.copy-success .dashicons-clipboard:before {
+    content: "\f147"; /* checkmark */
+}
+</style>
 
 <script>
+function copyShortcode() {
+    const input = document.getElementById('shortcode-input');
+    const button = document.querySelector('.copy-button');
+
+    // Select and copy the text
+    input.select();
+    input.setSelectionRange(0, 99999); // For mobile devices
+
+    navigator.clipboard.writeText(input.value).then(function() {
+        // Show success feedback
+        button.classList.add('copy-success');
+        const originalText = button.innerHTML;
+        button.innerHTML = '<span class="dashicons dashicons-yes"></span><?php echo esc_html__('Copied!', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>';
+
+        // Reset after 2 seconds
+        setTimeout(function() {
+            button.classList.remove('copy-success');
+            button.innerHTML = originalText;
+        }, 2000);
+    }).catch(function() {
+        // Fallback for older browsers
+        input.select();
+        document.execCommand('copy');
+        alert('<?php echo esc_html__('Shortcode copied to clipboard!', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>');
+    });
+}
+
+// Legacy function for compatibility
 function copyToClipboard(text) {
-    console.log(text);
-    
     navigator.clipboard.writeText(text).then(function() {
         alert('<?php echo esc_html__('Shortcode copied to clipboard!', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>');
     });
