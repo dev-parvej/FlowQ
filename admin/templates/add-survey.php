@@ -302,7 +302,7 @@ $page_title = $is_edit ? __('Edit Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('
     position: absolute;
     bottom: 125%;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(0px);
     background: #1d2327;
     color: #fff;
     padding: 8px 12px;

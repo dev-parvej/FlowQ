@@ -91,7 +91,6 @@ $form_action = $is_editing ? 'update_question' : 'create_question';
                         <div class="answer-option-card">
                             <div class="answer-card-header" data-toggle="collapse">
                                 <div class="answer-header-left">
-                                    <span class="answer-number"><?php echo esc_html($index + 1); ?></span>
                                     <span class="answer-preview"><?php echo esc_html($answer['answer_text'] ?: __('New Answer Option', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?></span>
                                 </div>
                                 <div class="answer-header-right">
@@ -182,7 +181,6 @@ $form_action = $is_editing ? 'update_question' : 'create_question';
     <div class="answer-option-card">
         <div class="answer-card-header" data-toggle="collapse">
             <div class="answer-header-left">
-                <span class="answer-number">1</span>
                 <span class="answer-preview"><?php echo esc_html__('New Answer Option', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
             </div>
             <div class="answer-header-right">

@@ -37,33 +37,38 @@ $page_title = $is_editing ? __('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) :
         </div>
     <?php else: ?>
 
-        <!-- Survey Selection -->
-        <div class="survey-selection-section">
-            <h2><?php echo esc_html__('Select Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h2>
-            <form method="get" action="">
-                <input type="hidden" name="page" value="wp-dynamic-surveys-questions">
-                <table class="form-table">
-                    <tbody>
-                        <tr>
-                            <th scope="row">
-                                <label for="survey_id"><?php echo esc_html__('Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></label>
-                            </th>
-                            <td>
-                                <select name="survey_id" id="survey_id" class="regular-text">
-                                    <option value=""><?php echo esc_html__('-- Select a Survey --', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></option>
-                                    <?php foreach ($surveys as $survey_option): ?>
-                                        <option value="<?php echo esc_attr($survey_option['id']); ?>" <?php selected($selected_survey_id, $survey_option['id']); ?>>
-                                            <?php echo esc_html($survey_option['title']); ?>
-                                            (<?php echo esc_html(ucfirst($survey_option['status'])); ?>)
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                                <input type="submit" class="button button-secondary" value="<?php echo esc_attr__('Select Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </form>
+        <!-- Survey Filter Bar -->
+        <div class="survey-filter-bar">
+            <div class="filter-bar-content">
+                <div class="filter-section">
+                    <label for="survey_id" class="filter-label">
+                        <span class="dashicons dashicons-filter"></span>
+                        <?php echo esc_html__('Filter by Survey:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                    </label>
+                    <form method="get" action="" class="filter-form">
+                        <input type="hidden" name="page" value="wp-dynamic-surveys-questions">
+                        <select name="survey_id" id="survey_id" class="filter-dropdown">
+                            <option value=""><?php echo esc_html__('-- Select a Survey --', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></option>
+                            <?php foreach ($surveys as $survey_option): ?>
+                                <option value="<?php echo esc_attr($survey_option['id']); ?>" <?php selected($selected_survey_id, $survey_option['id']); ?>>
+                                    <?php echo esc_html($survey_option['title']); ?>
+                                    <span class="survey-status">(<?php echo esc_html(ucfirst($survey_option['status'])); ?>)</span>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </form>
+                </div>
+
+                <?php if ($selected_survey_id && $survey): ?>
+                <div class="action-section">
+                    <a href="<?php echo esc_url(admin_url('admin.php?page=wp-dynamic-surveys-questions&survey_id=' . $selected_survey_id . '&action=add')); ?>"
+                       class="add-question-button">
+                        <span class="dashicons dashicons-plus-alt2"></span>
+                        <?php echo esc_html__('Add New Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                    </a>
+                </div>
+                <?php endif; ?>
+            </div>
         </div>
 
         <?php if ($survey): ?>
@@ -78,90 +83,134 @@ $page_title = $is_editing ? __('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) :
                 <div class="questions-list-section">
                     <h2><?php echo esc_html__('Questions', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h2>
 
-                    <p>
-                        <a href="<?php echo esc_url(admin_url('admin.php?page=wp-dynamic-surveys-questions&survey_id=' . $selected_survey_id . '&action=add')); ?>" class="button button-primary">
-                            <?php echo esc_html__('Add New Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
-                        </a>
-                    </p>
-
                     <?php if (empty($questions)): ?>
                         <div class="notice notice-info inline">
                             <p><?php echo esc_html__('No questions added yet.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></p>
                         </div>
                     <?php else: ?>
-                        <table class="wp-list-table widefat fixed striped">
-                            <thead>
-                                <tr>
-                                    <th style="width: 40%;"><?php echo esc_html__('Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></th>
-                                    <th><?php echo esc_html__('Answers', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></th>
-                                    <th style="width: 150px;"><?php echo esc_html__('Actions', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($questions as $question): ?>
-                                    <tr>
-                                        <td>
-                                            <strong><?php echo esc_html($question['title']); ?></strong>
+                        <div class="questions-cards-container">
+                            <?php foreach ($questions as $question): ?>
+                                <div class="question-card">
+                                    <div class="question-card-header">
+                                        <div class="question-header-content">
+                                            <h3 class="question-title"><?php echo esc_html($question['title']); ?></h3>
                                             <?php if ($question['description']): ?>
-                                                <br><small class="description"><?php echo esc_html($question['description']); ?></small>
+                                                <p class="question-description"><?php echo esc_html($question['description']); ?></p>
                                             <?php endif; ?>
                                             <?php if ($question['extra_message']): ?>
-                                                <br><em class="description" style="color: #555;"><b>Optional Message: </b><?php echo esc_html($question['extra_message']); ?></em>
+                                                <p class="question-extra-message">
+                                                    <span class="extra-message-label"><?php echo esc_html__('Optional Message:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
+                                                    <?php echo esc_html($question['extra_message']); ?>
+                                                </p>
                                             <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <?php if (!empty($question['answers'])): ?>
-                                                <div class="answers-list">
-                                                    <?php foreach ($question['answers'] as $answer): ?>
-                                                        <div class="answer-item" style="margin-bottom: 8px; padding: 6px; background: #f8f9fa; border-left: 3px solid #007cba; font-size: 12px;">
-                                                            <strong><?php echo esc_html($answer['answer_text']); ?></strong>
-                                                            <div class="next-question-controls">
-                                                                <span class="next-question-label"><?php echo esc_html__('Next Question:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
-                                                                <select class="next-question-dropdown"
-                                                                        data-answer-id="<?php echo esc_attr($answer['id']); ?>"
-                                                                        data-original-value="<?php echo esc_attr($answer['next_question_id'] ?? ''); ?>">
-                                                                    <option value=""><?php echo esc_html__('-- Select Next Question --', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></option>
-                                                                    <?php if (count($questions) > 1): ?>
-                                                                        <?php foreach ($questions as $q): ?>
-                                                                            <option value="<?php echo esc_attr($q['id']); ?>" <?php selected($answer['next_question_id'] ?? '', $q['id']); ?>>
-                                                                                <?php echo esc_html($q['title']); ?>  <?php echo $question['id'] == $q['id'] ? '<span style="color: red"><- Current question</span>' : '' ?>
-                                                                            </option>
-                                                                        <?php endforeach; ?>
-                                                                    <?php else: ?>
-                                                                        <option disabled><?php echo esc_html__('No other questions available', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></option>
-                                                                    <?php endif; ?>
-                                                                </select>
-                                                            </div>
-                                                            <?php if ($answer['redirect_url']): ?>
-                                                                <br><span style="color: #d63384;">🔗 <?php echo esc_html($answer['redirect_url']); ?></span>
-                                                            <?php endif; ?>
-                                                        </div>
-                                                    <?php endforeach; ?>
-                                                </div>
-                                            <?php else: ?>
-                                                <span class="description"><?php echo esc_html__('No answers configured', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <a href="<?php echo esc_url(admin_url('admin.php?page=wp-dynamic-surveys-questions&survey_id=' . $selected_survey_id . '&question_id=' . $question['id'])); ?>" class="button button-small">
-                                                <?php echo esc_html__('Edit', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                        </div>
+                                        <div class="question-actions">
+                                            <a href="<?php echo esc_url(admin_url('admin.php?page=wp-dynamic-surveys-questions&survey_id=' . $selected_survey_id . '&question_id=' . $question['id'])); ?>"
+                                               class="action-button edit-button"
+                                               title="<?php echo esc_attr__('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
+                                                <span class="dashicons dashicons-edit"></span>
                                             </a>
                                             <?php if ($question['response_count'] == 0): ?>
-                                                <a href="<?php echo esc_url(wp_nonce_url(admin_url('admin-post.php?action=wp_dynamic_survey_delete_question&survey_id=' . $selected_survey_id . '&question_id=' . $question['id']), 'wp_dynamic_survey_question_action')); ?>"
-                                                    class="button button-small button-link-delete"
-                                                    onclick="return confirm('<?php echo esc_attr__('Are you sure you want to delete this question?', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>')">
-                                                    <?php echo esc_html__('Delete', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
-                                                </a>
+                                                <button type="button"
+                                                        class="action-button delete-button"
+                                                        title="<?php echo esc_attr__('Delete Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>"
+                                                        data-question-id="<?php echo esc_attr($question['id']); ?>"
+                                                        data-question-title="<?php echo esc_attr($question['title']); ?>"
+                                                        data-delete-url="<?php echo esc_url(wp_nonce_url(admin_url('admin-post.php?action=wp_dynamic_survey_delete_question&survey_id=' . $selected_survey_id . '&question_id=' . $question['id']), 'wp_dynamic_survey_question_action')); ?>">
+                                                    <span class="dashicons dashicons-trash"></span>
+                                                </button>
                                             <?php else: ?>
-                                                <span class="button button-small button-disabled" title="<?php echo esc_attr__('Cannot delete question with responses', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
-                                                    <?php echo esc_html__('Delete', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                                <span class="action-button delete-button disabled"
+                                                      title="<?php echo esc_attr__('Cannot delete question with responses', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
+                                                    <span class="dashicons dashicons-trash"></span>
                                                 </span>
                                             <?php endif; ?>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
+                                        </div>
+                                    </div>
+
+                                    <div class="question-card-content">
+                                        <div class="answers-section">
+                                            <h4 class="answers-title">
+                                                <span class="dashicons dashicons-list-view"></span>
+                                                <?php echo esc_html__('Answer Options', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                            </h4>
+                                            <?php if (!empty($question['answers'])): ?>
+                                                <ol class="answers-list">
+                                                    <?php foreach ($question['answers'] as $index => $answer): ?>
+                                                        <li class="answer-item">
+                                                            <div class="answer-content">
+                                                                <div class="answer-text-container">
+                                                                    <strong class="answer-text"><?php echo esc_html($answer['answer_text']); ?></strong>
+                                                                    <?php if (!empty($answer['answer_value'])): ?>
+                                                                        <span class="answer-value"><?php echo esc_html($answer['answer_value']); ?></span>
+                                                                    <?php endif; ?>
+                                                                </div>
+
+                                                                <div class="answer-meta">
+                                                                    <?php
+                                                                    $next_question_title = '';
+                                                                    if (!empty($answer['next_question_id'])) {
+                                                                        foreach ($questions as $q) {
+                                                                            if ($q['id'] == $answer['next_question_id']) {
+                                                                                $next_question_title = $q['title'];
+                                                                                break;
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                    ?>
+
+                                                                    <div class="next-question-badge-container">
+                                                                        <span class="next-question-badge"
+                                                                              data-answer-id="<?php echo esc_attr($answer['id']); ?>"
+                                                                              data-original-value="<?php echo esc_attr($answer['next_question_id'] ?? ''); ?>">
+                                                                            <?php if (!empty($next_question_title)): ?>
+                                                                                <span class="dashicons dashicons-arrow-right-alt2"></span>
+                                                                                <?php echo esc_html($next_question_title); ?>
+                                                                            <?php else: ?>
+                                                                                <span class="dashicons dashicons-flag"></span>
+                                                                                <?php echo esc_html__('End Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                                                            <?php endif; ?>
+                                                                            <span class="edit-indicator dashicons dashicons-edit"></span>
+                                                                        </span>
+
+                                                                        <select class="next-question-dropdown hidden"
+                                                                                data-answer-id="<?php echo esc_attr($answer['id']); ?>"
+                                                                                data-original-value="<?php echo esc_attr($answer['next_question_id'] ?? ''); ?>">
+                                                                            <option value=""><?php echo esc_html__('— End survey —', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></option>
+                                                                            <?php if (count($questions) > 1): ?>
+                                                                                <?php foreach ($questions as $q): ?>
+                                                                                    <?php if ($q['id'] != $question['id']): ?>
+                                                                                        <option value="<?php echo esc_attr($q['id']); ?>" <?php selected($answer['next_question_id'] ?? '', $q['id']); ?>>
+                                                                                            <?php echo esc_html($q['title']); ?>
+                                                                                        </option>
+                                                                                    <?php endif; ?>
+                                                                                <?php endforeach; ?>
+                                                                            <?php else: ?>
+                                                                                <option disabled><?php echo esc_html__('No other questions available', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></option>
+                                                                            <?php endif; ?>
+                                                                        </select>
+                                                                    </div>
+
+                                                                    <?php if ($answer['redirect_url']): ?>
+                                                                        <div class="redirect-url-badge">
+                                                                            <span class="dashicons dashicons-external"></span>
+                                                                            <span class="redirect-text"><?php echo esc_html__('Redirects to:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
+                                                                            <span class="redirect-value"><?php echo esc_html($answer['redirect_url']); ?></span>
+                                                                        </div>
+                                                                    <?php endif; ?>
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                    <?php endforeach; ?>
+                                                </ol>
+                                            <?php else: ?>
+                                                <p class="no-answers"><?php echo esc_html__('No answers configured', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></p>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
                     <?php endif; ?>
                 </div>
             <?php endif; ?>
@@ -179,6 +228,43 @@ $page_title = $is_editing ? __('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) :
         <?php endif; ?>
 
     <?php endif; ?>
+</div>
+
+<!-- Delete Question Modal -->
+<div id="delete-question-modal" class="question-modal" style="display: none;">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                <span class="dashicons dashicons-warning"></span>
+                <?php echo esc_html__('Delete Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+            </h3>
+            <button type="button" class="modal-close" aria-label="<?php echo esc_attr__('Close', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
+                <span class="dashicons dashicons-no-alt"></span>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <div class="warning-message">
+                <p><?php echo esc_html__('Are you sure you want to delete this question?', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></p>
+                <p class="question-title-display"></p>
+                <p class="warning-note">
+                    <span class="dashicons dashicons-info"></span>
+                    <?php echo esc_html__('This action cannot be undone.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                </p>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="button button-secondary modal-cancel">
+                <?php echo esc_html__('Cancel', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+            </button>
+            <button type="button" class="button button-danger modal-confirm">
+                <span class="dashicons dashicons-trash"></span>
+                <?php echo esc_html__('Delete Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+            </button>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -230,21 +316,21 @@ jQuery(document).ready(function($) {
     });
 
     // Handle edit button clicks with visual feedback
-    $(document).on('click', 'a[href*="question_id="]', function(e) {
-        const href = $(this).attr('href');
-        if (!href.includes('action=delete')) {
-            const $button = $(this);
-            const originalText = $button.text();
+    $(document).on('click', '.edit-button', function(e) {
+        e.preventDefault();
 
-            // Add loading state
-            $button.addClass('loading').css('position', 'relative');
-            $button.text('Loading...');
+        const $button = $(this);
+        const href = $button.attr('href');
+        const $icon = $button.find('.dashicons');
 
-            // Navigate after brief delay
-            setTimeout(function() {
-                window.location.href = href;
-            }, 200);
-        }
+        // Add loading state
+        $button.addClass('loading').prop('disabled', true);
+        $icon.removeClass('dashicons-edit').addClass('dashicons-update');
+
+        // Navigate after brief delay
+        setTimeout(function() {
+            window.location.href = href;
+        }, 200);
     });
     // Add highlighting effect to form sections
     setTimeout(function() {
@@ -253,6 +339,91 @@ jQuery(document).ready(function($) {
             $('.question-form-section').removeClass('highlight-form');
         }, 2000);
     }, 500);
+
+    // Handle delete question button clicks (show modal)
+    $(document).on('click', '.delete-button:not(.disabled)', function(e) {
+        e.preventDefault();
+
+        const $button = $(this);
+        const questionId = $button.data('question-id');
+        const questionTitle = $button.data('question-title');
+        const deleteUrl = $button.data('delete-url');
+
+        // Update modal content
+        $('#delete-question-modal .question-title-display').html('<strong>"' + questionTitle + '"</strong>');
+        $('#delete-question-modal .modal-confirm').data('delete-url', deleteUrl);
+
+        // Show modal
+        showModal('#delete-question-modal');
+    });
+
+    // Handle modal close events
+    $(document).on('click', '.modal-close, .modal-cancel, .modal-overlay', function(e) {
+        e.preventDefault();
+        hideModal('#delete-question-modal');
+    });
+
+    // Handle modal confirm delete
+    $(document).on('click', '.modal-confirm', function(e) {
+        e.preventDefault();
+
+        const deleteUrl = $(this).data('delete-url');
+        if (deleteUrl) {
+            // Add loading state
+            $(this).prop('disabled', true).addClass('loading');
+            $(this).html('<span class="dashicons dashicons-update spin"></span> <?php echo esc_html__('Deleting...', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>');
+
+            // Redirect to delete URL
+            window.location.href = deleteUrl;
+        }
+    });
+
+    // Modal utility functions
+    function showModal(selector) {
+        const $modal = $(selector);
+        $modal.fadeIn(200);
+        $('body').addClass('modal-open');
+
+        // Focus management
+        $modal.find('.modal-confirm').focus();
+
+        // Trap focus within modal
+        $modal.on('keydown.modal', function(e) {
+            if (e.key === 'Escape') {
+                hideModal(selector);
+            }
+        });
+    }
+
+    function hideModal(selector) {
+        const $modal = $(selector);
+        $modal.fadeOut(200);
+        $('body').removeClass('modal-open');
+        $modal.off('keydown.modal');
+    }
+
+    // Handle next question badge clicks (show dropdown)
+    $(document).on('click', '.next-question-badge', function(e) {
+        e.preventDefault();
+        const $badge = $(this);
+        const $container = $badge.closest('.next-question-badge-container');
+        const $dropdown = $container.find('.next-question-dropdown');
+
+        // Hide badge and show dropdown
+        $badge.addClass('hidden');
+        $dropdown.removeClass('hidden').focus();
+    });
+
+    // Handle dropdown blur (hide dropdown, show badge)
+    $(document).on('blur', '.next-question-dropdown', function() {
+        const $dropdown = $(this);
+        const $container = $dropdown.closest('.next-question-badge-container');
+        const $badge = $container.find('.next-question-badge');
+
+        // Hide dropdown and show badge
+        $dropdown.addClass('hidden');
+        $badge.removeClass('hidden');
+    });
 
     // Handle inline next question dropdown changes
     $(document).on('change', '.next-question-dropdown', function() {
@@ -279,13 +450,28 @@ jQuery(document).ready(function($) {
                     // Update the original value to new selection
                     $dropdown.data('original-value', nextQuestionId);
 
+                    // Update the badge display
+                    const $container = $dropdown.closest('.next-question-badge-container');
+                    const $badge = $container.find('.next-question-badge');
+                    const selectedText = $dropdown.find('option:selected').text();
+
+                    if (nextQuestionId) {
+                        $badge.html('<span class="dashicons dashicons-arrow-right-alt2"></span>' + selectedText + '<span class="edit-indicator dashicons dashicons-edit"></span>');
+                    } else {
+                        $badge.html('<span class="dashicons dashicons-flag"></span><?php echo esc_html__('End Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?><span class="edit-indicator dashicons dashicons-edit"></span>');
+                    }
+
+                    // Hide dropdown and show updated badge
+                    $dropdown.addClass('hidden');
+                    $badge.removeClass('hidden');
+
                     // Show success feedback
                     showNotification('success', response.data.message);
 
                     // Add visual success indicator
-                    $dropdown.addClass('success-updated');
+                    $badge.addClass('success-updated');
                     setTimeout(function() {
-                        $dropdown.removeClass('success-updated');
+                        $badge.removeClass('success-updated');
                     }, 2000);
                 } else {
                     // Revert to original value on error
@@ -329,6 +515,101 @@ jQuery(document).ready(function($) {
 </script>
 
 <style>
+/* Survey Filter Bar */
+.survey-filter-bar {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 6px;
+    margin: 20px 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.filter-bar-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    gap: 20px;
+}
+
+.filter-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.filter-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: #1d2327;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.filter-label .dashicons {
+    color: #646970;
+    font-size: 16px;
+}
+
+.filter-form {
+    flex: 1;
+    max-width: 400px;
+}
+
+.filter-dropdown {
+    width: 100%;
+    height: 40px;
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 14px;
+    background: #fff;
+    color: #1d2327;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.filter-dropdown:focus {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+    outline: none;
+}
+
+.action-section {
+    flex-shrink: 0;
+}
+
+.add-question-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #2271b1;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    border: 1px solid #2271b1;
+}
+
+.add-question-button:hover {
+    background: #135e96;
+    color: white;
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.add-question-button .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
 /* Page header with back button */
 .page-header-with-back {
     display: flex;
@@ -505,5 +786,664 @@ html {
     background: #f0f0f1 !important;
     border-color: #dcdcde !important;
     color: #a7aaad !important;
+}
+
+/* Question Cards Layout */
+.questions-grid {
+    display: grid;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.question-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: box-shadow 0.3s ease, transform 0.2s ease;
+    margin-bottom: 20px;
+}
+
+.question-card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.question-card-header {
+    position: relative;
+    padding: 20px 70px 20px 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.question-header-content {
+    width: 100%;
+}
+
+.question-title {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1d2327;
+    line-height: 1.3;
+}
+
+.question-description {
+    margin: 0 0 5px 0;
+    color: #646970;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.question-extra-message {
+    margin: 0;
+    color: #8c8f94;
+    font-size: 13px;
+    font-style: italic;
+    line-height: 1.4;
+}
+
+.question-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}
+
+.action-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+.action-button .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+.edit-button {
+    background: #0073aa;
+    color: white;
+    border-color: #0073aa;
+}
+
+.edit-button:hover:not(.loading) {
+    background: #005a87;
+    color: white;
+    text-decoration: none;
+    transform: scale(1.05);
+}
+
+.edit-button.loading {
+    opacity: 0.7;
+    pointer-events: none;
+    transform: none !important;
+}
+
+.edit-button.loading .dashicons-update {
+    animation: spin 1s linear infinite;
+}
+
+.delete-button {
+    background: #d63638;
+    color: white;
+    border-color: #d63638;
+}
+
+.delete-button:hover {
+    background: #b32d2e;
+    color: white;
+    text-decoration: none;
+    transform: scale(1.05);
+}
+
+.delete-button.disabled {
+    background: #f0f0f1;
+    color: #a7aaad;
+    border-color: #dcdcde;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.delete-button.disabled:hover {
+    transform: none;
+    background: #f0f0f1;
+    color: #a7aaad;
+}
+
+.question-card-content {
+    padding: 20px;
+}
+
+.answers-section h4 {
+    margin: 0 0 15px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1d2327;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.answers-section h4 .dashicons {
+    color: #8c8f94;
+    font-size: 16px;
+}
+
+.answers-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.answer-item {
+    position: relative;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    padding: 15px 15px 15px 25px;
+    transition: all 0.2s ease;
+}
+
+.answer-item:hover {
+    background: #e9ecef;
+    border-color: #dee2e6;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.answer-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.answer-text-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.answer-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1d2327;
+    margin: 0;
+}
+
+.answer-value {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-size: 11px;
+    font-family: monospace;
+    color: #646970;
+}
+
+.answer-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.next-question-badge-container {
+    position: relative;
+}
+
+.next-question-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #0073aa;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.next-question-badge:hover {
+    background: #005a87;
+    color: white;
+    text-decoration: none;
+}
+
+.next-question-badge .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+}
+
+.next-question-badge .edit-indicator {
+    opacity: 0.7;
+    font-size: 12px;
+    width: 12px;
+    height: 12px;
+}
+
+.next-question-badge.success-updated {
+    background: #46b450;
+    animation: pulse 1s ease-in-out;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.redirect-url-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f0f6fc;
+    border: 1px solid #c3dcf2;
+    color: #0073aa;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+}
+
+.redirect-url-badge .dashicons {
+    font-size: 12px;
+    width: 12px;
+    height: 12px;
+}
+
+.redirect-text {
+    font-weight: 500;
+}
+
+.redirect-value {
+    font-family: monospace;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 1px 4px;
+    border-radius: 2px;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Delete Question Modal */
+.question-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 100000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(2px);
+}
+
+.modal-content {
+    position: relative;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow: hidden;
+    animation: modalSlideIn 0.2s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    border-bottom: 1px solid #e0e0e0;
+    background: #f8f9fa;
+}
+
+.modal-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #d63638;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modal-title .dashicons {
+    color: #d63638;
+    font-size: 20px;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    border-radius: 4px;
+    color: #646970;
+    transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+    background: #f0f0f0;
+    color: #d63638;
+}
+
+.modal-close .dashicons {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.warning-message p {
+    margin: 0 0 15px 0;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.question-title-display {
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 13px;
+    color: #1d2327;
+}
+
+.warning-note {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 4px;
+    padding: 10px;
+    color: #856404;
+    font-size: 13px;
+    margin-top: 15px !important;
+}
+
+.warning-note .dashicons {
+    color: #f39c12;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 20px;
+    border-top: 1px solid #e0e0e0;
+    background: #f8f9fa;
+}
+
+.modal-footer .button {
+    min-width: 100px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.button-danger {
+    background: #d63638;
+    border-color: #d63638;
+    color: white;
+}
+
+.button-danger:hover:not(:disabled) {
+    background: #b32d2e;
+    border-color: #b32d2e;
+    color: white;
+}
+
+.button-danger:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.button-danger.loading .dashicons {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Prevent body scroll when modal is open */
+body.modal-open {
+    overflow: hidden;
+}
+
+/* Responsive modal */
+@media screen and (max-width: 782px) {
+    .modal-content {
+        width: 95%;
+        margin: 20px;
+    }
+
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 15px;
+    }
+
+    .modal-footer {
+        flex-direction: column;
+    }
+
+    .modal-footer .button {
+        width: 100%;
+    }
+}
+
+.answer-card {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 15px;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.answer-card:hover {
+    background: #e9ecef;
+    border-color: #dee2e6;
+}
+
+.answer-main {
+    margin-bottom: 10px;
+}
+
+.answer-text {
+    font-weight: 500;
+    color: #1d2327;
+    margin: 0 0 4px 0;
+    font-size: 14px;
+}
+
+.answer-value {
+    color: #646970;
+    font-size: 12px;
+    font-family: monospace;
+    background: #fff;
+    padding: 2px 6px;
+    border-radius: 3px;
+    border: 1px solid #ddd;
+    display: inline-block;
+}
+
+.answer-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.next-question-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.next-question-label {
+    font-size: 11px;
+    color: #646970;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.next-question-dropdown {
+    min-width: 180px;
+    font-size: 12px;
+    height: 28px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    background: #fff;
+}
+
+.redirect-url {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #646970;
+    font-size: 12px;
+}
+
+.redirect-url .dashicons {
+    color: #8c8f94;
+    font-size: 14px;
+}
+
+.redirect-url span:last-child {
+    font-family: monospace;
+    background: #fff;
+    padding: 2px 6px;
+    border-radius: 3px;
+    border: 1px solid #ddd;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.no-answers {
+    color: #8c8f94;
+    font-style: italic;
+    margin: 0;
+    text-align: center;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px dashed #dee2e6;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 782px) {
+    .filter-bar-content {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+        padding: 15px;
+    }
+
+    .filter-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .filter-form {
+        max-width: none;
+        width: 100%;
+    }
+
+    .action-section {
+        align-self: center;
+    }
+
+    .add-question-button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .question-card-header {
+        padding: 15px 60px 15px 15px;
+    }
+
+    .question-actions {
+        top: 10px;
+        right: 10px;
+        gap: 6px;
+    }
+
+    .action-button {
+        width: 28px;
+        height: 28px;
+    }
+
+    .action-button .dashicons {
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
+    }
+
+    .answer-controls {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .next-question-dropdown {
+        min-width: 100%;
+    }
 }
 </style>
