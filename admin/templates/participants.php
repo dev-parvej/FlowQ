@@ -11,29 +11,34 @@ if (!defined('ABSPATH')) {
 }
 ?>
 <div class="wrap">
-    <h1><?php echo esc_html__('Survey Participants', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h1>
+    <h1 class="heading-primary"><?php echo esc_html__('Survey Participants', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h1>
 
     <div class="participants-wrapper">
         <!-- Survey Selection -->
         <div class="participants-header">
-            <form method="get" action="" class="survey-selector">
-                <input type="hidden" name="page" value="<?php echo esc_attr($_GET['page']); ?>">
+            <div class="header-top-row">
+                <form method="get" action="" class="survey-selector">
+                    <input type="hidden" name="page" value="<?php echo esc_attr($_GET['page']); ?>">
 
-                <label for="survey_id"><?php echo esc_html__('Select Survey:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></label>
-                <select name="survey_id" id="survey_id" onchange="this.form.submit()">
-                    <option value=""><?php echo esc_html__('-- Choose a Survey --', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></option>
-                    <?php foreach ($surveys as $survey): ?>
-                        <option value="<?php echo esc_attr($survey['id']); ?>"
-                                <?php selected($selected_survey_id, $survey['id']); ?>>
-                            <?php echo esc_html($survey['title']); ?>
-                            (<?php echo esc_html($survey['status']); ?>)
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </form>
+                    <div class="filter-group">
+                        <svg class="filter-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
+                        </svg>
+                        <label for="survey_id"><?php echo esc_html__('Filter by Survey:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></label>
+                        <select name="survey_id" id="survey_id" onchange="this.form.submit()">
+                            <option value=""><?php echo esc_html__('-- Choose a Survey --', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></option>
+                            <?php foreach ($surveys as $survey): ?>
+                                <option value="<?php echo esc_attr($survey['id']); ?>"
+                                        <?php selected($selected_survey_id, $survey['id']); ?>>
+                                    <?php echo esc_html($survey['title']); ?>
+                                    (<?php echo esc_html($survey['status']); ?>)
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </form>
 
-            <?php if ($selected_survey_id && isset($stats)): ?>
-                <div class="participants-controls">
+                <?php if ($selected_survey_id && isset($stats)): ?>
                     <div class="participants-stats">
                         <a href="<?php echo esc_url(add_query_arg(array('page' => $_GET['page'], 'survey_id' => $selected_survey_id, 'status' => 'all'), admin_url('admin.php'))); ?>"
                            class="stat-item <?php echo ($status_filter === 'all') ? 'active' : ''; ?>">
@@ -51,29 +56,15 @@ if (!defined('ABSPATH')) {
                             <?php echo esc_html__('Incomplete', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
                         </a>
                     </div>
-
-                    <div class="controls-right">
-
-                        <div class="per-page-selector">
-                            <label for="per_page"><?php echo esc_html__('Show:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></label>
-                            <select name="per_page" id="per_page" onchange="changePerPage(this.value)">
-                                <option value="10" <?php selected($pagination['per_page'], '10'); ?>>10</option>
-                                <option value="20" <?php selected($pagination['per_page'], '20'); ?>>20</option>
-                                <option value="30" <?php selected($pagination['per_page'], '30'); ?>>30</option>
-                                <option value="40" <?php selected($pagination['per_page'], '40'); ?>>40</option>
-                                <option value="all" <?php selected($pagination['per_page'], 'all'); ?>><?php echo esc_html__('All', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            <?php endif; ?>
+                <?php endif; ?>
+            </div>
         </div>
 
         <?php if ($selected_survey_id && !empty($participants_data)): ?>
             <!-- Participants List -->
             <div class="participants-list">
                 <div class="participants-list-header">
-                    <h2><?php echo esc_html__('Participant Responses', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h2>
+                    <h2 class="heading-secondary"><?php echo esc_html__('Participant Responses', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h2>
                     <?php if ($status_filter !== 'all'): ?>
                         <span class="filter-indicator">
                             <?php
@@ -84,26 +75,35 @@ if (!defined('ABSPATH')) {
                     <?php endif; ?>
                 </div>
 
-                <?php foreach ($participants_data as $index => $participant_data): ?>
-                    <?php $participant = $participant_data['participant']; ?>
-                    <?php $responses = $participant_data['responses']; ?>
+                <div class="participants-grid">
+                    <?php foreach ($participants_data as $index => $participant_data): ?>
+                        <?php $participant = $participant_data['participant']; ?>
+                        <?php $responses = $participant_data['responses']; ?>
 
-                    <div class="participant-card">
-                        <div class="participant-header" onclick="toggleAccordion(<?php echo $index; ?>)">
-                            <div class="participant-info">
-                                <h3>
-                                    <?php echo esc_html($participant['participant_name']); ?>
-                                    <span class="participant-email">(<?php echo esc_html($participant['participant_email']); ?>)</span>
-                                </h3>
+                        <div class="participant-card">
+                            <div class="participant-header" onclick="toggleAccordion(<?php echo $index; ?>)">
+                                <div class="participant-info">
+                                    <h3 class="text-participant-name">
+                                        <?php echo esc_html($participant['participant_name']); ?>
+                                        <span class="participant-email">(<?php echo esc_html($participant['participant_email']); ?>)</span>
+                                    </h3>
+                                </div>
+
                                 <div class="participant-meta">
-                                    <span class="start-date">
+                                    <span class="start-date text-small">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="opacity: 0.6;">
+                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                        </svg>
                                         <?php echo esc_html__('Started:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
                                         <span class="local-time" data-utc="<?php echo esc_attr($participant['started_at']); ?>">
                                             <?php echo esc_html(date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($participant['started_at']))); ?>
                                         </span>
                                     </span>
                                     <?php if ($participant['completed_at']): ?>
-                                        <span class="completion-date">
+                                        <span class="completion-date text-small">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="opacity: 0.6;">
+                                                <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
+                                            </svg>
                                             <?php echo esc_html__('Completed:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
                                             <span class="local-time" data-utc="<?php echo esc_attr($participant['completed_at']); ?>">
                                                 <?php echo esc_html(date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($participant['completed_at']))); ?>
@@ -111,19 +111,23 @@ if (!defined('ABSPATH')) {
                                         </span>
                                     <?php endif; ?>
                                 </div>
-                            </div>
 
-                            <div class="participant-stats">
-                                <span class="status-badge status-<?php echo esc_attr($participant_data['completion_status']); ?>">
-                                    <?php echo esc_html(ucfirst(str_replace('_', ' ', $participant_data['completion_status']))); ?>
-                                </span>
-                                <span class="response-count">
-                                    <?php echo esc_html($participant_data['response_count']); ?>
-                                    <?php echo esc_html__('responses', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
-                                </span>
-                                <span class="accordion-arrow">▼</span>
+                                <div class="participant-stats">
+                                    <div class="status-and-count">
+                                        <span class="status-badge status-<?php echo esc_attr($participant_data['completion_status']); ?>">
+                                            <?php echo esc_html(ucfirst(str_replace('_', ' ', $participant_data['completion_status']))); ?>
+                                        </span>
+                                        <span class="response-count">
+                                            <?php echo esc_html($participant_data['response_count']); ?> <?php echo esc_html__('responses', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                        </span>
+                                    </div>
+                                    <span class="accordion-arrow">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+                                        </svg>
+                                    </span>
+                                </div>
                             </div>
-                        </div>
 
                         <div class="participant-content" id="participant-content-<?php echo $index; ?>" style="display: none;">
                             <div class="participant-details">
@@ -139,42 +143,93 @@ if (!defined('ABSPATH')) {
                                 </div>
 
                                 <div class="responses-section">
-                                    <h4><?php echo esc_html__('Survey Responses', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h4>
+                                    <div class="responses-header">
+                                        <h4><?php echo esc_html__('Survey Responses', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h4>
+                                        <?php if (!empty($responses)): ?>
+                                            <div class="responses-meta">
+                                                <span class="response-count-badge"><?php echo count($responses); ?> <?php echo esc_html__('responses', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
 
                                     <?php if (!empty($responses)): ?>
-                                        <div class="responses-list">
-                                            <?php foreach ($responses as $response): ?>
-                                                <div class="response-item">
-                                                    <div class="question-title">
-                                                        <strong><?php echo esc_html($response['question']); ?></strong>
+                                        <div class="responses-container">
+                                            <?php foreach ($responses as $index => $response): ?>
+                                                <div class="response-card" data-question-number="<?php echo $index + 1; ?>">
+                                                    <div class="response-card-header">
+                                                        <div class="question-info">
+                                                            <span class="question-number">Q<?php echo $index + 1; ?></span>
+                                                            <div class="question-content">
+                                                                <h5 class="question-text"><?php echo esc_html($response['question']); ?></h5>
+                                                                <div class="question-type">
+                                                                    <svg class="response-type-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                                                        <?php if (isset($response['custom_answer']) && !empty($response['custom_answer'])): ?>
+                                                                            <!-- Text response icon -->
+                                                                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                                                                        <?php elseif (isset($response['answer'])): ?>
+                                                                            <!-- Multiple choice icon -->
+                                                                            <path d="M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+                                                                        <?php else: ?>
+                                                                            <!-- Default question icon -->
+                                                                            <path d="M10,19H13V22H10V19M12,2C17.35,2.22 19.68,7.62 16.5,11.67C15.67,12.67 14.33,13.33 13.67,14.17C13,15 13,16 13,17H10C10,15.33 10,13.92 10.67,12.92C11.33,11.92 12.67,11.33 13.5,10.67C15.92,8.43 15.32,5.26 12,5A3,3 0 0,0 9,8H6A6,6 0 0,1 12,2Z"/>
+                                                                        <?php endif; ?>
+                                                                    </svg>
+                                                                    <span class="response-type-label">
+                                                                        <?php
+                                                                        if (isset($response['custom_answer']) && !empty($response['custom_answer'])) {
+                                                                            echo esc_html__('Text Response', WP_DYNAMIC_SURVEY_TEXT_DOMAIN);
+                                                                        } elseif (isset($response['answer'])) {
+                                                                            echo esc_html__('Multiple Choice', WP_DYNAMIC_SURVEY_TEXT_DOMAIN);
+                                                                        } else {
+                                                                            echo esc_html__('Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN);
+                                                                        }
+                                                                        ?>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="response-timestamp">
+                                                            <span class="local-time" data-utc="<?php echo esc_attr($response['response_time']); ?>">
+                                                                <?php echo esc_html(date_i18n(get_option('time_format'), strtotime($response['response_time']))); ?>
+                                                            </span>
+                                                        </div>
                                                     </div>
 
-                                                    <div class="response-answer">
-                                                        <?php if (isset($response['answer'])): ?>
-                                                            <span class="selected-answer"><?php echo esc_html($response['answer']); ?></span>
+                                                    <div class="response-card-body">
+                                                        <?php if (isset($response['answer']) && !empty($response['answer'])): ?>
+                                                            <div class="selected-answer">
+                                                                <span class="answer-label"><?php echo esc_html__('Selected:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
+                                                                <span class="answer-value"><?php echo esc_html($response['answer']); ?></span>
+                                                            </div>
                                                         <?php endif; ?>
 
-                                                        <?php if (isset($response['custom_answer'])): ?>
-                                                            <div class="custom-text"><?php echo esc_html($response['custom_answer']); ?></div>
+                                                        <?php if (isset($response['custom_answer']) && !empty($response['custom_answer'])): ?>
+                                                            <div class="custom-answer">
+                                                                <span class="answer-label"><?php echo esc_html__('Response:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
+                                                                <div class="custom-text"><?php echo esc_html($response['custom_answer']); ?></div>
+                                                            </div>
                                                         <?php endif; ?>
-                                                    </div>
-
-                                                    <div class="response-time">
-                                                        <span class="local-time" data-utc="<?php echo esc_attr($response['response_time']); ?>">
-                                                            <?php echo esc_html(date_i18n(get_option('time_format'), strtotime($response['response_time']))); ?>
-                                                        </span>
                                                     </div>
                                                 </div>
                                             <?php endforeach; ?>
                                         </div>
                                     <?php else: ?>
-                                        <p class="no-responses"><?php echo esc_html__('No responses recorded yet.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></p>
+                                        <div class="no-responses-card">
+                                            <div class="no-responses-icon">
+                                                <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                                                    <path d="M9,5V9H15V5H9M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M12,4L13.09,8.26L17,7L14.74,10.74L19,12L14.74,13.26L17,17L13.09,15.74L12,20L10.91,15.74L7,17L9.26,13.26L5,12L9.26,10.74L7,7L10.91,8.26L12,4Z"/>
+                                                </svg>
+                                            </div>
+                                            <h5><?php echo esc_html__('No responses recorded yet', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h5>
+                                            <p><?php echo esc_html__('Responses will appear here as the participant answers questions.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></p>
+                                        </div>
                                     <?php endif; ?>
                                 </div>
                             </div>
                         </div>
                     </div>
-                <?php endforeach; ?>
+                    <?php endforeach; ?>
+                </div>
             </div>
 
             <!-- Pagination -->
@@ -278,16 +333,42 @@ function toggleAccordion(index) {
 
     if (content.style.display === 'none' || content.style.display === '') {
         content.style.display = 'block';
-        arrow.textContent = '▲';
-        arrow.style.transform = 'rotate(180deg)';
+        arrow.classList.add('expanded');
+
+        // Add smooth animation
+        content.style.maxHeight = content.scrollHeight + 'px';
+
+        // Add entrance animation for cards
+        setTimeout(function() {
+            content.style.opacity = '1';
+        }, 50);
     } else {
         content.style.display = 'none';
-        arrow.textContent = '▼';
-        arrow.style.transform = 'rotate(0deg)';
+        arrow.classList.remove('expanded');
+        content.style.maxHeight = '0';
+        content.style.opacity = '0';
     }
 }
 
-// Convert UTC times to local timezone
+// Enhanced page load animation
+function initializeAnimations() {
+    var cards = document.querySelectorAll('.participant-card');
+    cards.forEach(function(card, index) {
+        card.style.setProperty('--nth-child', index);
+    });
+}
+
+// Initialize animations when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    initializeAnimations();
+    initializeResponseAnimations();
+    convertToLocalTime();
+
+    // Update relative timestamps every minute
+    setInterval(convertToLocalTime, 0);
+});
+
+// Enhanced time conversion with relative timestamps
 function convertToLocalTime() {
     var timeElements = document.querySelectorAll('.local-time[data-utc]');
 
@@ -297,37 +378,80 @@ function convertToLocalTime() {
             try {
                 // Parse the UTC time and convert to local
                 var date = new Date(utcTime + ' UTC');
+                var now = new Date();
+                var timeDiff = now - date;
 
-                // Format the local time
-                var options = {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                };
+                // Check if this is in response timestamp (use relative time)
+                if (element.closest('.response-timestamp')) {
+                    var relativeTime = getRelativeTime(timeDiff);
+                    element.textContent = relativeTime;
 
-                // Check if this is just a time (no date needed)
-                if (element.closest('.response-time')) {
-                    options = {
+                    // Add full timestamp as title
+                    var fullTime = date.toLocaleString(undefined, {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                    });
+                    element.title = fullTime + ' (UTC: ' + utcTime + ')';
+                } else {
+                    // Regular timestamp formatting for other elements
+                    var options = {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
                         hour: '2-digit',
                         minute: '2-digit',
                         hour12: true
                     };
+
+                    // Check if this is just a time (no date needed)
+                    if (element.closest('.response-time')) {
+                        options = {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true
+                        };
+                    }
+
+                    var localTimeString = date.toLocaleString(undefined, options);
+                    element.textContent = localTimeString;
+
+                    // Add timezone info as title
+                    element.title = 'Your local time (UTC time: ' + utcTime + ')';
                 }
-
-                var localTimeString = date.toLocaleString(undefined, options);
-                element.textContent = localTimeString;
-
-                // Add timezone info as title
-                element.title = 'Your local time (UTC time: ' + utcTime + ')';
-
             } catch (e) {
                 console.warn('Could not parse time:', utcTime);
             }
         }
     });
+}
+
+// Helper function to get relative time
+function getRelativeTime(timeDiff) {
+    var seconds = Math.floor(timeDiff / 1000);
+    var minutes = Math.floor(seconds / 60);
+    var hours = Math.floor(minutes / 60);
+    var days = Math.floor(hours / 24);
+
+    if (seconds < 60) {
+        return 'Just now';
+    } else if (minutes < 60) {
+        return minutes + 'm ago';
+    } else if (hours < 24) {
+        return hours + 'h ago';
+    } else if (days < 7) {
+        return days + 'd ago';
+    } else {
+        return Math.floor(days / 7) + 'w ago';
+    }
+}
+
+// Enhanced response card animations (disabled)
+function initializeResponseAnimations() {
+    // Animation disabled for Survey Responses
 }
 
 // Run conversion when page loads
@@ -344,428 +468,1040 @@ function changePerPage(value) {
 </script>
 
 <style>
+/* Design System Variables */
+:root {
+    --color-primary: #3B82F6;
+    --color-primary-hover: #2563EB;
+    --color-success: #10B981;
+    --color-warning: #F59E0B;
+    --color-error: #EF4444;
+    --color-text-primary: #374151;
+    --color-text-secondary: #6B7280;
+    --color-text-muted: #9CA3AF;
+    --color-bg-primary: #FFFFFF;
+    --color-bg-secondary: #F9FAFB;
+    --color-bg-tertiary: #F3F4F6;
+    --color-border: #E5E7EB;
+    --color-border-light: #F3F4F6;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --spacing-2xl: 48px;
+}
+
+/* Typography System */
+.heading-primary {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    line-height: 1.3;
+    margin: 0;
+}
+
+.heading-secondary {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    line-height: 1.4;
+    margin: 0;
+}
+
+.text-participant-name {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    line-height: 1.4;
+    margin: 0;
+}
+
+.text-secondary {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+}
+
+.text-small {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    line-height: 1.4;
+}
+
+.text-badge {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+}
+
+/* Main Layout */
 .participants-wrapper {
-    max-width: 100%;
-    margin: 20px 0;
+    margin: var(--spacing-lg) auto;
+    min-height: 600px;
 }
 
 .participants-header {
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Header Components */
+.header-top-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
-    padding: 20px;
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 6px;
+    flex-wrap: wrap;
+    gap: var(--spacing-lg);
 }
 
 .survey-selector {
     display: flex;
     align-items: center;
-    gap: 10px;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    width: fit-content;
+    max-width: 100%;
+}
+
+.filter-icon {
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
 }
 
 .survey-selector label {
-    font-weight: 600;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    white-space: nowrap;
+    margin: 0;
+    flex-shrink: 0;
 }
 
 .survey-selector select {
-    min-width: 250px;
+    min-width: 200px;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    font-size: 14px;
+    color: var(--color-text-primary);
+    transition: all 0.2s ease;
+    outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right var(--spacing-xs) center;
+    background-repeat: no-repeat;
+    background-size: 16px 16px;
+    padding-right: var(--spacing-xl);
 }
 
-.participants-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 20px;
+.filter-group:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-md);
+}
+
+.filter-group:focus-within {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.survey-selector select:focus {
+    outline: none;
+    background: var(--color-bg-tertiary);
 }
 
 .controls-right {
     display: flex;
     align-items: center;
-    gap: 20px;
+    justify-content: flex-end;
+    gap: var(--spacing-lg);
     flex-wrap: wrap;
 }
 
+/* Dashboard Metrics */
 .participants-stats {
     display: flex;
-    gap: 20px;
+    gap: var(--spacing-md);
 }
 
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-primary);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    min-width: 120px;
+    box-shadow: var(--shadow-sm);
+}
+
+.stat-item strong {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-xs);
+    display: block;
+}
+
+.stat-item span:not(strong) {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: center;
+}
+
+.stat-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-primary);
+    text-decoration: none;
+}
+
+.stat-item.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    color: white;
+}
+
+.stat-item.active strong,
+.stat-item.active span {
+    color: white;
+}
+
+.stat-item.active:hover {
+    background: var(--color-primary-hover);
+    border-color: var(--color-primary-hover);
+}
+
+/* Per-page Selector */
 .per-page-selector {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--spacing-sm);
     font-size: 14px;
 }
 
 .per-page-selector label {
     font-weight: 600;
-    color: #666;
+    color: var(--color-text-secondary);
 }
 
 .per-page-selector select {
-    padding: 4px 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background: #fff;
-}
-
-.stat-item {
-    color: #666;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-primary);
     font-size: 14px;
-    text-decoration: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    border: 1px solid transparent;
-    transition: all 0.3s ease;
-    cursor: pointer;
+    color: var(--color-text-primary);
+    min-height: 32px;
+    transition: all 0.2s ease;
 }
 
-.stat-item:hover {
-    background: #f0f6fc;
-    border-color: #2271b1;
-    color: #2271b1;
-    text-decoration: none;
+.per-page-selector select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
 
-.stat-item.active {
-    background: #2271b1;
-    color: #fff;
-    border-color: #2271b1;
-}
-
-.stat-item.active:hover {
-    background: #135e96;
-    border-color: #135e96;
-    color: #fff;
-}
-
+/* Participants List Layout */
 .participants-list {
-    margin-bottom: 30px;
+    margin-bottom: var(--spacing-xl);
+    padding: var(--spacing-lg);
 }
 
 .participants-list-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: var(--spacing-lg);
 }
 
 .participants-list h2 {
     margin: 0;
-    color: #1d2327;
+    color: var(--color-text-primary);
+    font-size: 18px;
+    font-weight: 600;
 }
 
 .filter-indicator {
-    background: #fff3cd;
-    color: #856404;
-    padding: 4px 12px;
-    border-radius: 15px;
+    background: var(--color-warning);
+    color: white;
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--radius-xl);
     font-size: 12px;
     font-weight: 600;
-    border: 1px solid #ffeaa7;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Modern Card Grid Layout */
+.participants-grid {
+    display: grid;
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-lg);
 }
 
 .participant-card {
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    margin-bottom: 15px;
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
     overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+    position: relative;
 }
 
+.participant-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-primary);
+}
+
+/* Card Header */
 .participant-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    background: #f8f9fa;
-    border-bottom: 1px solid #eee;
+    padding: var(--spacing-lg);
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid var(--color-border-light);
+    position: relative;
 }
 
 .participant-header:hover {
-    background: #e9ecef;
+    background: var(--color-bg-tertiary);
+}
+
+.participant-info {
+    margin-bottom: var(--spacing-md);
 }
 
 .participant-info h3 {
-    margin: 0 0 8px 0;
-    color: #1d2327;
+    margin: 0 0 var(--spacing-xs) 0;
+    color: var(--color-text-primary);
     font-size: 16px;
+    font-weight: 500;
+    line-height: 1.4;
 }
 
 .participant-email {
-    color: #666;
-    font-weight: normal;
+    color: var(--color-text-secondary);
+    font-weight: 400;
     font-size: 14px;
+    margin-left: var(--spacing-xs);
 }
 
 .participant-meta {
     display: flex;
-    gap: 15px;
+    flex-direction: column;
+    gap: var(--spacing-xs);
     font-size: 13px;
-    color: #666;
+    color: var(--color-text-muted);
+    margin-bottom: var(--spacing-md);
 }
 
+.participant-meta span {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+/* Card Status and Stats */
 .participant-stats {
     display: flex;
     align-items: center;
-    gap: 15px;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+}
+
+.status-and-count {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
 }
 
 .status-badge {
-    padding: 4px 12px;
-    border-radius: 15px;
-    font-size: 12px;
-    font-weight: 600;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-xl);
+    font-size: 11px;
+    font-weight: 700;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
 }
 
 .status-badge.status-completed {
-    background: #d4edda;
-    color: #155724;
+    background: var(--color-success);
+    color: white;
 }
 
-.status-badge.status-incomplete {
-    background: #fff3cd;
-    color: #856404;
+.status-badge.status-incomplete,
+.status-badge.status-in_progress {
+    background: var(--color-warning);
+    color: white;
 }
 
 .response-count {
-    color: #666;
-    font-size: 13px;
+    color: var(--color-text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
 }
 
 .accordion-arrow {
-    font-size: 12px;
-    color: #666;
-    transition: transform 0.3s ease;
+    font-size: 14px;
+    color: var(--color-text-muted);
+    transition: transform 0.2s ease;
+    padding: var(--spacing-xs);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-tertiary);
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
+/* Card Content Section */
 .participant-content {
-    padding: 20px;
-    background: #fff;
+    padding: var(--spacing-lg);
+    background: var(--color-bg-primary);
+    border-top: 1px solid var(--color-border-light);
 }
 
 .participant-details {
     display: grid;
     grid-template-columns: 1fr 2fr;
-    gap: 30px;
+    gap: var(--spacing-xl);
 }
 
 .contact-info h4,
 .responses-section h4 {
-    margin-bottom: 15px;
-    color: #1d2327;
+    margin-bottom: var(--spacing-md);
+    color: var(--color-text-primary);
     font-size: 14px;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .contact-info p {
-    margin-bottom: 8px;
+    margin-bottom: var(--spacing-sm);
     font-size: 14px;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
 }
 
-.responses-list {
-    max-height: 400px;
-    overflow-y: auto;
+.contact-info strong {
+    color: var(--color-text-primary);
+    font-weight: 500;
 }
 
-.response-item {
-    padding: 15px;
-    margin-bottom: 12px;
-    background: #f9f9f9;
-    border-left: 3px solid #2271b1;
-    border-radius: 4px;
-}
-
-.question-title {
+/* Enhanced Responses Section */
+.responses-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: var(--spacing-lg);
 }
 
-
-.response-answer {
-    margin-bottom: 8px;
-}
-
-.selected-answer {
+.response-count-badge {
+    background: var(--color-primary);
+    color: white;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-xl);
+    font-size: 12px;
     font-weight: 600;
-    color: #1d2327;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.responses-container {
+    max-height: 500px;
+    overflow-y: auto;
+    padding-right: var(--spacing-xs);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.responses-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.responses-container::-webkit-scrollbar-track {
+    background: var(--color-bg-tertiary);
+    border-radius: 3px;
+}
+
+.responses-container::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 3px;
+}
+
+.responses-container::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-muted);
+}
+
+/* Individual Response Cards */
+.response-card {
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
+    border-left: 4px solid var(--color-primary);
+    border-radius: var(--radius-lg);
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.response-card:hover {
+    border-left-color: var(--color-primary-hover);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.response-card:nth-child(even) {
+    background: var(--color-bg-secondary);
+}
+
+/* Response Card Header */
+.response-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--color-border-light);
+    gap: var(--spacing-md);
+}
+
+.question-info {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    flex: 1;
+}
+
+.question-number {
+    background: var(--color-primary);
+    color: white;
+    font-weight: 700;
+    font-size: 12px;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-lg);
+    min-width: 32px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.question-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.question-text {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    line-height: 1.5;
+    margin: 0 0 var(--spacing-xs) 0;
+}
+
+.question-type {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    margin-top: var(--spacing-xs);
+}
+
+.response-type-icon {
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+}
+
+.response-type-label {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.response-timestamp {
+    font-size: 11px;
+    color: var(--color-text-muted);
+    font-weight: 500;
+    text-align: right;
+    flex-shrink: 0;
+    background: var(--color-bg-tertiary);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+}
+
+/* Response Card Body */
+.response-card-body {
+    padding: var(--spacing-md);
+}
+
+.selected-answer,
+.custom-answer {
+    margin-bottom: var(--spacing-sm);
+}
+
+.selected-answer:last-child,
+.custom-answer:last-child {
+    margin-bottom: 0;
+}
+
+.answer-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: var(--spacing-xs);
+}
+
+.answer-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    background: var(--color-bg-tertiary);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-sm);
+    display: inline-block;
+    border: 1px solid var(--color-border);
+    line-height: 1.4;
 }
 
 .custom-text {
-    font-style: italic;
-    color: #666;
-    margin-top: 5px;
-    padding: 8px;
-    background: #fff;
-    border-radius: 3px;
-    border: 1px solid #ddd;
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    background: var(--color-bg-tertiary);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 
-.response-time {
-    font-size: 12px;
-    color: #666;
-    text-align: right;
-}
-
-.no-responses {
-    color: #666;
-    font-style: italic;
+/* Enhanced Empty State */
+.no-responses-card {
+    background: var(--color-bg-primary);
+    border: 2px dashed var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-2xl);
     text-align: center;
-    padding: 20px;
+    margin: var(--spacing-lg) 0;
 }
 
+.no-responses-icon {
+    color: var(--color-text-muted);
+    margin-bottom: var(--spacing-md);
+    opacity: 0.6;
+}
+
+.no-responses-card h5 {
+    color: var(--color-text-primary);
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0 0 var(--spacing-sm) 0;
+}
+
+.no-responses-card p {
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Empty States */
 .no-data-message, .no-survey-selected {
     text-align: center;
-    padding: 60px 20px;
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    padding: var(--spacing-2xl) var(--spacing-lg);
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    margin: var(--spacing-xl) 0;
+    box-shadow: var(--shadow-sm);
 }
 
 .no-survey-selected .placeholder-content .dashicons {
-    font-size: 48px;
-    color: #ccd0d4;
-    margin-bottom: 15px;
+    font-size: 64px;
+    color: var(--color-text-muted);
+    margin-bottom: var(--spacing-lg);
+    opacity: 0.6;
 }
 
 .no-survey-selected h3 {
-    color: #666;
-    margin-bottom: 10px;
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-md);
+    font-size: 18px;
+    font-weight: 500;
 }
 
 .no-survey-selected p {
-    color: #888;
+    color: var(--color-text-secondary);
     max-width: 500px;
     margin: 0 auto;
+    line-height: 1.6;
 }
 
-/* Pagination Styles */
+.no-data-message p {
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-sm);
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* Modern Pagination */
 .pagination-wrapper {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 30px;
-    padding: 20px;
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 6px;
+    margin-top: var(--spacing-xl);
+    padding: var(--spacing-lg);
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
 }
 
 .pagination-info {
-    color: #666;
+    color: var(--color-text-secondary);
     font-size: 14px;
+    font-weight: 500;
 }
 
 .pagination-nav {
     display: flex;
-    gap: 5px;
+    gap: var(--spacing-xs);
     align-items: center;
 }
 
 .pagination-link {
-    display: inline-block;
-    padding: 8px 12px;
-    color: #2271b1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    color: var(--color-primary);
     text-decoration: none;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background: #fff;
-    transition: all 0.3s ease;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-primary);
+    transition: all 0.2s ease;
     font-size: 14px;
-    min-width: 20px;
+    font-weight: 500;
+    min-width: 36px;
+    height: 36px;
     text-align: center;
 }
 
 .pagination-link:hover {
-    background: #f0f6fc;
-    border-color: #2271b1;
-    color: #135e96;
+    background: var(--color-bg-tertiary);
+    border-color: var(--color-primary);
+    color: var(--color-primary-hover);
     text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
 }
 
 .pagination-link.current {
-    background: #2271b1;
-    color: #fff;
-    border-color: #2271b1;
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
     cursor: default;
+    box-shadow: var(--shadow-sm);
+}
+
+.pagination-link.current:hover {
+    transform: none;
+    background: var(--color-primary);
 }
 
 .pagination-link.prev,
 .pagination-link.next {
     font-weight: 600;
+    padding: var(--spacing-sm) var(--spacing-md);
 }
 
-/* Responsive adjustments */
+/* Mobile-First Responsive Design */
+@media (max-width: 1024px) {
+    .participants-grid {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: var(--spacing-md);
+    }
+
+    .stat-item {
+        min-width: 100px;
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
+
+    .stat-item strong {
+        font-size: 20px;
+    }
+}
+
 @media (max-width: 768px) {
+    .participants-wrapper {
+        margin: var(--spacing-md) 0;
+        padding: 0 var(--spacing-md);
+    }
+
     .participants-header {
+        padding: var(--spacing-md);
+    }
+
+    .header-top-row {
         flex-direction: column;
-        gap: 15px;
         align-items: stretch;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
     }
 
     .survey-selector {
-        flex-direction: column;
-        align-items: stretch;
+        width: 100%;
+    }
+
+    .filter-group {
+        width: 100%;
+        max-width: none;
     }
 
     .survey-selector select {
         min-width: auto;
-    }
-
-    .participants-controls {
-        flex-direction: column;
-        align-items: stretch;
+        flex: 1;
     }
 
     .controls-right {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 15px;
+        justify-content: center;
     }
 
     .participants-stats {
-        justify-content: center;
-        flex-wrap: wrap;
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .stat-item {
+        flex-direction: row;
+        justify-content: space-between;
+        text-align: left;
+        min-width: auto;
+    }
+
+    .stat-item strong {
+        font-size: 18px;
+        margin-bottom: 0;
+    }
+
+    .participants-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
     }
 
     .participant-header {
         flex-direction: column;
-        gap: 15px;
+        gap: var(--spacing-sm);
         align-items: stretch;
     }
 
-    .participant-meta {
+    .participant-stats {
         flex-direction: column;
-        gap: 5px;
+        align-items: stretch;
+        gap: var(--spacing-sm);
+    }
+
+    .status-and-count {
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .accordion-arrow {
+        align-self: center;
     }
 
     .participant-details {
         grid-template-columns: 1fr;
-        gap: 20px;
+        gap: var(--spacing-lg);
+    }
+
+    /* Mobile Response Cards */
+    .response-card-header {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        align-items: stretch;
+    }
+
+    .question-info {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .question-number {
+        align-self: flex-start;
+        min-width: 24px;
+        font-size: 11px;
+        padding: var(--spacing-xs);
+    }
+
+    .response-timestamp {
+        align-self: flex-end;
+        text-align: left;
+    }
+
+    .responses-container {
+        max-height: 300px;
     }
 
     .pagination-wrapper {
         flex-direction: column;
-        gap: 15px;
+        gap: var(--spacing-md);
         text-align: center;
+        padding: var(--spacing-md);
     }
 
     .pagination-nav {
         justify-content: center;
+        flex-wrap: wrap;
     }
 
-        order: -1;
+    .pagination-link {
+        min-width: 32px;
+        height: 32px;
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: 13px;
     }
+}
+
+@media (max-width: 480px) {
+    .participants-wrapper {
+        padding: 0 var(--spacing-sm);
+    }
+
+    .participants-header {
+        padding: var(--spacing-sm);
+    }
+
+    .participant-header {
+        padding: var(--spacing-sm);
+    }
+
+    .participant-content {
+        padding: var(--spacing-sm);
+    }
+
+    .pagination-wrapper {
+        padding: var(--spacing-sm);
+    }
+}
+
+/* Enhanced Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.participant-card {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.participant-card:nth-child(n) {
+    animation-delay: calc(0.05s * var(--nth-child, 0));
+}
+
+/* Response Card Animations (disabled) */
+
+.response-card:hover .question-number {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+.response-card:hover .response-type-icon {
+    color: var(--color-primary);
+    transition: color 0.2s ease;
+}
+
+/* Accordion Animation */
+.participant-content {
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.accordion-arrow {
+    transition: transform 0.2s ease;
+}
+
+.accordion-arrow.expanded {
+    transform: rotate(180deg);
+}
+
+/* Focus States for Accessibility */
+.survey-selector select:focus,
+.per-page-selector select:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.participant-header:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.pagination-link:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
 }
 </style>

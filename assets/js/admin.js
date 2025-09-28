@@ -23,9 +23,6 @@
             // Copy shortcode functionality
             $(document).on('click', '.copy-shortcode', this.copyShortcode.bind(this));
 
-            // Survey status changes
-            $(document).on('change', '#survey_status', this.handleStatusChange.bind(this));
-
 
             // Survey deletion confirmation
             $(document).on('click', '.delete-survey', this.confirmDelete.bind(this));
