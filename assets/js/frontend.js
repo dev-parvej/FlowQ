@@ -478,8 +478,6 @@
                 contentType: false,
                 timeout: 30000,
                 success: (response) => {
-                    console.log(response);
-                    
                     if (response.success) {
                         const nextStep = response.data;
                         switch (nextStep.type) {

@@ -51,7 +51,7 @@ class WP_Dynamic_Survey_Session_Manager {
     public function record_response($participant, $question, $answer_data) {
         // Validate session
         $session_id = $participant['session_id'];
-        
+
         if ($question['survey_id'] != $participant['survey_id']) {
             return new WP_Error('question_mismatch', __('Question does not belong to this survey.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
         }
@@ -334,31 +334,6 @@ class WP_Dynamic_Survey_Session_Manager {
             $this->wpdb->prepare($sql, $where_values),
             ARRAY_A
         );
-    }
-
-    /**
-     * Delete session and all related data
-     *
-     * @param string $session_id Session ID
-     * @return bool|WP_Error True on success, WP_Error on failure
-     */
-    public function delete_session($session_id) {
-        // Validate session exists
-        $participant = $this->participant_manager->get_participant($session_id);
-        if (!$participant) {
-            return new WP_Error('session_not_found', __('Session not found.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
-        }
-
-        // Delete responses first
-        $responses_table = $this->table_prefix . 'responses';
-        $this->wpdb->delete(
-            $responses_table,
-            array('session_id' => $session_id),
-            array('%s')
-        );
-
-        // Delete participant
-        return $this->participant_manager->delete_participant($session_id);
     }
 
     /**
