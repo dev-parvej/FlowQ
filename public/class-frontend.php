@@ -40,6 +40,10 @@ class WP_Dynamic_Survey_Frontend {
         add_action('wp_ajax_wp_dynamic_survey_submit_answer', array($this, 'handle_answer_submission'));
         add_action('wp_ajax_nopriv_wp_dynamic_survey_submit_answer', array($this, 'handle_answer_submission'));
 
+        // AJAX handler for skipping optional questions
+        add_action('wp_ajax_wp_dynamic_survey_skip_question', array($this, 'handle_skip_question'));
+        add_action('wp_ajax_nopriv_wp_dynamic_survey_skip_question', array($this, 'handle_skip_question'));
+
         // AJAX handlers for completion functionality
         add_action('wp_ajax_wp_dynamic_survey_get_completion_data', array($this, 'handle_get_completion_data'));
         add_action('wp_ajax_nopriv_wp_dynamic_survey_get_completion_data', array($this, 'handle_get_completion_data'));
@@ -361,7 +365,14 @@ class WP_Dynamic_Survey_Frontend {
             'answer_text' => $answer_text
         );
 
-        $result = $session_manager->record_response($session_id, $question_id, $answer_data);
+        $questionManger = new WP_Dynamic_Survey_Question_Manager();
+        $question = $questionManger->get_question($question_id);
+
+        if (!$question) {
+            wp_send_json_error(__('Question not found.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+        }
+
+        $result = $session_manager->record_response($participant, $question, $answer_data);
 
         if (is_wp_error($result)) {
             wp_send_json_error($result->get_error_message());
@@ -371,6 +382,68 @@ class WP_Dynamic_Survey_Frontend {
         $next_step = $this->get_next_step($session_id, $question_id, $answer_id);
 
         wp_send_json_success($next_step);
+    }
+
+    /**
+     * Handle skip question (for optional questions)
+     */
+    public function handle_skip_question() {
+        check_ajax_referer('wp_dynamic_survey_frontend_nonce', 'nonce');
+
+        $session_id = sanitize_text_field($_POST['session_id'] ?? '');
+        $question_id = intval($_POST['question_id'] ?? 0);
+
+        // Validate session
+        $participant_manager = new WP_Dynamic_Survey_Participant_Manager();
+        $participant = $participant_manager->validate_session($session_id);
+
+        if (is_wp_error($participant)) {
+            wp_send_json_error($participant->get_error_message());
+        }
+
+        // Get question details
+        $question_manager = new WP_Dynamic_Survey_Question_Manager();
+        $question = $question_manager->get_question($question_id, true);
+
+        if (!$question) {
+            wp_send_json_error(__('Question not found.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+        }
+
+        // Verify question is optional (not required)
+        if (filter_var($question['is_required'], FILTER_VALIDATE_BOOLEAN)) {
+            wp_send_json_error(__('This question is required and cannot be skipped.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+        }
+
+        // Record the skip as a response with null answer
+        $session_manager = new WP_Dynamic_Survey_Session_Manager();
+        $answer_data = array(
+            'answer_id' => null,
+            'answer_text' => '',
+            'skipped' => true
+        );
+
+        $result = $session_manager->record_response($participant, $question, $answer_data);
+
+        if (is_wp_error($result)) {
+            wp_send_json_error($result->get_error_message());
+        }
+
+        // Determine next step based on skip_next_question_id
+        if (!empty($question['skip_next_question_id'])) {
+            $next_question = $question_manager->get_question($question['skip_next_question_id'], true);
+            if ($next_question) {
+                wp_send_json_success(array(
+                    'type' => 'question',
+                    'question' => $next_question
+                ));
+            }
+        }
+
+        // No skip destination set - end survey
+        $session_manager->mark_survey_complete($session_id);
+        $completion_response = $this->handle_survey_completion($session_id);
+
+        wp_send_json_success($completion_response);
     }
 
     /**

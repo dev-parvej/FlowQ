@@ -43,51 +43,41 @@ class WP_Dynamic_Survey_Session_Manager {
     /**
      * Record a survey response
      *
-     * @param string $session_id Session ID
-     * @param int $question_id Question ID
+     * @param array $participant Participant data
+     * @param array $question Question
      * @param array $answer_data Answer data
      * @return bool|WP_Error True on success, WP_Error on failure
      */
-    public function record_response($session_id, $question_id, $answer_data) {
+    public function record_response($participant, $question, $answer_data) {
         // Validate session
-        $participant = $this->participant_manager->validate_session($session_id);
-        if (is_wp_error($participant)) {
-            return $participant;
-        }
-
-        // Validate question belongs to survey
-        $question_manager = new WP_Dynamic_Survey_Question_Manager();
-        $question = $question_manager->get_question($question_id);
-        if (!$question) {
-            return new WP_Error('question_not_found', __('Question not found.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
-        }
-
+        $session_id = $participant['session_id'];
+        
         if ($question['survey_id'] != $participant['survey_id']) {
             return new WP_Error('question_mismatch', __('Question does not belong to this survey.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
         }
 
         // Validate required fields - treat all questions as required since is_required column doesn't exist
-        if (empty($answer_data['answer_text']) && empty($answer_data['answer_id'])) {
+        if (empty($answer_data['answer_text']) && empty($answer_data['answer_id']) && filter_var($question['is_required'], FILTER_VALIDATE_BOOLEAN)) {
             return new WP_Error('required_answer', __('This question requires an answer.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
         }
 
         // Validate answer ID if provided
         if (!empty($answer_data['answer_id'])) {
-            $valid_answer = $this->validate_answer_for_question($answer_data['answer_id'], $question_id);
+            $valid_answer = $this->validate_answer_for_question($answer_data['answer_id'], $question['id']);
             if (!$valid_answer) {
                 return new WP_Error('invalid_answer', __('Invalid answer for this question.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
             }
         }
 
         // Handle duplicate responses (update existing)
-        $existing_response = $this->get_existing_response($session_id, $question_id);
+        $existing_response = $this->get_existing_response($session_id, $question['id']  );
 
         // Prepare response data
         $response_data = array(
             'participant_id' => $participant['id'],
             'survey_id' => $participant['survey_id'],
             'session_id' => $session_id,
-            'question_id' => $question_id,
+            'question_id' => $question['id'],
             'answer_id' => !empty($answer_data['answer_id']) ? intval($answer_data['answer_id']) : null,
             'answer_text' => sanitize_textarea_field($answer_data['answer_text'] ?? ''),
             'responded_at' => current_time('mysql')
@@ -114,11 +104,11 @@ class WP_Dynamic_Survey_Session_Manager {
         }
 
         // Update participant progress
-        $this->participant_manager->update_current_question($session_id, $question_id);
-        $this->participant_manager->add_to_question_chain($session_id, $question_id);
+        $this->participant_manager->update_current_question($session_id, $question['id']);
+        $this->participant_manager->add_to_question_chain($session_id, $question['id']);
 
         // Trigger action hook
-        do_action('wp_dynamic_survey_response_recorded', $session_id, $question_id, $answer_data);
+        do_action('wp_dynamic_survey_response_recorded', $session_id, $question['id'], $answer_data);
 
         return true;
     }

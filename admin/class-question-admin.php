@@ -34,6 +34,7 @@ class WP_Dynamic_Survey_Question_Admin {
         add_action('wp_ajax_wp_dynamic_survey_duplicate_question', array($this, 'ajax_duplicate_question'));
         add_action('wp_ajax_wp_dynamic_survey_reorder_questions', array($this, 'ajax_reorder_questions'));
         add_action('wp_ajax_wp_dynamic_survey_update_answer_next_question', array($this, 'ajax_update_answer_next_question'));
+        add_action('wp_ajax_wp_dynamic_survey_update_question_skip_destination', array($this, 'ajax_update_question_skip_destination'));
     }
 
     /**
@@ -84,7 +85,9 @@ class WP_Dynamic_Survey_Question_Admin {
         $question_data = array(
             'title' => sanitize_textarea_field($_POST['question_title']),
             'description' => sanitize_textarea_field($_POST['question_description']),
-            'extra_message' => sanitize_textarea_field($_POST['question_extra_message'] ?? '')
+            'extra_message' => sanitize_textarea_field($_POST['question_extra_message'] ?? ''),
+            'is_required' => isset($_POST['question_is_required']) ? intval($_POST['question_is_required']) : 1,
+            'skip_next_question_id' => !empty($_POST['question_skip_next_question_id']) ? intval($_POST['question_skip_next_question_id']) : null
         );
 
         $question_manager = new WP_Dynamic_Survey_Question_Manager();
@@ -122,7 +125,9 @@ class WP_Dynamic_Survey_Question_Admin {
         $question_data = array(
             'title' => sanitize_textarea_field($_POST['question_title']),
             'description' => sanitize_textarea_field($_POST['question_description']),
-            'extra_message' => sanitize_textarea_field($_POST['question_extra_message'] ?? '')
+            'extra_message' => sanitize_textarea_field($_POST['question_extra_message'] ?? ''),
+            'is_required' => isset($_POST['question_is_required']) ? intval($_POST['question_is_required']) : 1,
+            'skip_next_question_id' => !empty($_POST['question_skip_next_question_id']) ? intval($_POST['question_skip_next_question_id']) : null
         );
 
         $question_manager = new WP_Dynamic_Survey_Question_Manager();
@@ -197,7 +202,9 @@ class WP_Dynamic_Survey_Question_Admin {
         $duplicate_data = array(
             'title' => $original_question['title'] . ' (Copy)',
             'description' => $original_question['description'],
-            'extra_message' => $original_question['extra_message'] ?? ''
+            'extra_message' => $original_question['extra_message'] ?? '',
+            'is_required' => $original_question['is_required'] ?? 1,
+            'skip_next_question_id' => $original_question['skip_next_question_id'] ?? null
         );
 
         $new_question_id = $question_manager->create_question($original_question['survey_id'], $duplicate_data);
@@ -326,8 +333,15 @@ class WP_Dynamic_Survey_Question_Admin {
             wp_send_json_error(__('Cannot delete this question because other questions reference it in their flow logic. Please update the question flow first.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
         }
 
-        // Note: questions table doesn't have next_question_id, only answers table does
-        // Check if any questions point to this question as default next - skip this check since questions don't have next_question_id
+        // Check if any questions point to this question as skip destination
+        $dependent_questions = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$table_prefix}questions WHERE skip_next_question_id = %d",
+            $question_id
+        ));
+
+        if ($dependent_questions > 0) {
+            wp_send_json_error(__('Cannot delete this question because other questions reference it as a skip destination. Please update the question skip settings first.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+        }
 
         // Check if there are any responses for this question
         $responses_count = $wpdb->get_var($wpdb->prepare(
@@ -374,6 +388,40 @@ class WP_Dynamic_Survey_Question_Admin {
         wp_send_json_success(array(
             'message' => __('Next question updated successfully.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
             'next_question_id' => $next_question_id
+        ));
+    }
+
+    /**
+     * AJAX: Update question skip destination
+     */
+    public function ajax_update_question_skip_destination() {
+        check_ajax_referer('wp_dynamic_survey_admin_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(__('Insufficient permissions.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+        }
+
+        $question_id = intval($_POST['question_id']);
+        $skip_next_question_id = !empty($_POST['skip_next_question_id']) ? intval($_POST['skip_next_question_id']) : null;
+
+        if (!$question_id) {
+            wp_send_json_error(__('Invalid question ID.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+        }
+
+        $question_manager = new WP_Dynamic_Survey_Question_Manager();
+
+        // Update the question skip destination
+        $result = $question_manager->update_question($question_id, array(
+            'skip_next_question_id' => $skip_next_question_id
+        ));
+
+        if (is_wp_error($result)) {
+            wp_send_json_error($result->get_error_message());
+        }
+
+        wp_send_json_success(array(
+            'message' => __('Skip destination updated successfully.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+            'skip_next_question_id' => $skip_next_question_id
         ));
     }
 }

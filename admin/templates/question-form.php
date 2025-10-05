@@ -32,9 +32,6 @@ $form_action = $is_editing ? 'update_question' : 'create_question';
             <div class="form-field">
                 <label for="question_title" class="field-label">
                     <?php echo esc_html__('Question Title', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?> *
-                    <span class="help-tooltip" data-tooltip="<?php echo esc_attr__('The main question text that participants will see and answer.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
-                        <span class="dashicons dashicons-editor-help"></span>
-                    </span>
                 </label>
                 <input type="text"
                        id="question_title"
@@ -48,9 +45,6 @@ $form_action = $is_editing ? 'update_question' : 'create_question';
             <div class="form-field">
                 <label for="question_description" class="field-label">
                     <?php echo esc_html__('Description', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
-                    <span class="help-tooltip" data-tooltip="<?php echo esc_attr__('Optional additional context or instructions to help participants understand the question.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
-                        <span class="dashicons dashicons-editor-help"></span>
-                    </span>
                 </label>
                 <textarea id="question_description"
                           name="question_description"
@@ -71,6 +65,43 @@ $form_action = $is_editing ? 'update_question' : 'create_question';
                           class="full-width-textarea"
                           rows="3"
                           placeholder="<?php echo esc_attr__('Thank you for your answer! Our team will contact you if needed.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>"><?php echo esc_textarea($question_data['extra_message'] ?? ''); ?></textarea>
+            </div>
+
+            <div>
+                <label class="checkbox-field">
+                    <input type="checkbox"
+                           id="question_is_required"
+                           name="question_is_required"
+                           value="1"
+                           <?php checked(($question_data['is_required'] ?? 1), 1); ?>>
+                    <span class="checkbox-label">
+                        <?php echo esc_html__('This question is required', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        <span class="help-tooltip" data-tooltip="<?php echo esc_attr__('When unchecked, participants can skip this question using a skip button.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
+                            <span class="dashicons dashicons-editor-help"></span>
+                        </span>
+                    </span>
+                </label>
+            </div>
+
+            <div class="form-field skip-destination-field" style="display: none; margin-top: 20px;">
+                <label for="question_skip_next_question_id" class="field-label">
+                    <?php echo esc_html__('Skip Destination', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                    <span class="help-tooltip" data-tooltip="<?php echo esc_attr__('Choose which question to show when participants skip this question.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
+                        <span class="dashicons dashicons-editor-help"></span>
+                    </span>
+                </label>
+                <select id="question_skip_next_question_id" name="question_skip_next_question_id" class="full-width-select">
+                    <option value=""><?php echo esc_html__('— End survey —', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></option>
+                    <?php if (!empty($questions)): ?>
+                        <?php foreach ($questions as $q): ?>
+                            <?php if ($q['id'] != ($question_data['id'] ?? 0)): ?>
+                                <option value="<?php echo esc_attr($q['id']); ?>" <?php selected(($question_data['skip_next_question_id'] ?? ''), $q['id']); ?>>
+                                    <?php echo esc_html($q['title']); ?>
+                                </option>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </select>
             </div>
         </div>
     </div>
@@ -255,6 +286,20 @@ jQuery(document).ready(function($) {
         addAnswerOption();
     }
 
+    // Initialize required field toggle
+    initializeRequiredToggle();
+
+    // Handle required checkbox change
+    $('#question_is_required').on('change', function() {
+        toggleSkipDestinationField();
+        validateSkipDestination();
+    });
+
+    // Handle skip destination change
+    $('#question_skip_next_question_id').on('change', function() {
+        validateSkipDestination();
+    });
+
     // Add answer option
     $('#add-answer-option').on('click', function() {
         addAnswerOption();
@@ -345,6 +390,35 @@ jQuery(document).ready(function($) {
         $('#answer-options-container .answer-option-card').each(function(index) {
             $(this).find('.answer-number').text(index + 1);
         });
+    }
+
+    function initializeRequiredToggle() {
+        // Show/hide skip destination field based on initial state
+        toggleSkipDestinationField();
+        validateSkipDestination();
+    }
+
+    function toggleSkipDestinationField() {
+        var isRequired = $('#question_is_required').is(':checked');
+        var $skipField = $('.skip-destination-field');
+
+        if (isRequired) {
+            $skipField.slideUp(200);
+        } else {
+            $skipField.slideDown(200);
+        }
+    }
+
+    function validateSkipDestination() {
+        var isRequired = $('#question_is_required').is(':checked');
+        var skipDestination = $('#question_skip_next_question_id').val();
+        var $warning = $('.skip-warning');
+
+        if (!isRequired && !skipDestination) {
+            $warning.slideDown(200);
+        } else {
+            $warning.slideUp(200);
+        }
     }
 
 });
@@ -490,6 +564,48 @@ jQuery(document).ready(function($) {
 .help-tooltip:hover:after {
     opacity: 1;
     visibility: visible;
+}
+
+/* Checkbox Field */
+.checkbox-field {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    margin-bottom: 0 !important;
+}
+
+.checkbox-field input[type="checkbox"] {
+    margin: 0 !important;
+    margin-top: 2px !important;
+}
+
+.checkbox-label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #1d2327 !important;
+    margin: 0 !important;
+}
+
+/* Skip Warning */
+.skip-warning {
+    background: #fcf2cd;
+    border: 1px solid #f0b849;
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #8a6914;
+}
+
+.skip-warning .dashicons {
+    color: #f0b849;
+    font-size: 16px;
 }
 
 /* Answer Option Cards */

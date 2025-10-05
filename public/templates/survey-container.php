@@ -60,6 +60,17 @@ if (!defined('ABSPATH')) {
                 {{#if extraMessage}}
                     <div class="question-extra-message">{{extraMessage}}</div>
                 {{/if}}
+
+                <!-- Skip Button for Optional Questions -->
+                {{#if isRequired}}
+                <div class="question-skip-section">
+                    <button type="button" class="skip-question-btn" data-question-id="{{questionId}}">
+                        <span class="skip-icon">⏭️</span>
+                        <span class="skip-text"><?php echo esc_html__('Skip this question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
+                    </button>
+                    <p class="skip-notice"><?php echo esc_html__('This question is optional', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></p>
+                </div>
+                {{/if}}
             </div>
         </div>
     </div>
@@ -408,6 +419,57 @@ if (!defined('ABSPATH')) {
 .required-star {
     color: #d63638;
     font-weight: bold;
+}
+
+/* Skip Question Section */
+.question-skip-section {
+    text-align: center;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #e1e5e9;
+}
+
+.skip-question-btn {
+    background: #f8f9fa;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #646970;
+    text-decoration: none;
+}
+
+.skip-question-btn:hover {
+    border-color: #646970;
+    background: #f0f0f1;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.skip-question-btn:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.skip-icon {
+    font-size: 18px;
+}
+
+.skip-text {
+    font-weight: 500;
+}
+
+.skip-notice {
+    font-size: 14px;
+    color: #646970;
+    margin: 8px 0 0 0;
+    font-style: italic;
 }
 
 /* Error Display */

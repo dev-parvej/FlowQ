@@ -60,13 +60,12 @@ class WP_Dynamic_Survey_Question_Manager {
             'description' => sanitize_textarea_field($question_data['description'] ?? ''),
             'extra_message' => sanitize_textarea_field($question_data['extra_message'] ?? ''),
             'type' => 'single_choice', // Always single choice
+            'is_required' => !isset($question_data['is_required']) ? 0 : intval($question_data['is_required']),
+            'skip_next_question_id' => isset($question_data['skip_next_question_id']) ? intval($question_data['skip_next_question_id']) : null,
             'created_at' => current_time('mysql')
         );
 
-        // Validate redirect URL if provided
-        if ($question_record['redirect_url'] && !filter_var($question_record['redirect_url'], FILTER_VALIDATE_URL)) {
-            return new WP_Error('invalid_url', __('Invalid redirect URL.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
-        }
+        // No validation for skip_next_question_id - warnings will be shown in admin
 
         // Insert question
         $table_name = $this->table_prefix . 'questions';
@@ -124,9 +123,6 @@ class WP_Dynamic_Survey_Question_Manager {
             return new WP_Error('question_not_found', __('Question not found.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
         }
 
-        // Prepare update data
-        $update_data = array();
-
         if (isset($data['title'])) {
             if (empty($data['title'])) {
                 return new WP_Error('missing_title', __('Question title is required.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
@@ -140,6 +136,16 @@ class WP_Dynamic_Survey_Question_Manager {
 
         if (isset($data['extra_message'])) {
             $update_data['extra_message'] = sanitize_textarea_field($data['extra_message']);
+        }
+        
+        if (!isset($data['is_required'])) {
+            $update_data['is_required'] = 0;
+        } else {
+            $update_data['is_required'] = intval($data['is_required']);
+        }
+
+        if (isset($data['skip_next_question_id'])) {
+            $update_data['skip_next_question_id'] = $data['skip_next_question_id'] ? intval($data['skip_next_question_id']) : null;
         }
 
         // Type is always single_choice, no need to validate or update

@@ -28,6 +28,132 @@
 }
 
 /* =============================================================================
+   Question Badges
+   ============================================================================= */
+
+.question-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.question-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.optional-badge {
+    background: #e8f4f8;
+    color: #0073aa;
+    border: 1px solid #c3dbf0;
+}
+
+.warning-badge {
+    background: #fcf2cd;
+    color: #8a6914;
+    border: 1px solid #f0b849;
+}
+
+.warning-badge .dashicons {
+    font-size: 12px;
+    color: #f0b849;
+}
+
+/* Skip Destination Section */
+.skip-destination-section {
+    background: #f8f9fa;
+    border: 1px solid #e1e3e6;
+    border-radius: 6px;
+    padding: 12px;
+    margin-top: 12px;
+}
+
+.skip-destination-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+    color: #1d2327;
+    font-size: 13px;
+}
+
+.skip-destination-header .dashicons {
+    color: #646970;
+    font-size: 16px;
+}
+
+.skip-destination-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.skip-warning-inline {
+    background: #fcf2cd;
+    border: 1px solid #f0b849;
+    border-radius: 4px;
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #8a6914;
+}
+
+.skip-warning-inline .dashicons {
+    color: #f0b849;
+    font-size: 14px;
+}
+
+.skip-destination-selector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.skip-destination-dropdown {
+    min-width: 200px;
+    padding: 4px 8px;
+    border: 1px solid #8c8f94;
+    border-radius: 3px;
+    background: #fff;
+    font-size: 13px;
+}
+
+.skip-destination-dropdown:focus {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+    outline: none;
+}
+
+.warning-badge-inline {
+    background: #fcf2cd;
+    color: #8a6914;
+    border: 1px solid #f0b849;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.warning-badge-inline .dashicons {
+    font-size: 12px;
+    color: #f0b849;
+}
+
+/* =============================================================================
    Survey List Table
    ============================================================================= */
 

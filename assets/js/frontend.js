@@ -91,6 +91,9 @@
 
             // Answer selection visual feedback
             $(document).on('change', 'input[type="radio"]', this.handleAnswerSelection.bind(this));
+
+            // Skip question button click
+            $(document).off('click', '.skip-question-btn').on('click', '.skip-question-btn', this.handleSkipQuestion.bind(this));
         },
 
         /**
@@ -427,6 +430,102 @@
         },
 
         /**
+         * Handle skip question button click
+         */
+        handleSkipQuestion: function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const skipBtn = $(e.target).closest('.skip-question-btn');
+            const questionContainer = skipBtn.closest('.question-container');
+
+            if (!questionContainer.length) {
+                console.error('Question container not found');
+                return;
+            }
+
+            // Disable the skip button to prevent multiple clicks
+            skipBtn.prop('disabled', true).addClass('loading');
+
+            // Add loading state to skip button
+            const originalText = skipBtn.find('.skip-text').text();
+            skipBtn.find('.skip-text').text(this.config.strings.loading || 'Skipping...');
+
+            // Submit skip request
+            this.submitSkipQuestion(questionContainer, originalText, skipBtn);
+        },
+
+        /**
+         * Submit skip question request
+         */
+        submitSkipQuestion: function(container, originalText, skipBtn) {
+            // Show question loading overlay
+            this.hideFormErrors();
+
+            // Prepare form data
+            const formData = new FormData();
+            formData.append('session_id', this.currentSurvey.sessionId);
+            formData.append('question_id', this.currentSurvey.currentQuestionId);
+            formData.append('action', 'wp_dynamic_survey_skip_question');
+            formData.append('nonce', this.config.nonce);
+
+            // Submit via AJAX
+            $.ajax({
+                url: this.config.ajaxUrl,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                timeout: 30000,
+                success: (response) => {
+                    console.log(response);
+                    
+                    if (response.success) {
+                        const nextStep = response.data;
+                        switch (nextStep.type) {
+                            case 'question':
+                                this.currentSurvey.currentQuestionIndex++;
+                                setTimeout(() => {
+                                    this.showQuestion(nextStep.question);
+                                });
+                                break;
+
+                            case 'complete':
+                                setTimeout(() => {
+                                    this.showCompletion(nextStep);
+                                });
+                                break;
+
+                            default:
+                                console.error('Unknown next step type:', nextStep.type);
+                                this.showFormError('Unexpected response from server');
+                                break;
+                        }
+                    } else {
+                        this.showFormError(response.data || this.config.strings.error);
+                        this.resetSkipButton(skipBtn, originalText);
+                    }
+                },
+                error: (xhr, status, error) => {
+                    console.error('Skip question error:', error);
+                    this.showFormError(this.config.strings.error);
+                    this.resetSkipButton(skipBtn, originalText);
+                },
+                complete: () => {
+                    this.showQuestionLoading(false);
+                }
+            });
+        },
+
+        /**
+         * Reset skip button state
+         */
+        resetSkipButton: function(skipBtn, originalText) {
+            skipBtn.prop('disabled', false).removeClass('loading');
+            skipBtn.find('.skip-text').text(originalText);
+        },
+
+        /**
          * Show a question
          */
         showQuestion: function(questionData) {
@@ -518,7 +617,7 @@
             }
 
             // Handle {{#if isRequired}}
-            if (data.isRequired) {
+            if (!data.isRequired) {
                 html = html.replace(/\{\{#if isRequired\}\}([\s\S]*?)\{\{\/if\}\}/g, '$1');
             } else {
                 html = html.replace(/\{\{#if isRequired\}\}([\s\S]*?)\{\{\/if\}\}/g, '');

@@ -744,7 +744,8 @@ class WP_Dynamic_Survey_Admin {
         $question_data = array(
             'title' => sanitize_textarea_field($_POST['question_title']),
             'description' => sanitize_textarea_field($_POST['question_description']),
-            'extra_message' => sanitize_textarea_field($_POST['question_extra_message'] ?? '')
+            'extra_message' => sanitize_textarea_field($_POST['question_extra_message'] ?? ''),
+            'is_required' => isset($_POST['question_is_required']) ? 1 : 0
         );
 
         $question_manager->update_question($question_id, $question_data);

@@ -133,9 +133,12 @@ class WP_Dynamic_Survey_DB_Migrator {
             description text,
             extra_message text,
             type varchar(20) DEFAULT 'single_choice' COMMENT 'Question type: always single_choice',
+            is_required tinyint(1) DEFAULT 1 COMMENT 'Whether this question is required (1) or optional (0)',
+            skip_next_question_id bigint(20) DEFAULT NULL COMMENT 'Question ID to navigate to when question is skipped',
             created_at datetime DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
-            KEY survey_id_idx (survey_id)
+            KEY survey_id_idx (survey_id),
+            KEY skip_next_question_idx (skip_next_question_id)
         ) {$charset_collate};";
 
         $this->execute_sql($sql);
@@ -182,6 +185,7 @@ class WP_Dynamic_Survey_DB_Migrator {
             question_id bigint(20) NOT NULL,
             answer_id bigint(20) DEFAULT NULL,
             answer_text text DEFAULT NULL,
+            is_skipped tinyint(1) DEFAULT 0 COMMENT 'Whether this question was skipped (1) or answered (0)',
             responded_at datetime DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
             KEY participant_response_idx (participant_id, question_id),
@@ -189,7 +193,8 @@ class WP_Dynamic_Survey_DB_Migrator {
             KEY survey_id_idx (survey_id),
             KEY question_id_idx (question_id),
             KEY answer_id_idx (answer_id),
-            KEY responded_at_idx (responded_at)
+            KEY responded_at_idx (responded_at),
+            KEY is_skipped_idx (is_skipped)
         ) {$charset_collate};";
 
         $this->execute_sql($sql);

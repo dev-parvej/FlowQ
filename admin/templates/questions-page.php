@@ -93,7 +93,9 @@ $page_title = $is_editing ? __('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) :
                                 <div class="question-card">
                                     <div class="question-card-header">
                                         <div class="question-header-content">
-                                            <h3 class="question-title"><?php echo esc_html($question['title']); ?></h3>
+                                            <div class="question-title-row">
+                                                <h3 class="question-title"><?php echo esc_html($question['title']); ?></h3>
+                                            </div>
                                             <?php if ($question['description']): ?>
                                                 <p class="question-description"><?php echo esc_html($question['description']); ?></p>
                                             <?php endif; ?>
@@ -102,6 +104,74 @@ $page_title = $is_editing ? __('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) :
                                                     <span class="extra-message-label"><?php echo esc_html__('Optional Message:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
                                                     <?php echo esc_html($question['extra_message']); ?>
                                                 </p>
+                                            <?php endif; ?>
+
+                                            <div class="question-meta-badges">
+                                                <?php if (isset($question['is_required']) && !$question['is_required']): ?>
+                                                    <span class="question-badge optional-badge">
+                                                        <span class="dashicons dashicons-yes"></span>
+                                                        <?php echo esc_html__('Optional', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                                    </span>
+
+                                                    <?php
+                                                    $skip_question_title = '';
+                                                    if (!empty($question['skip_next_question_id'])) {
+                                                        foreach ($questions as $q) {
+                                                            if ($q['id'] == $question['skip_next_question_id']) {
+                                                                $skip_question_title = $q['title'];
+                                                                break;
+                                                            }
+                                                        }
+                                                    }
+                                                    ?>
+
+                                                    <div class="skip-destination-badge">
+                                                        <span class="dashicons dashicons-arrow-right-alt2"></span>
+                                                        <strong><?php echo esc_html__('Skip to:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></strong>
+                                                        <?php if (!empty($skip_question_title)): ?>
+                                                            <span class="skip-destination-text"><?php echo esc_html($skip_question_title); ?></span>
+                                                        <?php else: ?>
+                                                            <span class="skip-destination-text warning">
+                                                                <span class="dashicons dashicons-warning"></span>
+                                                                <?php echo esc_html__('End survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                                            </span>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                <?php else: ?>
+                                                    <span class="question-badge required-badge">
+                                                        <span class="dashicons dashicons-admin-network"></span>
+                                                        <?php echo esc_html__('Required', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
+
+                                            <?php if (isset($question['is_required']) && !$question['is_required']): ?>
+                                                <div class="skip-destination-section">
+                                                    <div class="skip-destination-header">
+                                                        <span class="dashicons dashicons-admin-generic"></span>
+                                                        <strong><?php echo esc_html__('Change Skip Destination:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></strong>
+                                                    </div>
+                                                    <div class="skip-destination-content">
+                                                        <div class="skip-destination-selector" data-question-id="<?php echo esc_attr($question['id']); ?>">
+                                                            <select class="skip-destination-dropdown" data-original-value="<?php echo esc_attr($question['skip_next_question_id'] ?? ''); ?>">
+                                                                <option value=""><?php echo esc_html__('— End survey —', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></option>
+                                                                <?php foreach ($questions as $q): ?>
+                                                                    <?php if ($q['id'] != $question['id']): ?>
+                                                                        <option value="<?php echo esc_attr($q['id']); ?>" <?php selected($question['skip_next_question_id'] ?? '', $q['id']); ?>>
+                                                                            <?php echo esc_html($q['title']); ?>
+                                                                        </option>
+                                                                    <?php endif; ?>
+                                                                <?php endforeach; ?>
+                                                            </select>
+                                                            <button type="button" class="button button-small save-skip-destination" style="display: none;">
+                                                                <?php echo esc_html__('Save', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                                            </button>
+                                                            <button type="button" class="button button-small cancel-skip-destination" style="display: none;">
+                                                                <?php echo esc_html__('Cancel', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             <?php endif; ?>
                                         </div>
                                         <div class="question-actions">
@@ -511,6 +581,86 @@ jQuery(document).ready(function($) {
             });
         });
     }
+
+    // Handle skip destination changes
+    $('.skip-destination-dropdown').on('change', function() {
+        var $dropdown = $(this);
+        var $selector = $dropdown.closest('.skip-destination-selector');
+        var $saveBtn = $selector.find('.save-skip-destination');
+        var $cancelBtn = $selector.find('.cancel-skip-destination');
+        var originalValue = $dropdown.data('original-value');
+        var currentValue = $dropdown.val();
+
+        if (currentValue !== originalValue) {
+            $saveBtn.show();
+            $cancelBtn.show();
+        } else {
+            $saveBtn.hide();
+            $cancelBtn.hide();
+        }
+    });
+
+    // Save skip destination
+    $('.save-skip-destination').on('click', function() {
+        var $button = $(this);
+        var $selector = $button.closest('.skip-destination-selector');
+        var $dropdown = $selector.find('.skip-destination-dropdown');
+        var questionId = $selector.data('question-id');
+        var skipQuestionId = $dropdown.val();
+
+        $button.prop('disabled', true).text('<?php echo esc_js(__('Saving...', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>');
+
+        $.ajax({
+            url: ajaxurl,
+            type: 'POST',
+            data: {
+                action: 'wp_dynamic_survey_update_question_skip_destination',
+                nonce: '<?php echo wp_create_nonce('wp_dynamic_survey_admin_nonce'); ?>',
+                question_id: questionId,
+                skip_next_question_id: skipQuestionId
+            },
+            success: function(response) {
+                if (response.success) {
+                    $dropdown.data('original-value', skipQuestionId);
+                    $button.hide();
+                    $selector.find('.cancel-skip-destination').hide();
+
+                    // Update warning display
+                    var $warningSection = $selector.closest('.skip-destination-section').find('.skip-warning-inline');
+                    if (skipQuestionId) {
+                        $warningSection.slideUp(200);
+                    } else {
+                        $warningSection.slideDown(200);
+                    }
+
+                    // Show success message briefly
+                    $button.text('<?php echo esc_js(__('Saved!', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>').prop('disabled', false);
+                    setTimeout(function() {
+                        $button.text('<?php echo esc_js(__('Save', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>');
+                    }, 2000);
+                } else {
+                    alert('<?php echo esc_js(__('Error saving skip destination.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>');
+                    $button.text('<?php echo esc_js(__('Save', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>').prop('disabled', false);
+                }
+            },
+            error: function() {
+                alert('<?php echo esc_js(__('Error saving skip destination.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>');
+                $button.text('<?php echo esc_js(__('Save', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>').prop('disabled', false);
+            }
+        });
+    });
+
+    // Cancel skip destination change
+    $('.cancel-skip-destination').on('click', function() {
+        var $button = $(this);
+        var $selector = $button.closest('.skip-destination-selector');
+        var $dropdown = $selector.find('.skip-destination-dropdown');
+        var originalValue = $dropdown.data('original-value');
+
+        $dropdown.val(originalValue);
+        $button.hide();
+        $selector.find('.save-skip-destination').hide();
+    });
 });
 </script>
 
@@ -786,6 +936,101 @@ html {
     background: #f0f0f1 !important;
     border-color: #dcdcde !important;
     color: #a7aaad !important;
+}
+
+/* Question meta badges */
+.question-meta-badges {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.question-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.question-badge .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+}
+
+.optional-badge {
+    background: #e7f5ff;
+    color: #0c5460;
+    border: 1px solid #b8daff;
+}
+
+.required-badge {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.skip-destination-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.skip-destination-badge .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    color: #6c757d;
+}
+
+.skip-destination-badge strong {
+    color: #495057;
+}
+
+.skip-destination-text {
+    color: #212529;
+    font-weight: 500;
+}
+
+.skip-destination-text.warning {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #856404;
+}
+
+.skip-destination-text.warning .dashicons {
+    color: #f39c12;
+}
+
+.skip-destination-section {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e9ecef;
+}
+
+.skip-destination-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+    color: #495057;
+    font-size: 13px;
+}
+
+.skip-destination-header .dashicons {
+    color: #6c757d;
 }
 
 /* Question Cards Layout */
@@ -1444,6 +1689,18 @@ body.modal-open {
 
     .next-question-dropdown {
         min-width: 100%;
+    }
+
+    .question-meta-badges {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .skip-destination-badge {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
     }
 }
 </style>
