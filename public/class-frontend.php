@@ -468,12 +468,17 @@ class WP_Dynamic_Survey_Frontend {
         // Check for answer-level routing first
         if ($selected_answer) {
             if (!empty($selected_answer['redirect_url'])) {
-                return array(
+                $redirects = [];
+                if (empty($selected_answer['next_question_id'])) {
+                    $redirects = $this->handle_survey_completion($session_id);
+                }
+                
+                return array_merge($redirects, array(
                     'type' => 'redirect',
                     'url' => $selected_answer['redirect_url'],
                     'question' => $selected_answer['next_question_id'] ? 
                         $question_manager->get_question($selected_answer['next_question_id'], true) : null
-                );
+                ));
             }
 
             if (!empty($selected_answer['next_question_id'])) {

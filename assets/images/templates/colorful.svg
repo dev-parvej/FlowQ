@@ -1,0 +1,42 @@
+<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background (Colorful) -->
+  <rect width="400" height="300" fill="#fef3c7"/>
+
+  <!-- Gradient Definition -->
+  <defs>
+    <linearGradient id="colorfulGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ec4899;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Header with Gradient -->
+  <rect x="25" y="25" width="350" height="45" fill="url(#colorfulGradient)" rx="20"/>
+  <rect x="45" y="40" width="180" height="7" fill="#ffffff" opacity="0.9" rx="3"/>
+  <rect x="45" y="53" width="120" height="5" fill="#ffffff" opacity="0.7" rx="2"/>
+
+  <!-- Question Section -->
+  <rect x="25" y="90" width="350" height="125" fill="#ffffff" rx="20"/>
+  <rect x="45" y="105" width="240" height="9" fill="#1f2937" rx="4"/>
+  <rect x="45" y="122" width="290" height="5" fill="#d1d5db" rx="2"/>
+  <rect x="45" y="132" width="250" height="5" fill="#d1d5db" rx="2"/>
+
+  <!-- Answer Options (Colorful Style) -->
+  <rect x="45" y="153" width="290" height="32" fill="#fef3c7" stroke="#ec4899" stroke-width="2" rx="16"/>
+  <rect x="65" y="164" width="120" height="7" fill="#ec4899" rx="3"/>
+
+  <rect x="45" y="193" width="290" height="32" fill="#fef3c7" stroke="#f59e0b" stroke-width="2" rx="16"/>
+  <rect x="65" y="204" width="140" height="7" fill="#f59e0b" rx="3"/>
+
+  <!-- Button with Gradient -->
+  <rect x="25" y="235" width="150" height="42" fill="url(#colorfulGradient)" rx="20"/>
+  <rect x="70" y="250" width="60" height="8" fill="#ffffff" rx="4"/>
+
+  <!-- Decorative Elements -->
+  <circle cx="360" cy="270" r="8" fill="#ec4899" opacity="0.6"/>
+  <circle cx="340" cy="280" r="6" fill="#f59e0b" opacity="0.6"/>
+  <circle cx="380" cy="285" r="5" fill="#ec4899" opacity="0.4"/>
+
+  <!-- Label -->
+  <text x="200" y="295" font-family="Arial, sans-serif" font-size="12" fill="#999999" text-anchor="middle">Colorful Template</text>
+</svg>

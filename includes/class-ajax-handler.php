@@ -44,6 +44,7 @@ class WP_Dynamic_Survey_Ajax_Handler {
         // Admin AJAX handlers
         add_action('wp_ajax_wp_dynamic_survey_get_survey_statistics', array($this, 'get_survey_statistics'));
         add_action('wp_ajax_wp_dynamic_survey_bulk_export_responses', array($this, 'bulk_export_responses'));
+        add_action('wp_ajax_wp_dynamic_survey_select_template', array($this, 'select_template'));
 
         // Security and validation
         add_action('wp_ajax_wp_dynamic_survey_check_permissions', array($this, 'check_permissions'));
@@ -263,6 +264,46 @@ class WP_Dynamic_Survey_Ajax_Handler {
         }
     }
     
+    /**
+     * Select template AJAX handler (Admin only)
+     */
+    public function select_template() {
+        $this->check_rate_limit('select_template', 10, 60);
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(__('Insufficient permissions.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+        }
+
+        check_ajax_referer('wp_dynamic_survey_admin_nonce', 'nonce');
+
+        $template_id = intval($_POST['template_id'] ?? 0);
+
+        if (!$template_id) {
+            wp_send_json_error(__('Template ID is required.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+        }
+
+        // Verify template exists
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'wp_dynamic_survey_templates';
+        $template = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM {$table_name} WHERE id = %d",
+            $template_id
+        ), ARRAY_A);
+
+        if (!$template) {
+            wp_send_json_error(__('Template not found.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+        }
+
+        // Update active template option
+        update_option('wp_dynamic_survey_active_template', $template_id);
+
+        wp_send_json_success(array(
+            'message' => __('Template activated successfully.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+            'template_id' => $template_id,
+            'template_name' => $template['name']
+        ));
+    }
+
     /**
      * Check permissions AJAX handler
      */

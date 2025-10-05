@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
 <div class="wp-dynamic-survey-participant-form">
     <div class="participant-form-container">
         <h3 class="form-title">
-            <?php echo esc_html__('Please provide your information to start the survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+            <?php echo esc_html__($survey['title'], WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
         </h3>
 
         <!-- Stage 1 Form -->
@@ -30,6 +30,7 @@ if (!defined('ABSPATH')) {
                         id="participant_name"
                         name="participant_name"
                         class="form-control"
+                        style="text-align: left !important;"
                         required
                         placeholder="<?php echo esc_attr__('Enter your full name', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>"
                     >

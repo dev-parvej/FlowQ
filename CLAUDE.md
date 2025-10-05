@@ -19,6 +19,7 @@
 - Answer fields: answer_text, answer_value, answer_order
 - **Conditional Logic**: Each answer can specify `next_question_id` for branching
 - **External Redirects**: Each answer can specify `redirect_url`
+- **Skip Question Option**: Questions can be marked as skippable, allowing users to proceed without selecting an answer
 - Answer reordering functionality
 
 ### Database Schema
@@ -29,6 +30,7 @@ Tables created:
 - `wp_dynamic_survey_responses`
 - `wp_dynamic_survey_participants`
 - `wp_dynamic_survey_sessions`
+- `wp_dynamic_survey_templates`
 
 ### Admin Interface
 - Survey management pages
@@ -37,6 +39,22 @@ Tables created:
 - Question duplication
 - Analytics and participant tracking
 - Shortcode builder
+- **Settings Page**: Tabbed navigation interface
+  - Templates tab for global template selection
+
+### Template System
+- **Global Templates**: Template applies to all surveys (not per-survey)
+- **Default Templates**: 5 pre-built templates seeded in database
+  - Classic - Traditional form-style
+  - Modern - Clean, minimalist design
+  - Card-based - Elevated card layout
+  - Dark Mode - Dark theme
+  - Colorful - Vibrant gradient design
+- **Template Storage**:
+  - Templates table with fields: id, name, description, is_default, preview_image, styles (JSON)
+  - Active template stored in options: `wp_dynamic_survey_active_template`
+  - Preview images: SVG files in `assets/images/templates/`
+- **Template Selection UI**: Grid layout with preview cards, active badge, and select buttons
 
 ### Frontend
 - Survey display via shortcodes
@@ -65,3 +83,12 @@ wp-dynamic-survey/
 - `WP_Dynamic_Survey_Frontend`: Frontend display
 - `WP_Dynamic_Survey_Manager`: Survey management
 - `WP_Dynamic_Survey_Session_Manager`: Session handling
+- `WP_Dynamic_Survey_Settings_Admin`: Settings page with tab navigation
+- `WP_Dynamic_Survey_DB_Migrator`: Database migrations including templates table
+
+### Recent Updates
+- Added Settings page with tab navigation (`admin/class-settings-admin.php`)
+- Implemented template system with database table and seeded 5 default templates
+- Created SVG preview images for all templates
+- Built template selection UI with flexbox grid layout
+- Template styles stored inline in PHP template file (`admin/templates/templates-list.php`)

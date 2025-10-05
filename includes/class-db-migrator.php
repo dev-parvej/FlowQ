@@ -48,6 +48,7 @@ class WP_Dynamic_Survey_DB_Migrator {
         $this->create_questions_table();
         $this->create_answers_table();
         $this->create_responses_table();
+        $this->create_templates_table();
 
         // Update database version
         update_option('wp_dynamic_survey_db_version', self::DB_VERSION);
@@ -200,6 +201,127 @@ class WP_Dynamic_Survey_DB_Migrator {
         $this->execute_sql($sql);
     }
 
+    /**
+     * Create wp_survey_templates table
+     */
+    private function create_templates_table() {
+        $table_name = $this->table_prefix . 'templates';
+
+        $charset_collate = $this->wpdb->get_charset_collate();
+
+        $sql = "CREATE TABLE {$table_name} (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            name varchar(255) NOT NULL,
+            description text,
+            is_default tinyint(1) DEFAULT 0 COMMENT 'Whether this is a system default template',
+            preview_image varchar(500),
+            styles longtext COMMENT 'JSON configuration for template styles',
+            created_at datetime DEFAULT CURRENT_TIMESTAMP,
+            updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            KEY is_default_idx (is_default),
+            KEY created_at_idx (created_at)
+        ) {$charset_collate};";
+
+        $this->execute_sql($sql);
+    }
+
+    /**
+     * Seed default templates
+     */
+    private function seed_default_templates() {
+        $table_name = $this->table_prefix . 'templates';
+
+        // Check if templates already exist
+        $count = $this->wpdb->get_var("SELECT COUNT(*) FROM {$table_name}");
+        if ($count > 0) {
+            return; // Templates already seeded
+        }
+
+        $default_templates = array(
+            array(
+                'name' => 'Classic',
+                'description' => 'Traditional form-style survey with clean, professional design',
+                'is_default' => 1,
+                'preview_image' => WP_DYNAMIC_SURVEY_URL . 'assets/images/templates/classic.svg',
+                'styles' => json_encode(array(
+                    'primary_color' => '#0073aa',
+                    'background_color' => '#ffffff',
+                    'text_color' => '#1d2327',
+                    'button_style' => 'solid',
+                    'border_radius' => '4px',
+                    'font_family' => 'system-ui, sans-serif'
+                ))
+            ),
+            array(
+                'name' => 'Modern',
+                'description' => 'Clean, minimalist design with modern aesthetics',
+                'is_default' => 1,
+                'preview_image' => WP_DYNAMIC_SURVEY_URL . 'assets/images/templates/modern.svg',
+                'styles' => json_encode(array(
+                    'primary_color' => '#6366f1',
+                    'background_color' => '#f8f9fa',
+                    'text_color' => '#1e293b',
+                    'button_style' => 'rounded',
+                    'border_radius' => '12px',
+                    'font_family' => 'Inter, system-ui, sans-serif'
+                ))
+            ),
+            array(
+                'name' => 'Card-based',
+                'description' => 'Each question displayed as an elegant card',
+                'is_default' => 1,
+                'preview_image' => WP_DYNAMIC_SURVEY_URL . 'assets/images/templates/card.svg',
+                'styles' => json_encode(array(
+                    'primary_color' => '#10b981',
+                    'background_color' => '#f3f4f6',
+                    'text_color' => '#111827',
+                    'button_style' => 'elevated',
+                    'border_radius' => '16px',
+                    'font_family' => 'system-ui, sans-serif',
+                    'card_shadow' => '0 4px 6px rgba(0,0,0,0.1)'
+                ))
+            ),
+            array(
+                'name' => 'Dark Mode',
+                'description' => 'Sleek dark theme for modern surveys',
+                'is_default' => 1,
+                'preview_image' => WP_DYNAMIC_SURVEY_URL . 'assets/images/templates/dark.svg',
+                'styles' => json_encode(array(
+                    'primary_color' => '#818cf8',
+                    'background_color' => '#1e293b',
+                    'text_color' => '#f1f5f9',
+                    'button_style' => 'solid',
+                    'border_radius' => '8px',
+                    'font_family' => 'system-ui, sans-serif'
+                ))
+            ),
+            array(
+                'name' => 'Colorful',
+                'description' => 'Vibrant, engaging design with bold colors',
+                'is_default' => 1,
+                'preview_image' => WP_DYNAMIC_SURVEY_URL . 'assets/images/templates/colorful.svg',
+                'styles' => json_encode(array(
+                    'primary_color' => '#ec4899',
+                    'background_color' => '#fef3c7',
+                    'text_color' => '#1f2937',
+                    'button_style' => 'gradient',
+                    'border_radius' => '20px',
+                    'font_family' => 'system-ui, sans-serif',
+                    'gradient_start' => '#ec4899',
+                    'gradient_end' => '#f59e0b'
+                ))
+            )
+        );
+
+        foreach ($default_templates as $template) {
+            $this->wpdb->insert($table_name, $template);
+        }
+
+        // Set default active template to Classic (ID: 1)
+        update_option('wp_dynamic_survey_active_template', 1);
+    }
+
 
     /**
      * Execute SQL with error handling
@@ -243,6 +365,7 @@ class WP_Dynamic_Survey_DB_Migrator {
             $this->table_prefix . 'questions',
             $this->table_prefix . 'answers',
             $this->table_prefix . 'responses',
+            $this->table_prefix . 'templates',
         );
     }
 

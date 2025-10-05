@@ -160,6 +160,10 @@ class WP_Dynamic_Survey_Plugin {
         require_once WP_DYNAMIC_SURVEY_PATH . 'admin/class-question-admin.php';
         new WP_Dynamic_Survey_Question_Admin();
 
+        // Load settings admin class
+        require_once WP_DYNAMIC_SURVEY_PATH . 'admin/class-settings-admin.php';
+        new WP_Dynamic_Survey_Settings_Admin();
+
     }
 
     /**
