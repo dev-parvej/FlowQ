@@ -9,6 +9,10 @@
 if (!defined('ABSPATH')) {
     exit;
 }
+
+// Get template handler
+$template_handler = new WP_Dynamic_Survey_Template_Handler();
+$template_styles = $template_handler->get_template_styles();
 ?>
 
 <div class="wp-dynamic-survey-container" data-survey-id="<?php echo esc_attr($survey['id']); ?>" data-theme="<?php echo esc_attr($theme); ?>">
@@ -19,16 +23,6 @@ if (!defined('ABSPATH')) {
 
     <div class="hidden" id="wp-dynamic-survey-question-template-wrapper">
         <div class="question-container">
-            <!-- Progress Bar -->
-            <div class="progress-container">
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: {{progressPercentage}}%"></div>
-                </div>
-                <div class="progress-text">
-                    Question {{currentQuestion}} of {{totalQuestions}} ({{progressPercentage}}%)
-                </div>
-            </div>
-
             <!-- Question Content -->
             <div class="question-content">
                 <h2 class="question-title">{{questionTitle}}</h2>
@@ -66,9 +60,8 @@ if (!defined('ABSPATH')) {
                 <div class="question-skip-section">
                     <button type="button" class="skip-question-btn" data-question-id="{{questionId}}">
                         <span class="skip-icon">⏭️</span>
-                        <span class="skip-text"><?php echo esc_html__('Skip this question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
+                        <span class="skip-text"><?php echo esc_html__('Skip', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
                     </button>
-                    <p class="skip-notice"><?php echo esc_html__('This question is optional', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></p>
                 </div>
                 {{/if}}
             </div>
@@ -241,7 +234,7 @@ if (!defined('ABSPATH')) {
     padding: 30px;
     background: #fff;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: none;
     margin-bottom: 20px;
 }
 
@@ -271,11 +264,6 @@ if (!defined('ABSPATH')) {
     font-size: 14px;
     color: #666;
     font-weight: 500;
-}
-
-/* Question Content */
-.question-content {
-    margin-bottom: 30px;
 }
 
 .question-title {
@@ -423,7 +411,6 @@ if (!defined('ABSPATH')) {
 
 /* Skip Question Section */
 .question-skip-section {
-    text-align: center;
     margin-top: 25px;
     padding-top: 20px;
     border-top: 1px solid #e1e5e9;
@@ -532,6 +519,9 @@ if (!defined('ABSPATH')) {
     }
 }
 </style>
+
+<!-- Template-specific styles -->
+<?php echo $template_handler->render_template_css(); ?>
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {

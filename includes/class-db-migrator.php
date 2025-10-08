@@ -289,11 +289,14 @@ class WP_Dynamic_Survey_DB_Migrator {
                 'preview_image' => WP_DYNAMIC_SURVEY_URL . 'assets/images/templates/dark.svg',
                 'styles' => json_encode(array(
                     'primary_color' => '#818cf8',
-                    'background_color' => '#1e293b',
+                    'background_color' => '#2d3748',
                     'text_color' => '#f1f5f9',
                     'button_style' => 'solid',
                     'border_radius' => '8px',
-                    'font_family' => 'system-ui, sans-serif'
+                    'font_family' => 'system-ui, sans-serif',
+                    'input_bg_color' => '#1a202c',
+                    'input_border_color' => '#4a5568',
+                    'input_text_color' => '#f1f5f9'
                 ))
             ),
             array(

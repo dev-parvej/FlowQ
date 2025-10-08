@@ -9,6 +9,10 @@
 if (!defined('ABSPATH')) {
     exit;
 }
+
+// Get template handler
+$template_handler = new WP_Dynamic_Survey_Template_Handler();
+$template_styles = $template_handler->get_template_styles();
 ?>
 
 <div class="wp-dynamic-survey-participant-form">
@@ -199,10 +203,10 @@ if (!defined('ABSPATH')) {
 
 .participant-form-container {
     background: #fff;
-    border: 1px solid #ddd;
+    border: none;
     border-radius: 8px;
     padding: 30px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: none;
 }
 
 .form-title {
@@ -409,6 +413,9 @@ if (!defined('ABSPATH')) {
     }
 }
 .hidden {
-    display: none !important;   
+    display: none !important;
 }
 </style>
+
+<!-- Template-specific styles -->
+<?php echo $template_handler->render_template_css(); ?>

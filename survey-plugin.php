@@ -87,6 +87,7 @@ class WP_Dynamic_Survey_Plugin {
         require_once WP_DYNAMIC_SURVEY_PATH . 'includes/class-participant-manager.php';
         require_once WP_DYNAMIC_SURVEY_PATH . 'includes/class-question-manager.php';
         require_once WP_DYNAMIC_SURVEY_PATH . 'includes/class-session-manager.php';
+        require_once WP_DYNAMIC_SURVEY_PATH . 'includes/class-template-handler.php';
     }
 
     /**
