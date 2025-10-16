@@ -119,7 +119,6 @@ $template_styles = $template_handler->get_template_styles();
 .wp-dynamic-survey-container {
     position: relative;
     width: 100%;
-    max-width: 800px;
     margin: 0 auto;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -214,24 +213,8 @@ $template_styles = $template_handler->get_template_styles();
     margin: 0;
 }
 
-/* Theme variations */
-.wp-dynamic-survey-container[data-theme="minimal"] {
-    max-width: 600px;
-}
-
-.wp-dynamic-survey-container[data-theme="minimal"] .participant-form-container {
-    border: none;
-    box-shadow: none;
-    padding: 20px;
-}
-
-.wp-dynamic-survey-container[data-theme="minimal"] .survey-title {
-    font-size: 24px;
-}
-
 /* Question Template Styles */
 .question-container {
-    padding: 30px;
     background: #fff;
     border-radius: 8px;
     box-shadow: none;
@@ -484,11 +467,6 @@ $template_styles = $template_handler->get_template_styles();
 @media (max-width: 768px) {
     .wp-dynamic-survey-container {
         max-width: 100%;
-        margin: 0 10px;
-    }
-
-    .question-container {
-        padding: 20px;
     }
 
     .question-title {
@@ -506,10 +484,6 @@ $template_styles = $template_handler->get_template_styles();
 }
 
 @media (max-width: 480px) {
-    .question-container {
-        padding: 15px;
-    }
-
     .question-title {
         font-size: 18px;
     }

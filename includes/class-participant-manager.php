@@ -76,6 +76,18 @@ class WP_Dynamic_Survey_Participant_Manager {
             return new WP_Error('survey_not_published', __('Survey is not published.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
         }
 
+        // Check for duplicate email if setting is disabled
+        $allow_duplicate_emails = get_option('wp_dynamic_survey_allow_duplicate_emails', '0');
+        if ($allow_duplicate_emails != '1') {
+            $email_exists = $this->email_exists_for_survey($survey_id, $participant_data['email']);
+            if ($email_exists) {
+                return new WP_Error(
+                    'duplicate_email',
+                    __('You have already submitted this survey with this email address.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)
+                );
+            }
+        }
+
         // Generate unique session ID
         $session_id = $this->generate_session_id();
 
@@ -538,5 +550,26 @@ class WP_Dynamic_Survey_Participant_Manager {
         }
 
         return $participant;
+    }
+
+    /**
+     * Check if email already exists for a survey
+     *
+     * @param int $survey_id Survey ID
+     * @param string $email Email address
+     * @return bool True if email exists, false otherwise
+     */
+    public function email_exists_for_survey($survey_id, $email) {
+        $table_name = $this->table_prefix . 'participants';
+
+        $count = $this->wpdb->get_var(
+            $this->wpdb->prepare(
+                "SELECT COUNT(*) FROM {$table_name} WHERE survey_id = %d AND participant_email = %s",
+                $survey_id,
+                $email
+            )
+        );
+
+        return $count > 0;
     }
 }

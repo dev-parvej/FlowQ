@@ -447,11 +447,32 @@ class WP_Dynamic_Survey_Admin {
         $survey_id = isset($_POST['survey_id']) ? intval($_POST['survey_id']) : 0;
         $survey_manager = new WP_Dynamic_Survey_Manager();
 
+        // Process header fields
+        $show_header = isset($_POST['show_header']) ? 1 : 0;
+        $form_header = sanitize_text_field($_POST['form_header'] ?? '');
+        $form_subtitle = sanitize_textarea_field($_POST['form_subtitle'] ?? '');
+
+        // Validation: If show_header is enabled, form_header must not be empty
+        if ($show_header && empty(trim($form_header))) {
+            $this->add_admin_notice(__('Survey Form Header is required when Show Custom Header is enabled', WP_DYNAMIC_SURVEY_TEXT_DOMAIN), 'error');
+
+            // Redirect back to form
+            if ($survey_id) {
+                wp_safe_redirect(admin_url('admin.php?page=' . $this->menu_slugs['add_survey'] . '&survey_id=' . $survey_id));
+            } else {
+                wp_safe_redirect(admin_url('admin.php?page=' . $this->menu_slugs['add_survey']));
+            }
+            exit;
+        }
+
         $survey_data = array(
             'title' => sanitize_text_field($_POST['survey_title']),
             'description' => sanitize_textarea_field($_POST['survey_description']),
             'thank_you_page_slug' => sanitize_text_field($_POST['thank_you_page_slug'] ?? ''),
             'status' => sanitize_text_field($_POST['survey_status']),
+            'show_header' => $show_header,
+            'form_header' => $form_header,
+            'form_subtitle' => $form_subtitle,
         );
 
         if ($survey_id) {

@@ -66,6 +66,62 @@ $page_title = $is_edit ? __('Edit Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('
             </div>
         </div>
 
+        <!-- Display Settings Card -->
+        <div class="survey-card">
+            <h3 class="card-title"><?php echo esc_html__('Display Settings', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h3>
+            <div class="card-content">
+                <div class="form-field">
+                    <label class="checkbox-label">
+                        <input type="checkbox"
+                               id="show_header"
+                               name="show_header"
+                               value="1"
+                               <?php checked(!empty($survey['show_header']), true); ?>>
+                        <?php echo esc_html__('Show Custom Header and Subtitle', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                    </label>
+                    <p class="field-description">
+                        <?php echo esc_html__('Display a custom header and subtitle at the top of the participant form instead of the survey title', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                    </p>
+                </div>
+
+                <div id="header-fields-container" style="display: none;">
+                    <div class="form-field">
+                        <label for="form_header" class="field-label">
+                            <?php echo esc_html__('Survey Form Header', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                            <span style="color: #dc3232;">*</span>
+                            <span class="help-tooltip" data-tooltip="<?php echo esc_attr__('Main heading displayed at the top of the participant form (max 255 characters)', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
+                                <span class="dashicons dashicons-editor-help"></span>
+                            </span>
+                        </label>
+                        <input type="text"
+                               id="form_header"
+                               name="form_header"
+                               class="full-width-input"
+                               value="<?php echo esc_attr($survey['form_header'] ?? ''); ?>"
+                               placeholder="<?php echo esc_attr__('e.g., Help Us Improve Your Experience', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>"
+                               maxlength="255">
+                        <p class="field-description character-count">
+                            <span id="header-char-count">0</span> / 255 <?php echo esc_html__('characters', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        </p>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="form_subtitle" class="field-label">
+                            <?php echo esc_html__('Survey Form Subtitle', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                            <span class="help-tooltip" data-tooltip="<?php echo esc_attr__('Subtitle displayed below the header (optional)', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
+                                <span class="dashicons dashicons-editor-help"></span>
+                            </span>
+                        </label>
+                        <textarea id="form_subtitle"
+                                  name="form_subtitle"
+                                  class="full-width-textarea"
+                                  rows="3"
+                                  placeholder="<?php echo esc_attr__('e.g., Your feedback matters! Take 2 minutes to share your thoughts.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>"><?php echo esc_textarea($survey['form_subtitle'] ?? ''); ?></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Page Settings Card -->
         <div class="survey-card">
             <h3 class="card-title"><?php echo esc_html__('Page Settings', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h3>
@@ -586,6 +642,34 @@ $page_title = $is_edit ? __('Edit Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('
 .copy-success .dashicons-clipboard:before {
     content: "\f147"; /* checkmark */
 }
+
+/* Checkbox Label */
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1d2327;
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    margin: 0;
+    cursor: pointer;
+}
+
+/* Character Count */
+.character-count {
+    font-size: 12px !important;
+    color: #646970 !important;
+    margin-top: 4px !important;
+}
+
+#header-char-count {
+    font-weight: 600;
+    color: #1d2327;
+}
 </style>
 
 <script>
@@ -622,4 +706,69 @@ function copyToClipboard(text) {
         alert('<?php echo esc_html__('Shortcode copied to clipboard!', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>');
     });
 }
+
+// Header Fields Toggle and Validation
+jQuery(document).ready(function($) {
+    var $showHeaderCheckbox = $('#show_header');
+    var $headerFieldsContainer = $('#header-fields-container');
+    var $formHeaderInput = $('#form_header');
+    var $charCount = $('#header-char-count');
+    var $surveyForm = $('form[action*="admin-post.php"]');
+
+    // Update character count
+    function updateCharCount() {
+        var length = $formHeaderInput.val().length;
+        $charCount.text(length);
+
+        // Change color if approaching limit
+        if (length > 240) {
+            $charCount.css('color', '#dc3232');
+        } else if (length > 200) {
+            $charCount.css('color', '#dba617');
+        } else {
+            $charCount.css('color', '#1d2327');
+        }
+    }
+
+    // Toggle header fields visibility
+    function toggleHeaderFields() {
+        if ($showHeaderCheckbox.is(':checked')) {
+            $headerFieldsContainer.slideDown(300);
+            $formHeaderInput.attr('required', true);
+        } else {
+            $headerFieldsContainer.slideUp(300);
+            $formHeaderInput.attr('required', false);
+        }
+    }
+
+    // Initialize on page load
+    toggleHeaderFields();
+    updateCharCount();
+
+    // Listen for checkbox changes
+    $showHeaderCheckbox.on('change', toggleHeaderFields);
+
+    // Listen for input changes on header field
+    $formHeaderInput.on('input', updateCharCount);
+
+    // Form validation
+    $surveyForm.on('submit', function(e) {
+        if ($showHeaderCheckbox.is(':checked')) {
+            var headerValue = $formHeaderInput.val().trim();
+
+            if (headerValue === '') {
+                e.preventDefault();
+                alert('<?php echo esc_js(__('Survey Form Header is required when Show Custom Header is enabled', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>');
+                $formHeaderInput.focus();
+
+                // Scroll to the field
+                $('html, body').animate({
+                    scrollTop: $formHeaderInput.offset().top - 100
+                }, 500);
+
+                return false;
+            }
+        }
+    });
+});
 </script>

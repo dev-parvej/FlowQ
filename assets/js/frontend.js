@@ -80,6 +80,9 @@
             // Back button click
             $(document).off('click', '.btn-back').on('click', '.btn-back', this.handleBackButton.bind(this));
 
+            // Skip phone button click
+            $(document).off('click', '#btn-skip-phone').on('click', '#btn-skip-phone', this.handleSkipPhone.bind(this));
+
             // Auto-submit on answer selection (single choice radio buttons)
             $(document).off('change', 'input[type="radio"].auto-submit').on('change', 'input[type="radio"].auto-submit', this.handleAutoSubmit.bind(this));
 
@@ -180,13 +183,63 @@
         },
 
         /**
+         * Handle skip phone button click
+         */
+        handleSkipPhone: function(e) {
+            e.preventDefault();
+
+            // Use stored stage1 data to start survey without phone
+            if (this.stage1Data) {
+                // Show loading state
+                const skipBtn = $(e.target);
+                skipBtn.prop('disabled', true).text(this.config.strings.loading || 'Loading...');
+
+                // Prepare form data without phone number
+                const formData = new FormData();
+                formData.append('survey_id', this.stage1Data.survey_id || $('#wp-dynamic-survey-participant-form-stage2 input[name="survey_id"]').val());
+                formData.append('session_id', this.stage1Data.session_id);
+                formData.append('participant_phone', ''); // Empty phone
+                formData.append('action', 'wp_dynamic_survey_submit_stage2_info');
+                formData.append('nonce', this.config.nonce);
+                formData.append('stage1_data', JSON.stringify(this.stage1Data));
+
+                // Submit via AJAX
+                $.ajax({
+                    url: this.config.ajaxUrl,
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: this.handleStage2FormSuccess.bind(this),
+                    error: this.handleStage2FormError.bind(this),
+                    complete: function() {
+                        skipBtn.prop('disabled', false).text('Skip');
+                    }
+                });
+            }
+        },
+
+        /**
          * Handle successful Stage 1 form submission
          */
         handleStage1FormSuccess: function(response) {
             if (response.success) {
-                // Store stage 1 data for stage 2
-                this.stage1Data = response.data;
-                this.showStage2Form();
+                // Check if two-stage form is enabled
+                if (response.data.two_stage_form) {
+                    // Two-stage mode: show Stage 2 form
+                    this.stage1Data = response.data;
+                    this.showStage2Form();
+                } else {
+                    // Single-stage mode: start survey immediately
+                    this.currentSurvey.sessionId = response.data.session_id;
+                    this.currentSurvey.participantId = response.data.participant_id;
+                    this.currentSurvey.totalQuestions = response.data.total_questions;
+                    this.currentSurvey.currentQuestionIndex = 1;
+
+                    // Hide participant form and show first question
+                    this.hideStep('participant-form-step');
+                    this.showQuestion(response.data.first_question);
+                }
             } else {
                 this.showFormError(response.data || this.config.strings.error);
             }
@@ -245,12 +298,20 @@
                 if (!value) {
                     this.showFieldError(field, this.config.strings.required_field);
                     isValid = false;
+                    // Scroll to phone field if it's empty
+                    if (attribute === 'tel') {
+                        $(field).focus();
+                        this.scrollToField(field);
+                    }
                 } else if (attribute === 'email' && !this.isValidEmail(value)) {
                     this.showFieldError(field, this.config.strings.invalid_email);
                     isValid = false;
                 } else if (attribute === 'tel' && !this.isValidPhone(value)) {
                     this.showFieldError(field, this.config.strings.invalid_phone);
                     isValid = false;
+                    // Scroll to phone field if it's invalid
+                    $(field).focus();
+                    this.scrollToField(field);
                 }
             }.bind(this));
 
@@ -296,14 +357,49 @@
          * Alias for validateParticipantForm to handle stage 1
          */
         validateStage1Form: function(form) {
-            return this.validateParticipantForm(form);
+            let isValid = this.validateParticipantForm(form);
+
+            // Check privacy policy checkbox if it exists
+            const privacyCheckbox = form.find('#privacy_agreement_stage1');
+            if (privacyCheckbox.length) {
+                if (!privacyCheckbox.is(':checked')) {
+                    this.showFormError('You must agree to the privacy policy to continue');
+                    isValid = false;
+                } else {
+                    form.find('#error-privacy_agreement').text('');
+                }
+            }
+
+            return isValid;
         },
 
         /**
          * Alias for validateParticipantForm to handle stage 2
          */
         validateStage2Form: function(form) {
-            return this.validateParticipantForm(form);
+            let isValid = true;
+            const phoneField = form.find('#participant_phone');
+            
+            if (!this.isValidPhone(phoneField.val().trim())) {
+                this.showFieldError(phoneField, this.config.strings.invalid_phone);
+                isValid = false;
+                // Scroll to phone field if it's invalid
+                $(phoneField).focus();
+                this.scrollToField(phoneField);
+            }
+            
+            // Check privacy policy checkbox if it exists
+            const privacyCheckbox = form.find('#privacy_agreement_stage2');
+            this.showFormError('');
+            
+            if (privacyCheckbox.length) {
+                if (!privacyCheckbox.is(':checked')) {
+                   this.showFormError('You must agree to the privacy policy to continue', 'form-error-container-stage2');
+                    isValid = false;
+                }
+            }
+
+            return isValid;
         },
 
         /**
@@ -1137,11 +1233,16 @@
         /**
          * Error handling
          */
-        showFormError: function(message) {
-            const errorContainer = $('#form-error-container, .form-error-container').first();
+        showFormError: function(message, idField) {
+            if (!idField) { 
+                idField = 'form-error-container';
+            }
+
+            const errorContainer = $('#'+idField).first();            
             if (errorContainer.length) {
                 errorContainer.find('.error-text').text(message);
                 errorContainer.show();
+               $('.form-actions').css('cssText', 'margin-top: 0px !important');
                 this.scrollToError();
             } else {
                 alert(message);
@@ -1209,6 +1310,15 @@
             }
         },
 
+        scrollToField: function(field) {
+            const $field = $(field);
+            if ($field.length) {
+                $('html, body').animate({
+                    scrollTop: $field.offset().top - 100
+                }, 500);
+            }
+        },
+
         escapeHtml: function(text) {
             if (!text) return '';
             const div = document.createElement('div');
@@ -1222,15 +1332,38 @@
         },
 
         isValidPhone: function(phone) {
-            // Basic phone validation - at least 10 digits
-            const digitsOnly = phone.replace(/\D/g, '');
-            return digitsOnly.length >= 10;
+            // Phone validation: numbers only, optional + at start, max 12 characters
+            // Pattern: Optional + followed by 10-12 digits
+            const phonePattern = /^\+?\d{5,12}$/;
+            return phonePattern.test(phone.trim());
         },
 
         isValidZipCode: function(zipCode) {
-            // US zip code validation (5 digits or 5+4 format)
-            const zipPattern = /^\d{5}(-\d{4})?$/;
-            return zipPattern.test(zipCode);
+            // International postal/zip code validation
+            // Supports:
+            // - Bangladesh: 4 digits (1234)
+            // - US: 5 digits or 5+4 (12345 or 12345-6789)
+            // - UK: Alphanumeric with space (SW1A 1AA)
+            // - Canada: Alphanumeric (K1A 0B1)
+            // - Most countries: 4-6 digits
+
+            const trimmed = zipCode.trim();
+
+            // Allow alphanumeric, spaces, and hyphens
+            // Length: 4-10 characters
+            if (trimmed.length < 4 || trimmed.length > 10) {
+                return false;
+            }
+
+            // Must contain at least 3 alphanumeric characters
+            const alphanumeric = trimmed.replace(/[\s\-]/g, '');
+            if (alphanumeric.length < 3) {
+                return false;
+            }
+
+            // Only allow letters, numbers, spaces, and hyphens
+            const validPattern = /^[A-Za-z0-9\s\-]+$/;
+            return validPattern.test(trimmed);
         },
 
         /**

@@ -97,9 +97,19 @@ class WP_Dynamic_Survey_Template_Handler {
         $css .= "}";
 
         // Secondary text colors (descriptions, notes, etc.)
-        $css .= ".survey-description, .question-description p, .form-notes, .privacy-note, .required-note, .skip-notice, .progress-text {";
+        $css .= ".survey-description, .question-description p, .form-notes, .privacy-note, .required-note, .skip-notice, .progress-text, .privacy-policy-text {";
         $css .= "color: {$text_color};";
         $css .= "opacity: 0.8;";
+        $css .= "}";
+
+        // Privacy policy links
+        $css .= ".privacy-policy-text a {";
+        $css .= "color: {$primary_color};";
+        $css .= "}";
+
+        // Privacy policy checkbox label
+        $css .= ".privacy-policy-checkbox label {";
+        $css .= "color: {$text_color};";
         $css .= "}";
 
         // Primary buttons

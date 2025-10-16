@@ -39,8 +39,9 @@ Tables created:
 - Question duplication
 - Analytics and participant tracking
 - Shortcode builder
-- **Settings Page**: Tabbed navigation interface
-  - Templates tab for global template selection
+- **Settings Page**: Tabbed navigation interface with multiple tabs
+  - **General Tab**: Global form configuration and field visibility
+  - **Templates Tab**: Global template selection
 
 ### Template System
 - **Global Templates**: Template applies to all surveys (not per-survey)
@@ -70,6 +71,12 @@ Tables created:
 - Session management for participants
 - Progress tracking
 - Thank you page handling
+- **Dynamic Participant Forms**:
+  - Two-stage form support (configurable)
+  - Single-stage form with all fields combined
+  - Privacy policy display with required checkbox
+  - Conditional field visibility based on settings
+  - Template-aware styling
 
 ### Integrations
 - REST API endpoints (`class-rest-api.php`)
@@ -95,7 +102,86 @@ wp-dynamic-survey/
 - `WP_Dynamic_Survey_DB_Migrator`: Database migrations including templates table
 - `WP_Dynamic_Survey_Template_Handler`: Template management and dynamic CSS generation
 
+### General Settings System
+Implemented comprehensive global settings system for form configuration:
+
+**Settings Storage:**
+- All settings stored as individual WordPress options (not database table)
+- 9 global options for form behavior and privacy policies
+- Settings accessible via `get_option()` with default values
+
+**Available Settings:**
+
+1. **Two-Stage Form Toggle** (`wp_dynamic_survey_two_stage_form`)
+   - Default: `1` (enabled)
+   - When enabled: Stage 1 (name, email, address, zipcode) → Stage 2 (phone)
+   - When disabled: All fields in single form
+   - Fully implemented ✅
+
+2. **Allow Multiple Submissions with Same Email** (`wp_dynamic_survey_allow_duplicate_emails`)
+   - Default: `0` (disabled)
+   - Controls whether same email can submit survey multiple times
+   - When disabled: Validates email uniqueness per survey before participant creation
+   - When enabled: Allows duplicate email submissions
+   - Fully implemented ✅
+
+3. **Participant Information Fields**
+   - `wp_dynamic_survey_field_address` - Default: `1`
+   - `wp_dynamic_survey_field_zipcode` - Default: `1`
+   - `wp_dynamic_survey_field_phone` - Default: `1`
+   - Name and Email always required (non-configurable)
+   - When phone disabled → Two-stage form automatically disabled
+   - Fully implemented ✅
+
+4. **Privacy Policy Text** (Rich HTML content)
+   - `wp_dynamic_survey_privacy_policy` - Single-stage privacy policy
+   - `wp_dynamic_survey_privacy_policy_stage1` - Stage 1 privacy policy
+   - `wp_dynamic_survey_privacy_policy_stage2` - Stage 2 privacy policy
+   - Default values include sample text with privacy policy links
+   - Sanitized with `wp_kses_post()` for safe HTML
+   - Displays with required checkbox before form submission
+   - Fully implemented ✅
+
+5. **Optional Phone Number Stage** (`wp_dynamic_survey_phone_optional`)
+   - Default: `0` (disabled)
+   - Only visible when two-stage form enabled
+   - Allows users to skip phone number in Stage 2 (not yet implemented)
+
+**Frontend Integration:**
+- Participant form dynamically shows/hides fields based on settings
+- Email duplication validation before participant creation
+  - Checks for existing email per survey when duplicate emails disabled
+  - Returns error "You have already submitted this survey with this email address" if duplicate found
+- Privacy policy displays above submit buttons with template-aware styling
+- JavaScript validation for privacy policy checkboxes
+- International zip/postal code validation (supports 4-10 characters, Bangladesh 4-digit codes)
+- Form adapts between single-stage and two-stage modes automatically
+- Button text changes: "Continue" (two-stage) vs "Start Survey" (single-stage)
+
+**Settings UI:**
+- General tab in Settings page (`admin/templates/general-settings.php`)
+- Interactive field dependencies via JavaScript:
+  - Phone number checkbox controls two-stage form availability
+  - Two-stage form checkbox toggles privacy policy editor visibility
+  - Two-stage form checkbox controls phone optional setting visibility
+- WordPress `wp_editor()` for rich text privacy policy editing
+- Save handler in `WP_Dynamic_Survey_Settings_Admin::save_general_settings()`
+
 ### Recent Updates
+- **Email Duplication Validation**: Implemented frontend validation to prevent duplicate email submissions
+  - Added `email_exists_for_survey()` method in Participant Manager
+  - Validates email uniqueness before participant creation when setting is disabled
+  - Returns user-friendly error message for duplicate submissions
+- **General Settings System**: Implemented comprehensive form configuration with 5 setting groups
+  - Removed Two-Page Survey Form setting (not in current version scope)
+  - Completed email duplication validation (Setting #2)
+- Added General tab to Settings page with field visibility controls
+- Created privacy policy system with template-aware rendering
+- Implemented dynamic participant form with conditional field display
+- Added international zip code validation (4-10 characters, supports Bangladesh)
+- Privacy policy checkboxes with JavaScript validation
+- Template handler extended to style privacy policy sections
+- Two-stage/single-stage form mode switching based on settings
 - Added Settings page with tab navigation (`admin/class-settings-admin.php`)
 - Implemented template system with database table and seeded 5 default templates
 - Created SVG preview images for all templates

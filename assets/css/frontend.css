@@ -320,7 +320,6 @@
 }
 
 .question-content {
-    padding: 20px;
     position: relative;
     overflow: hidden;
 }
@@ -812,7 +811,7 @@
     }
 
     .question-content {
-        padding: 30px 24px;
+        padding: 15px 0px;
         border-radius: 12px;
     }
 
@@ -865,7 +864,7 @@
 
 @media (max-width: 480px) {
     .question-content {
-        padding: 24px 20px;
+        padding: 15px 0px;
     }
 
     .question-title {

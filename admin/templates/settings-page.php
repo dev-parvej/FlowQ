@@ -45,6 +45,10 @@ if (!defined('ABSPATH')) {
             <?php
             // Render content based on current tab
             switch ($current_tab) {
+                case 'general':
+                    $this->render_general_tab();
+                    break;
+
                 case 'templates':
                     $this->render_templates_tab();
                     break;
@@ -52,7 +56,7 @@ if (!defined('ABSPATH')) {
                 // Additional tabs will be added here in future updates
 
                 default:
-                    $this->render_templates_tab();
+                    $this->render_general_tab();
                     break;
             }
             ?>

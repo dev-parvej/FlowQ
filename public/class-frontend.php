@@ -272,11 +272,36 @@ class WP_Dynamic_Survey_Frontend {
             wp_send_json_error($result->get_error_message());
         }
 
-        wp_send_json_success(array(
+        // Get two-stage form setting
+        $two_stage_form = get_option('wp_dynamic_survey_two_stage_form', '1');
+        $field_phone = get_option('wp_dynamic_survey_field_phone', '1');
+
+        // If phone is disabled, force single-stage
+        if ($field_phone == '0') {
+            $two_stage_form = '0';
+        }
+
+        $response_data = array(
             'session_id' => $result['session_id'],
             'participant_id' => $result['participant_id'],
-            'stage' => 2
-        ));
+            'stage' => 2,
+            'two_stage_form' => $two_stage_form == '1'
+        );
+
+        // If single-stage mode, include first question to start survey immediately
+        if ($two_stage_form != '1') {
+            $question_manager = new WP_Dynamic_Survey_Question_Manager();
+            $questions = $question_manager->get_survey_questions($survey_id, true);
+
+            if (!empty($questions)) {
+                $response_data['first_question'] = $questions[0];
+                $response_data['survey_title'] = $survey['title'];
+                $response_data['survey_description'] = $survey['description'];
+                $response_data['total_questions'] = count($questions);
+            }
+        }
+
+        wp_send_json_success($response_data);
     }
 
     /**
@@ -289,8 +314,11 @@ class WP_Dynamic_Survey_Frontend {
         $stage1_data = json_decode(stripslashes($_POST['stage1_data'] ?? ''), true);
         $participant_phone = sanitize_text_field($_POST['participant_phone'] ?? '');
 
-        // Validate phone number
-        if (empty($participant_phone)) {
+        // Check if phone is optional
+        $phone_optional = get_option('wp_dynamic_survey_phone_optional', '0');
+
+        // Validate phone number (only if not optional or if provided)
+        if (empty($participant_phone) && $phone_optional != '1') {
             wp_send_json_error(__('Phone number is required.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
         }
 
@@ -308,11 +336,14 @@ class WP_Dynamic_Survey_Frontend {
             wp_send_json_error(__('Session not found. Please start over.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
         }
 
-        // Update participant with phone number using participant manager
-        $result = $participant_manager->update_phone_number($session_id, $participant_phone);
+         if (empty($participant_phone) && $phone_optional != '1') {
+            // Update participant with phone number using participant manager
+            $result = $participant_manager->update_phone_number($session_id, $participant_phone);
+            
+            if (is_wp_error($result)) {
+                wp_send_json_error($result->get_error_message());
+            }
 
-        if (is_wp_error($result)) {
-            wp_send_json_error($result->get_error_message());
         }
 
         // Get first question to start survey

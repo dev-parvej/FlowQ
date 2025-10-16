@@ -265,10 +265,6 @@ jQuery(document).ready(function($) {
     gap: 5px;
 }
 
-.question-content {
-    padding: 20px;
-}
-
 .question-title {
     font-size: 16px;
     margin-bottom: 10px;
