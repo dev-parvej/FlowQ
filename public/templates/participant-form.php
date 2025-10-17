@@ -55,7 +55,7 @@ $stage2_privacy_text = $privacy_policy_stage2;
             <div class="survey-header-section">
                 <h1 class="survey-form-header"><?php echo esc_html($form_header); ?></h1>
                 <?php if (!empty($form_subtitle)): ?>
-                    <p class="survey-form-subtitle"><?php echo esc_html($form_subtitle); ?></p>
+                    <div class="survey-form-subtitle"><?php echo wp_kses_post($form_subtitle); ?></div>
                 <?php endif; ?>
             </div>
         <?php endif; ?>

@@ -242,7 +242,8 @@ class WP_Dynamic_Survey_Admin {
         $surveys = $survey_manager->get_surveys(array(
             'limit' => 50,
             'orderby' => 'updated_at',
-            'order' => 'DESC'
+            'order' => 'DESC',
+            'include_question_count' => true
         ));
 
         // Include template
@@ -450,7 +451,7 @@ class WP_Dynamic_Survey_Admin {
         // Process header fields
         $show_header = isset($_POST['show_header']) ? 1 : 0;
         $form_header = sanitize_text_field($_POST['form_header'] ?? '');
-        $form_subtitle = sanitize_textarea_field($_POST['form_subtitle'] ?? '');
+        $form_subtitle = wp_kses_post($_POST['form_subtitle'] ?? '');
 
         // Validation: If show_header is enabled, form_header must not be empty
         if ($show_header && empty(trim($form_header))) {
@@ -472,7 +473,7 @@ class WP_Dynamic_Survey_Admin {
             'status' => sanitize_text_field($_POST['survey_status']),
             'show_header' => $show_header,
             'form_header' => $form_header,
-            'form_subtitle' => $form_subtitle,
+            'form_subtitle' => wp_kses_post($form_subtitle),
         );
 
         if ($survey_id) {

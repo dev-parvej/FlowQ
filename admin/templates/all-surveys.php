@@ -67,6 +67,9 @@ if (!defined('ABSPATH')) {
                     <?php foreach ($surveys as $survey):
                         $survey_manager = new WP_Dynamic_Survey_Manager();
                         $stats = $survey_manager->get_survey_statistics($survey['id']);
+
+                        // Question count is already included from the JOIN query
+                        $question_count = isset($survey['question_count']) ? intval($survey['question_count']) : 0;
                     ?>
                         <div class="survey-card">
                             <div class="survey-card-header">
@@ -97,7 +100,34 @@ if (!defined('ABSPATH')) {
                                 </div>
                             </div>
 
+                            <div class="survey-card-details">
+                                <?php if (!empty($survey['form_header'])): ?>
+                                    <div class="survey-detail-item">
+                                        <span class="detail-label"><?php echo esc_html__('Form Header:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
+                                        <span class="detail-value"><?php echo esc_html($survey['form_header']); ?></span>
+                                    </div>
+                                <?php endif; ?>
+
+                                <?php if ($survey['status'] === 'published'): ?>
+                                    <div class="survey-detail-item">
+                                        <span class="detail-label"><?php echo esc_html__('Shortcode:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
+                                        <code class="detail-shortcode">[wp_dynamic_survey id="<?php echo esc_attr($survey['id']); ?>"]</code>
+                                    </div>
+                                <?php endif; ?>
+
+                                <?php if (!empty($survey['thank_you_page_slug'])): ?>
+                                    <div class="survey-detail-item">
+                                        <span class="detail-label"><?php echo esc_html__('Thank You Page:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
+                                        <span class="detail-value"><?php echo esc_html($survey['thank_you_page_slug']); ?></span>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+
                             <div class="survey-card-stats">
+                                <div class="stat-item">
+                                    <div class="stat-number"><?php echo esc_html($question_count); ?></div>
+                                    <div class="stat-label"><?php echo esc_html__('Questions', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></div>
+                                </div>
                                 <div class="stat-item">
                                     <div class="stat-number"><?php echo esc_html($stats['total_participants']); ?></div>
                                     <div class="stat-label"><?php echo esc_html__('Participants', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></div>
@@ -393,7 +423,7 @@ if (!defined('ABSPATH')) {
 /* Surveys Grid */
 .surveys-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-lg);
     padding: var(--spacing-lg);
 }
@@ -418,6 +448,46 @@ if (!defined('ABSPATH')) {
 .survey-card-header {
     padding: var(--spacing-lg);
     border-bottom: 1px solid var(--color-border-light);
+}
+
+/* Survey Card Details */
+.survey-card-details {
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--color-bg-tertiary);
+    border-bottom: 1px solid var(--color-border-light);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.survey-detail-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-xs);
+    line-height: 1.6;
+}
+
+.detail-label {
+    color: var(--color-text-secondary);
+    font-weight: var(--font-weight-semibold);
+    flex-shrink: 0;
+}
+
+.detail-value {
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-medium);
+}
+
+.detail-shortcode {
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
+    padding: 2px var(--spacing-xs);
+    border-radius: var(--radius-sm);
+    font-family: monospace;
+    font-size: 11px;
+    color: var(--color-purple);
+    font-weight: var(--font-weight-medium);
 }
 
 .survey-info {
@@ -491,20 +561,29 @@ if (!defined('ABSPATH')) {
 
 /* Survey Card Stats */
 .survey-card-stats {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
     padding: var(--spacing-md) var(--spacing-lg);
     background: var(--color-bg-secondary);
     border-bottom: 1px solid var(--color-border-light);
+    gap: 0;
 }
 
 .stat-item {
-    flex: 1;
     text-align: center;
     padding: 0 var(--spacing-sm);
+    position: relative;
 }
 
-.stat-item:not(:last-child) {
-    border-right: 1px solid var(--color-border);
+.stat-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 40px;
+    width: 1px;
+    background: var(--color-border);
 }
 
 .stat-number {
@@ -601,7 +680,7 @@ if (!defined('ABSPATH')) {
     }
 
     .surveys-grid {
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        grid-template-columns: repeat(2, 1fr);
         gap: var(--spacing-md);
     }
 }
@@ -641,9 +720,18 @@ if (!defined('ABSPATH')) {
         gap: var(--spacing-xs);
     }
 
-    .survey-card-stats {
+    .survey-card-details {
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
+
+    .survey-detail-item {
         flex-direction: column;
-        gap: var(--spacing-sm);
+        align-items: flex-start;
+        gap: 2px;
+    }
+
+    .survey-card-stats {
+        flex-wrap: wrap;
     }
 
     .stat-item {

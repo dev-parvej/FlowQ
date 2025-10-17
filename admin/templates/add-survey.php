@@ -70,7 +70,7 @@ $page_title = $is_edit ? __('Edit Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('
         <div class="survey-card">
             <h3 class="card-title"><?php echo esc_html__('Display Settings', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h3>
             <div class="card-content">
-                <div class="form-field">
+                <div>
                     <label class="checkbox-label">
                         <input type="checkbox"
                                id="show_header"
@@ -84,7 +84,7 @@ $page_title = $is_edit ? __('Edit Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('
                     </p>
                 </div>
 
-                <div id="header-fields-container" style="display: none;">
+                <div id="header-fields-container" style="display: none; margin-top: 30px;">
                     <div class="form-field">
                         <label for="form_header" class="field-label">
                             <?php echo esc_html__('Survey Form Header', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
@@ -112,11 +112,23 @@ $page_title = $is_edit ? __('Edit Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('
                                 <span class="dashicons dashicons-editor-help"></span>
                             </span>
                         </label>
-                        <textarea id="form_subtitle"
-                                  name="form_subtitle"
-                                  class="full-width-textarea"
-                                  rows="3"
-                                  placeholder="<?php echo esc_attr__('e.g., Your feedback matters! Take 2 minutes to share your thoughts.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>"><?php echo esc_textarea($survey['form_subtitle'] ?? ''); ?></textarea>
+                        <?php
+                        wp_editor($survey['form_subtitle'] ?? '', 'form_subtitle', array(
+                            'textarea_name' => 'form_subtitle',
+                            'textarea_rows' => 6,
+                            'media_buttons' => false,
+                            'teeny' => true,
+                            'tinymce' => array(
+                                'toolbar1' => 'bold,italic,underline,link,unlink,bullist,numlist,undo,redo'
+                            ),
+                            'quicktags' => array(
+                                'buttons' => 'strong,em,link,ul,ol,li'
+                            )
+                        ));
+                        ?>
+                        <p class="field-description">
+                            <?php echo esc_html__('e.g., Your feedback matters! Take 2 minutes to share your thoughts.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        </p>
                     </div>
                 </div>
             </div>
@@ -128,33 +140,69 @@ $page_title = $is_edit ? __('Edit Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('
             <div class="card-content">
                 <div class="form-field">
                     <label for="thank_you_page_slug" class="field-label">
-                        <?php echo esc_html__('Thank You Page Slug', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
-                        <span class="help-tooltip" data-tooltip="<?php echo esc_attr__('Optional: Specify an existing published page slug. After completion, participants get a secure token to access this page (expires in 1 hour).', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
+                        <?php echo esc_html__('Thank You Page', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        <span class="help-tooltip" data-tooltip="<?php echo esc_attr__('Optional: Select an existing published page. After completion, participants get a secure token to access this page (expires in 1 hour).', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
                             <span class="dashicons dashicons-editor-help"></span>
                         </span>
                     </label>
                     <div class="input-with-action">
-                        <input type="text"
-                               id="thank_you_page_slug"
-                               name="thank_you_page_slug"
-                               class="full-width-input"
-                               value="<?php echo esc_attr($survey['thank_you_page_slug'] ?? ''); ?>"
-                               placeholder="<?php echo esc_attr__('my-custom-thank-you-page', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
-                        <?php if (!empty($survey['thank_you_page_slug'])): ?>
+                        <?php
+                        // Get all published pages
+                        $pages = get_pages(array(
+                            'post_status' => 'publish',
+                            'sort_column' => 'post_title',
+                            'sort_order' => 'ASC'
+                        ));
+
+                        $current_slug = $survey['thank_you_page_slug'] ?? '';
+                        ?>
+                        <select id="thank_you_page_slug"
+                                name="thank_you_page_slug"
+                                class="full-width-select">
+                            <option value=""><?php echo esc_html__('-- Select a page --', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></option>
+                            <?php foreach ($pages as $page):
+                                $page_slug = $page->post_name;
+                                $page_title = $page->post_title;
+                                $is_thank_you = stripos($page_title, 'thank you') !== false || stripos($page_title, 'thankyou') !== false;
+                                $display_title = $is_thank_you ? '⭐ ' . $page_title : $page_title;
+                                $selected = ($page_slug === $current_slug) ? 'selected' : '';
+                            ?>
+                                <option value="<?php echo esc_attr($page_slug); ?>"
+                                        <?php echo $selected; ?>
+                                        data-is-thank-you="<?php echo $is_thank_you ? '1' : '0'; ?>">
+                                    <?php echo esc_html($display_title); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <?php if (!empty($current_slug)): ?>
                             <?php
-                            $thank_you_page = get_page_by_path($survey['thank_you_page_slug']);
+                            $thank_you_page = get_page_by_path($current_slug);
                             $edit_url = $thank_you_page
                                 ? admin_url('post.php?post=' . $thank_you_page->ID . '&action=edit')
-                                : admin_url('edit.php?post_type=page&s=' . urlencode($survey['thank_you_page_slug']));
+                                : admin_url('edit.php?post_type=page');
                             ?>
                             <a href="<?php echo esc_url($edit_url); ?>"
+                               id="edit-page-button"
                                class="button button-secondary edit-page-button"
-                               target="_blank">
+                               target="_blank"
+                               style="<?php echo empty($current_slug) ? 'display:none;' : ''; ?>">
+                                <span class="dashicons dashicons-edit"></span>
+                                <?php echo esc_html__('Edit Page', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                            </a>
+                        <?php else: ?>
+                            <a href="#"
+                               id="edit-page-button"
+                               class="button button-secondary edit-page-button"
+                               target="_blank"
+                               style="display:none;">
                                 <span class="dashicons dashicons-edit"></span>
                                 <?php echo esc_html__('Edit Page', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
                             </a>
                         <?php endif; ?>
                     </div>
+                    <p class="field-description">
+                        <?php echo esc_html__('⭐ Pages marked with a star contain "Thank You" in their title', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                    </p>
                 </div>
 
                 <div class="form-field">
@@ -444,12 +492,27 @@ $page_title = $is_edit ? __('Edit Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('
     outline: none;
 }
 
-.status-select {
+.status-select,
+.full-width-select {
     padding: 6px 8px;
     border: 1px solid #8c8f94;
     border-radius: 4px;
     font-size: 14px;
     min-width: 200px;
+}
+
+.full-width-select {
+    width: 100%;
+    max-width: 100%;
+    padding: 8px 12px;
+    line-height: 1.5;
+    transition: border-color 0.2s ease;
+}
+
+.full-width-select:focus {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+    outline: none;
 }
 
 /* Action Buttons */
@@ -706,6 +769,43 @@ function copyToClipboard(text) {
         alert('<?php echo esc_html__('Shortcode copied to clipboard!', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>');
     });
 }
+
+// Thank You Page Selection Handler
+jQuery(document).ready(function($) {
+    var $thankYouPageSelect = $('#thank_you_page_slug');
+    var $editPageButton = $('#edit-page-button');
+
+    // Get pages data for edit URL generation
+    var pages = <?php echo json_encode(array_map(function($page) {
+        return array('ID' => $page->ID, 'post_name' => $page->post_name);
+    }, $pages)); ?>;
+
+    // Handle thank you page selection change
+    $thankYouPageSelect.on('change', function() {
+        var selectedSlug = $(this).val();
+
+        if (selectedSlug) {
+            // Find the selected page
+            var selectedPage = pages.find(function(page) {
+                return page.post_name === selectedSlug;
+            });
+
+            if (selectedPage) {
+                var editUrl = '<?php echo admin_url("post.php?post="); ?>' + selectedPage.ID + '&action=edit';
+                $editPageButton.attr('href', editUrl).show();
+            }
+        } else {
+            $editPageButton.hide();
+        }
+    });
+
+    // Initialize button visibility on page load
+    if ($thankYouPageSelect.val()) {
+        $editPageButton.show();
+    } else {
+        $editPageButton.hide();
+    }
+});
 
 // Header Fields Toggle and Validation
 jQuery(document).ready(function($) {

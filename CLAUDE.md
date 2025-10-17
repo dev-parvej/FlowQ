@@ -43,6 +43,29 @@ Tables created:
   - **General Tab**: Global form configuration and field visibility
   - **Templates Tab**: Global template selection
 
+#### Survey List (All Surveys) Page
+- **Enhanced Survey Cards**: Each card displays comprehensive survey information
+  - Form Header (if set)
+  - Shortcode (for published surveys)
+  - Thank You Page slug (if configured)
+  - Question count statistic
+  - Total participants, sessions, and responses counts
+- **Optimized Database Queries**: Uses LEFT JOIN to fetch question counts in single query (no N+1 problem)
+- **2-Column Grid Layout**: Responsive grid showing 2 surveys per row
+- **Survey Actions**: Quick access to edit, duplicate, delete, analytics, and question management
+
+#### Add/Edit Survey Page
+- **Survey Form Subtitle**: Rich text editor (TinyMCE) for formatted subtitle text
+  - Supports bold, italic, underline, links, lists
+  - HTML sanitized with `wp_kses_post()`
+  - Renders with rich formatting on participant forms
+- **Thank You Page Selection**:
+  - Dropdown showing all published WordPress pages
+  - Pages containing "thank you" or "thankyou" marked with ⭐ star
+  - Dynamic "Edit Page" button that updates when selection changes
+  - Case-insensitive matching for thank you pages
+  - JavaScript-powered page selection and URL generation
+
 ### Template System
 - **Global Templates**: Template applies to all surveys (not per-survey)
 - **Default Templates**: 5 pre-built templates seeded in database
@@ -168,6 +191,71 @@ Implemented comprehensive global settings system for form configuration:
 - Save handler in `WP_Dynamic_Survey_Settings_Admin::save_general_settings()`
 
 ### Recent Updates
+
+#### Survey Management UI Enhancements
+- **Enhanced Survey Cards (`admin/templates/all-surveys.php`)**:
+  - Added `.survey-card-details` section showing form header, shortcode, and thank you page slug
+  - Added question count as first statistic (4 stats total: questions, participants, sessions, responses)
+  - Changed grid layout from 3 columns to 2 columns per row (`repeat(2, 1fr)`)
+  - Improved visual hierarchy with detail labels and values
+- **Database Query Optimization (`includes/class-survey-manager.php`)**:
+  - Fixed N+1 query problem by adding `include_question_count` parameter to `get_surveys()`
+  - Implemented LEFT JOIN query to fetch question counts in single database call
+  - Updated `WP_Dynamic_Survey_Admin::display_all_surveys_page()` to pass `include_question_count => true`
+  - Question counts now pre-fetched and included in survey data array
+- **Rich Text Subtitle Editor (`admin/templates/add-survey.php`)**:
+  - Converted Survey Form Subtitle from plain textarea to `wp_editor()` (TinyMCE)
+  - Configured teeny mode with toolbar: bold, italic, underline, link, lists, undo/redo
+  - Changed sanitization from `sanitize_textarea_field()` to `wp_kses_post()` for HTML support
+  - Updated frontend output in `participant-form.php` from `esc_html()` to `wp_kses_post()`
+  - Subtitle now supports rich formatting (bold, links, lists) on participant forms
+- **Thank You Page Dropdown Selection (`admin/templates/add-survey.php`)**:
+  - Converted text input to dropdown using `get_pages()` to show all published pages
+  - Pages containing "thank you" or "thankyou" (case-insensitive) marked with ⭐ star
+  - Added dynamic "Edit Page" button with JavaScript handler
+  - Button shows/hides and updates URL based on dropdown selection
+  - Improved UX with visual highlighting of recommended pages
+
+#### Technical Implementation Details
+
+**Modified Files:**
+1. **`admin/templates/all-surveys.php`**:
+   - Added new `.survey-card-details` section with form header, shortcode, and thank you page display
+   - Updated statistics section to include question count as first metric
+   - Changed CSS grid from `repeat(auto-fill, minmax(400px, 1fr))` to `repeat(2, 1fr)`
+   - Updated to use pre-fetched `question_count` from survey data array
+
+2. **`includes/class-survey-manager.php`**:
+   - Modified `get_surveys()` method signature to accept `include_question_count` parameter
+   - Implemented LEFT JOIN query: `SELECT s.*, COUNT(q.id) as question_count FROM surveys s LEFT JOIN questions q ON s.id = q.survey_id GROUP BY s.id`
+   - Updated `create_survey()` and `update_survey()` to use `wp_kses_post()` for form_subtitle
+   - Added GROUP BY clause for correct aggregation
+
+3. **`admin/class-admin.php`**:
+   - Updated `display_all_surveys_page()` to pass `include_question_count => true` parameter
+   - Changed form_subtitle sanitization from `sanitize_textarea_field()` to `wp_kses_post()`
+
+4. **`admin/templates/add-survey.php`**:
+   - Replaced form_subtitle textarea with `wp_editor()` call
+   - Configured editor with teeny mode, media buttons disabled, limited toolbar
+   - Converted thank_you_page_slug text input to `<select>` dropdown
+   - Added `get_pages()` call to fetch all published WordPress pages
+   - Implemented star marking logic using `stripos()` for case-insensitive matching
+   - Added JavaScript handler for dynamic Edit Page button visibility and URL updates
+   - Created pages array with ID and post_name mapping for JavaScript
+
+5. **`public/templates/participant-form.php`**:
+   - Changed form_subtitle output wrapper from `<p>` to `<div>` with class `survey-form-subtitle`
+   - Replaced `esc_html()` with `wp_kses_post()` for subtitle rendering
+
+**Key Code Patterns:**
+- **N+1 Prevention**: Always use JOIN queries when fetching related counts in loops
+- **Rich Text Sanitization**: Use `wp_kses_post()` for HTML content, not `sanitize_textarea_field()`
+- **Page Selection**: Use `get_pages()` with `post_status => 'publish'` for WordPress page lists
+- **Dynamic UI**: Use jQuery to handle dropdown changes and update related elements (buttons, URLs)
+- **Case-Insensitive Matching**: Use `stripos()` instead of `strpos()` for flexible text matching
+
+#### Previous Updates
 - **Email Duplication Validation**: Implemented frontend validation to prevent duplicate email submissions
   - Added `email_exists_for_survey()` method in Participant Manager
   - Validates email uniqueness before participant creation when setting is disabled

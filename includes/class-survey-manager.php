@@ -55,7 +55,10 @@ class WP_Dynamic_Survey_Manager {
             'status' => sanitize_text_field($data['status'] ?? 'draft'),
             'settings' => wp_json_encode($data['settings'] ?? array()),
             'created_at' => current_time('mysql'),
-            'updated_at' => current_time('mysql')
+            'updated_at' => current_time('mysql'),
+            'show_header' => intval($data['show_header'] ?? 1),
+            'form_header' => sanitize_text_field($data['form_header'] ?? ''),
+            'form_subtitle' => wp_kses_post($data['form_subtitle'] ?? '')
         );
 
         // Validate status
@@ -146,6 +149,19 @@ class WP_Dynamic_Survey_Manager {
                 return new WP_Error('invalid_status', __('Invalid survey status.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
             }
             $update_data['status'] = sanitize_text_field($data['status']);
+        }
+
+
+        if (isset($data['show_header'])) {
+            $update_data['show_header'] = intval($data['show_header']);
+        }
+
+        if (isset($data['form_header'])) {
+            $update_data['form_header'] = sanitize_text_field($data['form_header']);
+        }
+
+        if (isset($data['form_subtitle'])) {
+            $update_data['form_subtitle'] = wp_kses_post($data['form_subtitle']);
         }
 
 
@@ -358,26 +374,38 @@ class WP_Dynamic_Survey_Manager {
             'limit' => 50,
             'offset' => 0,
             'orderby' => 'created_at',
-            'order' => 'DESC'
+            'order' => 'DESC',
+            'include_question_count' => false
         );
 
         $args = wp_parse_args($args, $defaults);
         $table_name = $this->table_prefix . 'surveys';
+        $questions_table = $this->table_prefix . 'questions';
 
         $where_clauses = array();
         $where_values = array();
 
         if ($args['status']) {
-            $where_clauses[] = 'status = %s';
+            $where_clauses[] = 's.status = %s';
             $where_values[] = $args['status'];
         }
 
-
         $where_sql = !empty($where_clauses) ? 'WHERE ' . implode(' AND ', $where_clauses) : '';
 
-        $sql = "SELECT * FROM {$table_name} {$where_sql}
-                ORDER BY {$args['orderby']} {$args['order']}
-                LIMIT %d OFFSET %d";
+        // Include question count if requested
+        if ($args['include_question_count']) {
+            $sql = "SELECT s.*, COUNT(q.id) as question_count
+                    FROM {$table_name} s
+                    LEFT JOIN {$questions_table} q ON s.id = q.survey_id
+                    {$where_sql}
+                    GROUP BY s.id
+                    ORDER BY s.{$args['orderby']} {$args['order']}
+                    LIMIT %d OFFSET %d";
+        } else {
+            $sql = "SELECT s.* FROM {$table_name} s {$where_sql}
+                    ORDER BY s.{$args['orderby']} {$args['order']}
+                    LIMIT %d OFFSET %d";
+        }
 
         $where_values[] = $args['limit'];
         $where_values[] = $args['offset'];
