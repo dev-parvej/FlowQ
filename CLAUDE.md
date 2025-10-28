@@ -24,13 +24,13 @@
 
 ### Database Schema
 Tables created:
-- `wp_dynamic_survey_surveys`
-- `wp_dynamic_survey_questions`
-- `wp_dynamic_survey_answers`
-- `wp_dynamic_survey_responses`
-- `wp_dynamic_survey_participants`
-- `wp_dynamic_survey_sessions`
-- `wp_dynamic_survey_templates`
+- `flowq_surveys`
+- `flowq_questions`
+- `flowq_answers`
+- `flowq_responses`
+- `flowq_participants`
+- `flowq_sessions`
+- `flowq_templates`
 
 ### Admin Interface
 - Survey management pages
@@ -76,7 +76,7 @@ Tables created:
   - Colorful - Vibrant gradient design
 - **Template Storage**:
   - Templates table with fields: id, name, description, is_default, preview_image, styles (JSON)
-  - Active template stored in options: `wp_dynamic_survey_active_template`
+  - Active template stored in options: `flowq_active_template`
   - Preview images: SVG files in `assets/images/templates/`
 - **Template Selection UI**: Grid layout with preview cards, active badge, and select buttons
 - **Template Handler** (`includes/class-template-handler.php`):
@@ -116,14 +116,14 @@ wp-dynamic-survey/
 ```
 
 ### Key Classes
-- `WP_Dynamic_Survey_Question_Manager`: Question CRUD operations
-- `WP_Dynamic_Survey_Question_Admin`: Admin AJAX handlers
-- `WP_Dynamic_Survey_Frontend`: Frontend display
-- `WP_Dynamic_Survey_Manager`: Survey management
-- `WP_Dynamic_Survey_Session_Manager`: Session handling
-- `WP_Dynamic_Survey_Settings_Admin`: Settings page with tab navigation
-- `WP_Dynamic_Survey_DB_Migrator`: Database migrations including templates table
-- `WP_Dynamic_Survey_Template_Handler`: Template management and dynamic CSS generation
+- `flowq_Question_Manager`: Question CRUD operations
+- `flowq_Question_Admin`: Admin AJAX handlers
+- `flowq_Frontend`: Frontend display
+- `flowq_Manager`: Survey management
+- `flowq_Session_Manager`: Session handling
+- `flowq_Settings_Admin`: Settings page with tab navigation
+- `flowq_DB_Migrator`: Database migrations including templates table
+- `flowq_Template_Handler`: Template management and dynamic CSS generation
 
 ### General Settings System
 Implemented comprehensive global settings system for form configuration:
@@ -135,13 +135,13 @@ Implemented comprehensive global settings system for form configuration:
 
 **Available Settings:**
 
-1. **Two-Stage Form Toggle** (`wp_dynamic_survey_two_stage_form`)
+1. **Two-Stage Form Toggle** (`flowq_two_stage_form`)
    - Default: `1` (enabled)
    - When enabled: Stage 1 (name, email, address, zipcode) → Stage 2 (phone)
    - When disabled: All fields in single form
    - Fully implemented ✅
 
-2. **Allow Multiple Submissions with Same Email** (`wp_dynamic_survey_allow_duplicate_emails`)
+2. **Allow Multiple Submissions with Same Email** (`flowq_allow_duplicate_emails`)
    - Default: `0` (disabled)
    - Controls whether same email can submit survey multiple times
    - When disabled: Validates email uniqueness per survey before participant creation
@@ -149,23 +149,23 @@ Implemented comprehensive global settings system for form configuration:
    - Fully implemented ✅
 
 3. **Participant Information Fields**
-   - `wp_dynamic_survey_field_address` - Default: `1`
-   - `wp_dynamic_survey_field_zipcode` - Default: `1`
-   - `wp_dynamic_survey_field_phone` - Default: `1`
+   - `flowq_field_address` - Default: `1`
+   - `flowq_field_zipcode` - Default: `1`
+   - `flowq_field_phone` - Default: `1`
    - Name and Email always required (non-configurable)
    - When phone disabled → Two-stage form automatically disabled
    - Fully implemented ✅
 
 4. **Privacy Policy Text** (Rich HTML content)
-   - `wp_dynamic_survey_privacy_policy` - Single-stage privacy policy
-   - `wp_dynamic_survey_privacy_policy_stage1` - Stage 1 privacy policy
-   - `wp_dynamic_survey_privacy_policy_stage2` - Stage 2 privacy policy
+   - `flowq_privacy_policy` - Single-stage privacy policy
+   - `flowq_privacy_policy_stage1` - Stage 1 privacy policy
+   - `flowq_privacy_policy_stage2` - Stage 2 privacy policy
    - Default values include sample text with privacy policy links
    - Sanitized with `wp_kses_post()` for safe HTML
    - Displays with required checkbox before form submission
    - Fully implemented ✅
 
-5. **Optional Phone Number Stage** (`wp_dynamic_survey_phone_optional`)
+5. **Optional Phone Number Stage** (`flowq_phone_optional`)
    - Default: `0` (disabled)
    - Only visible when two-stage form enabled
    - Allows users to skip phone number in Stage 2 (not yet implemented)
@@ -188,7 +188,7 @@ Implemented comprehensive global settings system for form configuration:
   - Two-stage form checkbox toggles privacy policy editor visibility
   - Two-stage form checkbox controls phone optional setting visibility
 - WordPress `wp_editor()` for rich text privacy policy editing
-- Save handler in `WP_Dynamic_Survey_Settings_Admin::save_general_settings()`
+- Save handler in `flowq_Settings_Admin::save_general_settings()`
 
 ### Recent Updates
 
@@ -201,7 +201,7 @@ Implemented comprehensive global settings system for form configuration:
 - **Database Query Optimization (`includes/class-survey-manager.php`)**:
   - Fixed N+1 query problem by adding `include_question_count` parameter to `get_surveys()`
   - Implemented LEFT JOIN query to fetch question counts in single database call
-  - Updated `WP_Dynamic_Survey_Admin::display_all_surveys_page()` to pass `include_question_count => true`
+  - Updated `flowq_Admin::display_all_surveys_page()` to pass `include_question_count => true`
   - Question counts now pre-fetched and included in survey data array
 - **Rich Text Subtitle Editor (`admin/templates/add-survey.php`)**:
   - Converted Survey Form Subtitle from plain textarea to `wp_editor()` (TinyMCE)
@@ -274,7 +274,7 @@ Implemented comprehensive global settings system for form configuration:
 - Implemented template system with database table and seeded 5 default templates
 - Created SVG preview images for all templates
 - Built template selection UI with flexbox grid layout
-- Created `WP_Dynamic_Survey_Template_Handler` class for centralized template management
+- Created `flowq_Template_Handler` class for centralized template management
 - Integrated dynamic CSS generation into participant forms and question containers
 - Removed box shadows and borders from containers for cleaner design
 - Enhanced Dark Mode template with:

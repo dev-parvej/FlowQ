@@ -2,7 +2,7 @@
 /**
  * Admin Interface for WP Dynamic Survey Plugin
  *
- * @package WP_Dynamic_Survey
+ * @package FlowQ
  */
 
 // Prevent direct access
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 /**
  * Survey Admin class
  */
-class WP_Dynamic_Survey_Admin {
+class FlowQ_Admin {
 
     /**
      * Plugin version
@@ -29,20 +29,20 @@ class WP_Dynamic_Survey_Admin {
      * Menu slugs
      */
     private $menu_slugs = array(
-        'main' => 'wp-dynamic-surveys',
-        'all_surveys' => 'wp-dynamic-surveys',
-        'add_survey' => 'wp-dynamic-surveys-add',
-        'questions' => 'wp-dynamic-surveys-questions',
-        'participants' => 'wp-dynamic-survey-participants',
-        'analytics' => 'wp-dynamic-surveys-analytics'
+        'main' => 'flowq',
+        'all_surveys' => 'flowq',
+        'add_survey' => 'flowq-add',
+        'questions' => 'flowq-questions',
+        'participants' => 'flowq-participants',
+        'analytics' => 'flowq-analytics'
     );
 
     /**
      * Constructor
      */
     public function __construct() {
-        $this->version = WP_DYNAMIC_SURVEY_VERSION;
-        $this->survey_manager = new WP_Dynamic_Survey_Manager();
+        $this->version = FLOWQ_VERSION;
+        $this->survey_manager = new FlowQ_Survey_Manager();
         $this->init_hooks();
     }
 
@@ -60,13 +60,13 @@ class WP_Dynamic_Survey_Admin {
         add_action('admin_notices', array($this, 'show_admin_notices'));
 
         // AJAX handlers
-        add_action('wp_ajax_wp_dynamic_survey_admin_action', array($this, 'handle_admin_ajax'));
+        add_action('wp_ajax_flowq_admin_action', array($this, 'handle_admin_ajax'));
 
         // Form submission handlers
-        add_action('admin_post_wp_dynamic_survey_save_survey', array($this, 'handle_save_survey_action'));
-        add_action('admin_post_wp_dynamic_survey_save_question', array($this, 'handle_save_question_action'));
-        add_action('admin_post_wp_dynamic_survey_delete_question', array($this, 'handle_delete_question_action'));
-        add_action('admin_post_wp_dynamic_survey_survey_action', array($this, 'handle_survey_action'));
+        add_action('admin_post_flowq_save_survey', array($this, 'handle_save_survey_action'));
+        add_action('admin_post_flowq_save_question', array($this, 'handle_save_question_action'));
+        add_action('admin_post_flowq_delete_question', array($this, 'handle_delete_question_action'));
+        add_action('admin_post_flowq_survey_action', array($this, 'handle_survey_action'));
 
         // Custom capabilities
         add_action('init', array($this, 'add_custom_capabilities'));
@@ -83,20 +83,20 @@ class WP_Dynamic_Survey_Admin {
 
         // Main menu item
         add_menu_page(
-            __('Surveys', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),           // Page title
-            __('Surveys', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),           // Menu title
+            __('FlowQ', FLOWQ_TEXT_DOMAIN),           // Page title
+            __('FlowQ', FLOWQ_TEXT_DOMAIN),           // Menu title
             'manage_options',                                        // Capability
             $this->menu_slugs['main'],                              // Menu slug
             array($this, 'display_all_surveys_page'),               // Callback
-            'dashicons-feedback',                                    // Icon
+            'dashicons-forms',                                    // Icon
             30                                                       // Position
         );
 
         // All Surveys submenu (same as main)
         add_submenu_page(
             $this->menu_slugs['main'],
-            __('All Surveys', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-            __('All Surveys', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+            __('All Surveys', FLOWQ_TEXT_DOMAIN),
+            __('All Surveys', FLOWQ_TEXT_DOMAIN),
             'manage_options',
             $this->menu_slugs['all_surveys'],
             array($this, 'display_all_surveys_page')
@@ -105,8 +105,8 @@ class WP_Dynamic_Survey_Admin {
         // Add New Survey submenu
         add_submenu_page(
             $this->menu_slugs['main'],
-            __('Add New Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-            __('Add New Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+            __('Add New Survey', FLOWQ_TEXT_DOMAIN),
+            __('Add New Survey', FLOWQ_TEXT_DOMAIN),
             'manage_options',
             $this->menu_slugs['add_survey'],
             array($this, 'display_add_survey_page')
@@ -115,8 +115,8 @@ class WP_Dynamic_Survey_Admin {
         // Questions Management submenu
         add_submenu_page(
             $this->menu_slugs['main'],
-            __('Manage Questions', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-            __('Questions', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+            __('Manage Questions', FLOWQ_TEXT_DOMAIN),
+            __('Questions', FLOWQ_TEXT_DOMAIN),
             'manage_options',
             $this->menu_slugs['questions'],
             array($this, 'display_questions_page')
@@ -125,8 +125,8 @@ class WP_Dynamic_Survey_Admin {
         // Participants submenu
         add_submenu_page(
             $this->menu_slugs['main'],
-            __('Survey Participants', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-            __('Participants', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+            __('Survey Participants', FLOWQ_TEXT_DOMAIN),
+            __('Participants', FLOWQ_TEXT_DOMAIN),
             'manage_options',
             $this->menu_slugs['participants'],
             array($this, 'display_participants_page')
@@ -135,8 +135,8 @@ class WP_Dynamic_Survey_Admin {
         // Analytics submenu
         add_submenu_page(
             $this->menu_slugs['main'],
-            __('Survey Analytics', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-            __('Analytics', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+            __('Survey Analytics', FLOWQ_TEXT_DOMAIN),
+            __('Analytics', FLOWQ_TEXT_DOMAIN),
             'manage_options',
             $this->menu_slugs['analytics'],
             array($this, 'display_analytics_page')
@@ -155,16 +155,16 @@ class WP_Dynamic_Survey_Admin {
 
         // Admin CSS
         wp_enqueue_style(
-            'wp-dynamic-survey-admin',
-            WP_DYNAMIC_SURVEY_URL . 'assets/css/admin.css',
+            'flowq-admin',
+            FLOWQ_URL . 'assets/css/admin.css',
             array(),
             $this->version
         );
 
         // Admin JavaScript
         wp_enqueue_script(
-            'wp-dynamic-survey-admin',
-            WP_DYNAMIC_SURVEY_URL . 'assets/js/admin.js',
+            'flowq-admin',
+            FLOWQ_URL . 'assets/js/admin.js',
             array('jquery', 'wp-util'),
             $this->version,
             true
@@ -172,33 +172,33 @@ class WP_Dynamic_Survey_Admin {
 
         // Admin AJAX JavaScript
         wp_enqueue_script(
-            'wp-dynamic-survey-admin-ajax',
-            WP_DYNAMIC_SURVEY_URL . 'assets/js/admin-ajax.js',
-            array('jquery', 'wp-dynamic-survey-admin'),
+            'flowq-admin-ajax',
+            FLOWQ_URL . 'assets/js/admin-ajax.js',
+            array('jquery', 'flowq-admin'),
             $this->version,
             true
         );
 
         // Localize script for AJAX
-        wp_localize_script('wp-dynamic-survey-admin', 'wpDynamicSurveyAdmin', array(
+        wp_localize_script('flowq-admin', 'flowqAdmin', array(
             'ajaxurl' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('wp_dynamic_survey_admin_nonce'),
+            'nonce' => wp_create_nonce('flowq_admin_nonce'),
             'strings' => array(
-                'confirm_delete' => __('Are you sure you want to delete this survey?', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                'saving' => __('Saving...', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                'saved' => __('Saved!', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                'error' => __('An error occurred. Please try again.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                'loading' => __('Loading...', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                'refresh' => __('Refresh', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                'export' => __('Export Selected', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                'exporting' => __('Exporting...', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                'cleanup' => __('Cleanup Sessions', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                'cleaning' => __('Cleaning...', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+                'confirm_delete' => __('Are you sure you want to delete this survey?', FLOWQ_TEXT_DOMAIN),
+                'saving' => __('Saving...', FLOWQ_TEXT_DOMAIN),
+                'saved' => __('Saved!', FLOWQ_TEXT_DOMAIN),
+                'error' => __('An error occurred. Please try again.', FLOWQ_TEXT_DOMAIN),
+                'loading' => __('Loading...', FLOWQ_TEXT_DOMAIN),
+                'refresh' => __('Refresh', FLOWQ_TEXT_DOMAIN),
+                'export' => __('Export Selected', FLOWQ_TEXT_DOMAIN),
+                'exporting' => __('Exporting...', FLOWQ_TEXT_DOMAIN),
+                'cleanup' => __('Cleanup Sessions', FLOWQ_TEXT_DOMAIN),
+                'cleaning' => __('Cleaning...', FLOWQ_TEXT_DOMAIN),
                 // Question management strings
-                'add_question' => __('Add New Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                'edit_question' => __('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                'save_question' => __('Save Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                'confirm_delete_question' => __('Are you sure you want to delete this question? This action cannot be undone.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)
+                'add_question' => __('Add New Question', FLOWQ_TEXT_DOMAIN),
+                'edit_question' => __('Edit Question', FLOWQ_TEXT_DOMAIN),
+                'save_question' => __('Save Question', FLOWQ_TEXT_DOMAIN),
+                'confirm_delete_question' => __('Are you sure you want to delete this question? This action cannot be undone.', FLOWQ_TEXT_DOMAIN)
             )
         ));
 
@@ -211,9 +211,9 @@ class WP_Dynamic_Survey_Admin {
 
             // Question Management JavaScript
             wp_enqueue_script(
-                'wp-dynamic-survey-question-management',
-                WP_DYNAMIC_SURVEY_URL . 'assets/js/question-management.js',
-                array('jquery', 'jquery-ui-sortable', 'wp-dynamic-survey-admin'),
+                'flowq-question-management',
+                FLOWQ_URL . 'assets/js/question-management.js',
+                array('jquery', 'jquery-ui-sortable', 'flowq-admin'),
                 $this->version,
                 true
             );
@@ -221,13 +221,13 @@ class WP_Dynamic_Survey_Admin {
 
         // Additional libraries for specific pages
         if ($hook === 'surveys_page_' . $this->menu_slugs['analytics']) {
-            // Chart.js for analytics
+            // Chart.js for analytics - load in head to ensure it's available for inline scripts
             wp_enqueue_script(
                 'chart-js',
                 'https://cdn.jsdelivr.net/npm/chart.js',
                 array(),
                 '3.9.1',
-                true
+                false  // Load in head, not footer
             );
         }
     }
@@ -238,7 +238,7 @@ class WP_Dynamic_Survey_Admin {
     public function display_all_surveys_page() {
 
         // Get surveys
-        $survey_manager = new WP_Dynamic_Survey_Manager();
+        $survey_manager = new FlowQ_Survey_Manager();
         $surveys = $survey_manager->get_surveys(array(
             'limit' => 50,
             'orderby' => 'updated_at',
@@ -247,7 +247,7 @@ class WP_Dynamic_Survey_Admin {
         ));
 
         // Include template
-        include WP_DYNAMIC_SURVEY_PATH . 'admin/templates/all-surveys.php';
+        include FLOWQ_PATH . 'admin/templates/all-surveys.php';
     }
 
     /**
@@ -259,24 +259,24 @@ class WP_Dynamic_Survey_Admin {
         $questions = array();
 
         if ($survey_id) {
-            $survey_manager = new WP_Dynamic_Survey_Manager();
+            $survey_manager = new FlowQ_Survey_Manager();
             $survey = $survey_manager->get_survey($survey_id);
 
             if ($survey) {
-                $question_manager = new WP_Dynamic_Survey_Question_Manager();
+                $question_manager = new FlowQ_Question_Manager();
                 $questions = $question_manager->get_survey_questions($survey_id, true);
             }
         }
 
         // Now safe to output HTML
-        include WP_DYNAMIC_SURVEY_PATH . 'admin/templates/add-survey.php';
+        include FLOWQ_PATH . 'admin/templates/add-survey.php';
     }
 
     /**
      * Display Analytics page
      */
     public function display_analytics_page() {
-        $survey_manager = new WP_Dynamic_Survey_Manager();
+        $survey_manager = new FlowQ_Survey_Manager();
         $surveys = $survey_manager->get_surveys(array('status' => 'published'));
 
         $selected_survey_id = isset($_GET['survey_id']) ? intval($_GET['survey_id']) : 0;
@@ -287,17 +287,17 @@ class WP_Dynamic_Survey_Admin {
         }
 
         // Include template
-        include WP_DYNAMIC_SURVEY_PATH . 'admin/templates/analytics.php';
+        include FLOWQ_PATH . 'admin/templates/analytics.php';
     }
 
     /**
      * Display Participants page
      */
     public function display_participants_page() {
-        $survey_manager = new WP_Dynamic_Survey_Manager();
-        $participant_manager = new WP_Dynamic_Survey_Participant_Manager();
-        $question_manager = new WP_Dynamic_Survey_Question_Manager();
-        $session_manager = new WP_Dynamic_Survey_Session_Manager();
+        $survey_manager = new FlowQ_Survey_Manager();
+        $participant_manager = new FlowQ_Participant_Manager();
+        $question_manager = new FlowQ_Question_Manager();
+        $session_manager = new FlowQ_Session_Manager();
 
         // Get all surveys for dropdown
         $surveys = $survey_manager->get_surveys();
@@ -324,7 +324,7 @@ class WP_Dynamic_Survey_Admin {
             if ($survey) {
                 // Get stats using direct DB queries
                 global $wpdb;
-                $table_name = $wpdb->prefix . 'wp_dynamic_survey_participants';
+                $table_name = $wpdb->prefix . 'flowq_participants';
 
                 $result = $wpdb->get_row($wpdb->prepare(
                     "SELECT
@@ -385,7 +385,7 @@ class WP_Dynamic_Survey_Admin {
         }
 
         // Include template
-        include WP_DYNAMIC_SURVEY_PATH . 'admin/templates/participants.php';
+        include FLOWQ_PATH . 'admin/templates/participants.php';
     }
 
     /**
@@ -398,20 +398,20 @@ class WP_Dynamic_Survey_Admin {
 
         $survey_id = intval($_GET['survey_id']);
         $action = sanitize_text_field($_GET['survey_action']);
-        $survey_manager = new WP_Dynamic_Survey_Manager();
+        $survey_manager = new FlowQ_Survey_Manager();
 
         switch ($action) {
             case 'delete':
                 // Get survey details to check status
                 $survey = $survey_manager->get_survey($survey_id);
                 if ($survey && $survey['status'] === 'published') {
-                    $this->add_admin_notice(__('Cannot delete published survey. Please change the survey status to draft or archived first.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN), 'error');
+                    $this->add_admin_notice(__('Cannot delete published survey. Please change the survey status to draft or archived first.', FLOWQ_TEXT_DOMAIN), 'error');
                 } else {
                     $result = $survey_manager->delete_survey($survey_id);
                     if (is_wp_error($result)) {
                         $this->add_admin_notice($result->get_error_message(), 'error');
                     } else {
-                        $this->add_admin_notice(__('Survey deleted successfully.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN), 'success');
+                        $this->add_admin_notice(__('Survey deleted successfully.', FLOWQ_TEXT_DOMAIN), 'success');
                     }
                 }
                 break;
@@ -422,7 +422,7 @@ class WP_Dynamic_Survey_Admin {
                 if (is_wp_error($result)) {
                     $this->add_admin_notice($result->get_error_message(), 'error');
                 } else {
-                    $this->add_admin_notice(__('Survey published.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN), 'success');
+                    $this->add_admin_notice(__('Survey published.', FLOWQ_TEXT_DOMAIN), 'success');
                 }
                 break;
 
@@ -431,7 +431,7 @@ class WP_Dynamic_Survey_Admin {
                 if (is_wp_error($result)) {
                     $this->add_admin_notice($result->get_error_message(), 'error');
                 } else {
-                    $this->add_admin_notice(__('Survey moved to draft.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN), 'success');
+                    $this->add_admin_notice(__('Survey moved to draft.', FLOWQ_TEXT_DOMAIN), 'success');
                 }
                 break;
         }
@@ -446,7 +446,7 @@ class WP_Dynamic_Survey_Admin {
      */
     private function handle_save_survey() {
         $survey_id = isset($_POST['survey_id']) ? intval($_POST['survey_id']) : 0;
-        $survey_manager = new WP_Dynamic_Survey_Manager();
+        $survey_manager = new FlowQ_Survey_Manager();
 
         // Process header fields
         $show_header = isset($_POST['show_header']) ? 1 : 0;
@@ -455,7 +455,7 @@ class WP_Dynamic_Survey_Admin {
 
         // Validation: If show_header is enabled, form_header must not be empty
         if ($show_header && empty(trim($form_header))) {
-            $this->add_admin_notice(__('Survey Form Header is required when Show Custom Header is enabled', WP_DYNAMIC_SURVEY_TEXT_DOMAIN), 'error');
+            $this->add_admin_notice(__('Survey Form Header is required when Show Custom Header is enabled', FLOWQ_TEXT_DOMAIN), 'error');
 
             // Redirect back to form
             if ($survey_id) {
@@ -491,7 +491,7 @@ class WP_Dynamic_Survey_Admin {
             $this->add_admin_notice($result->get_error_message(), 'error');
         } else {
 
-            $this->add_admin_notice(__('Survey saved successfully.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN), 'success');
+            $this->add_admin_notice(__('Survey saved successfully.', FLOWQ_TEXT_DOMAIN), 'success');
 
             // Redirect to edit page
             wp_safe_redirect(admin_url('admin.php?page=' . $this->menu_slugs['all_surveys'] . '&survey_id=' . $survey_id));
@@ -514,15 +514,15 @@ class WP_Dynamic_Survey_Admin {
             'require_all_fields' => isset($_POST['require_all_fields']) ? 1 : 0,
         );
 
-        update_option('wp_dynamic_survey_settings', $settings);
-        $this->add_admin_notice(__('Settings saved successfully.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN), 'success');
+        update_option('flowq_settings', $settings);
+        $this->add_admin_notice(__('Settings saved successfully.', FLOWQ_TEXT_DOMAIN), 'success');
     }
 
     /**
      * Handle admin AJAX requests
      */
     public function handle_admin_ajax() {
-        check_ajax_referer('wp_dynamic_survey_admin_nonce', 'nonce');
+        check_ajax_referer('flowq_admin_nonce', 'nonce');
 
         $action = sanitize_text_field($_POST['admin_action']);
 
@@ -545,7 +545,7 @@ class WP_Dynamic_Survey_Admin {
      */
     private function ajax_get_survey_stats() {
         $survey_id = intval($_POST['survey_id']);
-        $survey_manager = new WP_Dynamic_Survey_Manager();
+        $survey_manager = new FlowQ_Survey_Manager();
         $stats = $survey_manager->get_survey_statistics($survey_id);
         wp_send_json_success($stats);
     }
@@ -555,7 +555,7 @@ class WP_Dynamic_Survey_Admin {
      */
     private function ajax_export_responses() {
         $survey_id = intval($_POST['survey_id']);
-        $session_manager = new WP_Dynamic_Survey_Session_Manager();
+        $session_manager = new FlowQ_Session_Manager();
         $csv_data = $session_manager->export_responses_csv($survey_id);
         wp_send_json_success(array('csv_data' => $csv_data));
     }
@@ -564,9 +564,9 @@ class WP_Dynamic_Survey_Admin {
      * Get survey analytics data
      */
     private function get_survey_analytics($survey_id) {
-        $survey_manager = new WP_Dynamic_Survey_Manager();
-        $session_manager = new WP_Dynamic_Survey_Session_Manager();
-        $question_manager = new WP_Dynamic_Survey_Question_Manager();
+        $survey_manager = new FlowQ_Survey_Manager();
+        $session_manager = new FlowQ_Session_Manager();
+        $question_manager = new FlowQ_Question_Manager();
 
         $survey_stats = $survey_manager->get_survey_statistics($survey_id);
         $questions = $question_manager->get_survey_questions($survey_id, false);
@@ -587,8 +587,8 @@ class WP_Dynamic_Survey_Admin {
      * Display questions management page
      */
     public function display_questions_page() {
-        $survey_manager = new WP_Dynamic_Survey_Manager();
-        $question_manager = new WP_Dynamic_Survey_Question_Manager();
+        $survey_manager = new FlowQ_Survey_Manager();
+        $question_manager = new FlowQ_Question_Manager();
 
         // Get all surveys for dropdown
         $surveys = $survey_manager->get_surveys();
@@ -616,7 +616,7 @@ class WP_Dynamic_Survey_Admin {
 
 
         // Include the template
-        include WP_DYNAMIC_SURVEY_PATH . 'admin/templates/questions-page.php';
+        include FLOWQ_PATH . 'admin/templates/questions-page.php';
     }
 
     /**
@@ -624,11 +624,11 @@ class WP_Dynamic_Survey_Admin {
      */
     private function handle_question_form_submission() {
         // Verify nonce
-        if (!wp_verify_nonce($_POST['_wpnonce'], 'wp_dynamic_survey_question_action')) {
-            wp_die(__('Security check failed.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+        if (!wp_verify_nonce($_POST['_wpnonce'], 'flowq_question_action')) {
+            wp_die(__('Security check failed.', FLOWQ_TEXT_DOMAIN));
         }
 
-        $question_manager = new WP_Dynamic_Survey_Question_Manager();
+        $question_manager = new FlowQ_Question_Manager();
         $action = sanitize_text_field($_POST['question_action']);
         $survey_id = intval($_POST['survey_id']);
 
@@ -636,24 +636,24 @@ class WP_Dynamic_Survey_Admin {
             switch ($action) {
                 case 'create_question':
                     $question_id = $this->create_question_from_form($question_manager, $survey_id);
-                    $this->add_admin_notice(__('Question created successfully!', WP_DYNAMIC_SURVEY_TEXT_DOMAIN), 'success');
+                    $this->add_admin_notice(__('Question created successfully!', FLOWQ_TEXT_DOMAIN), 'success');
                     break;
 
                 case 'update_question':
                     $question_id = intval($_POST['question_id']);
                     $this->update_question_from_form($question_manager, $question_id);
-                    $this->add_admin_notice(__('Question updated successfully!', WP_DYNAMIC_SURVEY_TEXT_DOMAIN), 'success');
+                    $this->add_admin_notice(__('Question updated successfully!', FLOWQ_TEXT_DOMAIN), 'success');
                     break;
 
                 case 'delete_question':
                     $question_id = intval($_POST['question_id']);
                     $question_manager->delete_question($question_id);
-                    $this->add_admin_notice(__('Question deleted successfully!', WP_DYNAMIC_SURVEY_TEXT_DOMAIN), 'success');
+                    $this->add_admin_notice(__('Question deleted successfully!', FLOWQ_TEXT_DOMAIN), 'success');
                     break;
             }
 
             // Redirect to prevent form resubmission
-            $redirect_url = admin_url('admin.php?page=wp-dynamic-surveys-questions&survey_id=' . $survey_id);
+            $redirect_url = admin_url('admin.php?page=flowq-questions&survey_id=' . $survey_id);
             wp_redirect($redirect_url);
             exit;
 
@@ -668,38 +668,38 @@ class WP_Dynamic_Survey_Admin {
     private function handle_question_delete_action() {
         // Check user permissions
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have sufficient permissions to perform this action.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_die(__('You do not have sufficient permissions to perform this action.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Verify nonce
-        if (!wp_verify_nonce($_GET['_wpnonce'], 'wp_dynamic_survey_question_action')) {
-            wp_die(__('Security check failed.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+        if (!wp_verify_nonce($_GET['_wpnonce'], 'flowq_question_action')) {
+            wp_die(__('Security check failed.', FLOWQ_TEXT_DOMAIN));
         }
 
         $question_id = intval($_GET['question_id']);
         $survey_id = intval($_GET['survey_id']);
 
         if (!$question_id || !$survey_id) {
-            wp_die(__('Invalid question or survey ID.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_die(__('Invalid question or survey ID.', FLOWQ_TEXT_DOMAIN));
         }
 
-        $question_manager = new WP_Dynamic_Survey_Question_Manager();
-        $survey_manager = new WP_Dynamic_Survey_Manager();
+        $question_manager = new FlowQ_Question_Manager();
+        $survey_manager = new FlowQ_Survey_Manager();
 
         try {
             // Get survey details to check status
             $survey = $survey_manager->get_survey($survey_id);
             if (!$survey) {
-                $this->add_admin_notice(__('Survey not found.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN), 'error');
-                $redirect_url = admin_url('admin.php?page=wp-dynamic-surveys-questions&survey_id=' . $survey_id);
+                $this->add_admin_notice(__('Survey not found.', FLOWQ_TEXT_DOMAIN), 'error');
+                $redirect_url = admin_url('admin.php?page=flowq-questions&survey_id=' . $survey_id);
                 wp_redirect($redirect_url);
                 exit;
             }
 
             // Check if survey is in draft status
             if ($survey['status'] !== 'draft') {
-                $this->add_admin_notice(__('Questions can only be deleted from draft surveys. Please set the survey to draft status first.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN), 'error');
-                $redirect_url = admin_url('admin.php?page=wp-dynamic-surveys-questions&survey_id=' . $survey_id);
+                $this->add_admin_notice(__('Questions can only be deleted from draft surveys. Please set the survey to draft status first.', FLOWQ_TEXT_DOMAIN), 'error');
+                $redirect_url = admin_url('admin.php?page=flowq-questions&survey_id=' . $survey_id);
                 wp_redirect($redirect_url);
                 exit;
             }
@@ -710,12 +710,12 @@ class WP_Dynamic_Survey_Admin {
             if ($response_count > 0) {
                 $this->add_admin_notice(
                     sprintf(
-                        __('Cannot delete question: It has %d response(s). Questions with responses cannot be deleted to maintain data integrity.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+                        __('Cannot delete question: It has %d response(s). Questions with responses cannot be deleted to maintain data integrity.', FLOWQ_TEXT_DOMAIN),
                         $response_count
                     ),
                     'error'
                 );
-                $redirect_url = admin_url('admin.php?page=wp-dynamic-surveys-questions&survey_id=' . $survey_id);
+                $redirect_url = admin_url('admin.php?page=flowq-questions&survey_id=' . $survey_id);
                 wp_redirect($redirect_url);
                 exit;
             }
@@ -726,7 +726,7 @@ class WP_Dynamic_Survey_Admin {
             if (is_wp_error($result)) {
                 $this->add_admin_notice($result->get_error_message(), 'error');
             } else {
-                $this->add_admin_notice(__('Question deleted successfully!', WP_DYNAMIC_SURVEY_TEXT_DOMAIN), 'success');
+                $this->add_admin_notice(__('Question deleted successfully!', FLOWQ_TEXT_DOMAIN), 'success');
             }
 
         } catch (Exception $e) {
@@ -734,7 +734,7 @@ class WP_Dynamic_Survey_Admin {
         }
 
         // Redirect to prevent re-execution
-        $redirect_url = admin_url('admin.php?page=wp-dynamic-surveys-questions&survey_id=' . $survey_id);
+        $redirect_url = admin_url('admin.php?page=flowq-questions&survey_id=' . $survey_id);
         wp_redirect($redirect_url);
         exit;
     }
@@ -746,7 +746,8 @@ class WP_Dynamic_Survey_Admin {
         $question_data = array(
             'title' => sanitize_textarea_field($_POST['question_title']),
             'description' => sanitize_textarea_field($_POST['question_description']),
-            'extra_message' => sanitize_textarea_field($_POST['question_extra_message'] ?? '')
+            'extra_message' => sanitize_textarea_field($_POST['question_extra_message'] ?? ''),
+            'is_required' => rest_sanitize_boolean($_POST['question_is_required'])
         );
 
         $question_id = $question_manager->create_question($survey_id, $question_data);
@@ -823,7 +824,7 @@ class WP_Dynamic_Survey_Admin {
 
         // Create Yes answer
         $question_manager->create_answer($question_id, array(
-            'answer_text' => __('Yes', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+            'answer_text' => __('Yes', FLOWQ_TEXT_DOMAIN),
             'answer_order' => 1,
             'next_question_id' => null,
             'redirect_url' => null
@@ -831,7 +832,7 @@ class WP_Dynamic_Survey_Admin {
 
         // Create No answer
         $question_manager->create_answer($question_id, array(
-            'answer_text' => __('No', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+            'answer_text' => __('No', FLOWQ_TEXT_DOMAIN),
             'answer_order' => 2,
             'next_question_id' => null,
             'redirect_url' => null
@@ -869,26 +870,26 @@ class WP_Dynamic_Survey_Admin {
      * Add admin notice
      */
     private function add_admin_notice($message, $type = 'info') {
-        $notices = get_transient('wp_dynamic_survey_admin_notices') ?: array();
+        $notices = get_transient('flowq_admin_notices') ?: array();
         $notices[] = array(
             'message' => $message,
             'type' => $type
         );
-        set_transient('wp_dynamic_survey_admin_notices', $notices, 30);
+        set_transient('flowq_admin_notices', $notices, 30);
     }
 
     /**
      * Show admin notices
      */
     public function show_admin_notices() {
-        $notices = get_transient('wp_dynamic_survey_admin_notices');
+        $notices = get_transient('flowq_admin_notices');
         if ($notices) {
             foreach ($notices as $notice) {
                 echo '<div class="notice notice-' . esc_attr($notice['type']) . ' is-dismissible">';
                 echo '<p>' . esc_html($notice['message']) . '</p>';
                 echo '</div>';
             }
-            delete_transient('wp_dynamic_survey_admin_notices');
+            delete_transient('flowq_admin_notices');
         }
     }
 
@@ -901,7 +902,7 @@ class WP_Dynamic_Survey_Admin {
     private function get_question_responses_count($question_id) {
         global $wpdb;
 
-        $table_name = $wpdb->prefix . 'wp_dynamic_survey_responses';
+        $table_name = $wpdb->prefix . 'flowq_responses';
 
         $count = $wpdb->get_var(
             $wpdb->prepare(
@@ -919,12 +920,12 @@ class WP_Dynamic_Survey_Admin {
     public function handle_save_survey_action() {
         // Check user permissions
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have sufficient permissions to perform this action.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_die(__('You do not have sufficient permissions to perform this action.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Verify nonce
-        if (!check_admin_referer('wp_dynamic_survey_save_survey')) {
-            wp_die(__('Security check failed.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+        if (!check_admin_referer('flowq_save_survey')) {
+            wp_die(__('Security check failed.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Call the existing handler
@@ -937,12 +938,12 @@ class WP_Dynamic_Survey_Admin {
     public function handle_save_question_action() {
         // Check user permissions
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have sufficient permissions to perform this action.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_die(__('You do not have sufficient permissions to perform this action.', FLOWQ_TEXT_DOMAIN));
         }
 
-        // Verify nonce - the form uses wp_dynamic_survey_question_action
-        if (!wp_verify_nonce($_POST['_wpnonce'], 'wp_dynamic_survey_question_action')) {
-            wp_die(__('Security check failed.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+        // Verify nonce - the form uses flowq_question_action
+        if (!wp_verify_nonce($_POST['_wpnonce'], 'flowq_question_action')) {
+            wp_die(__('Security check failed.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Call the existing handler
@@ -955,12 +956,12 @@ class WP_Dynamic_Survey_Admin {
     public function handle_delete_question_action() {
         // Check user permissions
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have sufficient permissions to perform this action.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_die(__('You do not have sufficient permissions to perform this action.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Verify nonce
-        if (!wp_verify_nonce($_GET['_wpnonce'], 'wp_dynamic_survey_question_action')) {
-            wp_die(__('Security check failed.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+        if (!wp_verify_nonce($_GET['_wpnonce'], 'flowq_question_action')) {
+            wp_die(__('Security check failed.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Call the existing handler
@@ -973,12 +974,12 @@ class WP_Dynamic_Survey_Admin {
     public function handle_survey_action() {
         // Check user permissions
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have sufficient permissions to perform this action.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_die(__('You do not have sufficient permissions to perform this action.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Verify nonce
         if (!wp_verify_nonce($_GET['_wpnonce'], 'survey_action')) {
-            wp_die(__('Security check failed.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_die(__('Security check failed.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Call the existing handler
@@ -989,8 +990,8 @@ class WP_Dynamic_Survey_Admin {
      * Build participants data with their responses
      *
      * @param array $participants Array of participant records
-     * @param WP_Dynamic_Survey_Question_Manager $question_manager Question manager instance
-     * @param WP_Dynamic_Survey_Session_Manager $session_manager Session manager instance
+     * @param FlowQ_Question_Manager $question_manager Question manager instance
+     * @param FlowQ_Session_Manager $session_manager Session manager instance
      * @return array Formatted participants data
      */
     function build_participants_data($participants, $question_manager, $session_manager) {

@@ -2,7 +2,7 @@
 /**
  * Survey Manager for WP Dynamic Survey Plugin
  *
- * @package WP_Dynamic_Survey
+ * @package FlowQ
  */
 
 // Prevent direct access
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 /**
  * Survey Manager class
  */
-class WP_Dynamic_Survey_Manager {
+class FlowQ_Survey_Manager {
 
     /**
      * WordPress database object
@@ -31,7 +31,7 @@ class WP_Dynamic_Survey_Manager {
     public function __construct() {
         global $wpdb;
         $this->wpdb = $wpdb;
-        $this->table_prefix = $this->wpdb->prefix . 'wp_dynamic_survey_';
+        $this->table_prefix = $this->wpdb->prefix . 'flowq_';
     }
 
     /**
@@ -43,7 +43,7 @@ class WP_Dynamic_Survey_Manager {
     public function create_survey($data) {
         // Validate required fields
         if (empty($data['title'])) {
-            return new WP_Error('missing_title', __('Survey title is required.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('missing_title', __('Survey title is required.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Sanitize and prepare data
@@ -63,7 +63,7 @@ class WP_Dynamic_Survey_Manager {
 
         // Validate status
         if (!in_array($survey_data['status'], ['draft', 'published', 'archived'])) {
-            return new WP_Error('invalid_status', __('Invalid survey status.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('invalid_status', __('Invalid survey status.', FLOWQ_TEXT_DOMAIN));
         }
 
 
@@ -72,13 +72,13 @@ class WP_Dynamic_Survey_Manager {
         $result = $this->wpdb->insert($table_name, $survey_data);
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to create survey.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to create survey.', FLOWQ_TEXT_DOMAIN));
         }
 
         $survey_id = $this->wpdb->insert_id;
 
         // Trigger action hook
-        do_action('wp_dynamic_survey_created', $survey_id, $survey_data);
+        do_action('flowq_survey_created', $survey_id, $survey_data);
 
         return $survey_id;
     }
@@ -123,7 +123,7 @@ class WP_Dynamic_Survey_Manager {
     public function update_survey($survey_id, $data) {
         // Check if survey exists
         if (!$this->get_survey($survey_id)) {
-            return new WP_Error('survey_not_found', __('Survey not found.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('survey_not_found', __('Survey not found.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Prepare update data
@@ -131,7 +131,7 @@ class WP_Dynamic_Survey_Manager {
 
         if (isset($data['title'])) {
             if (empty($data['title'])) {
-                return new WP_Error('missing_title', __('Survey title is required.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+                return new WP_Error('missing_title', __('Survey title is required.', FLOWQ_TEXT_DOMAIN));
             }
             $update_data['title'] = sanitize_text_field($data['title']);
         }
@@ -146,7 +146,7 @@ class WP_Dynamic_Survey_Manager {
 
         if (isset($data['status'])) {
             if (!in_array($data['status'], ['draft', 'published', 'archived'])) {
-                return new WP_Error('invalid_status', __('Invalid survey status.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+                return new WP_Error('invalid_status', __('Invalid survey status.', FLOWQ_TEXT_DOMAIN));
             }
             $update_data['status'] = sanitize_text_field($data['status']);
         }
@@ -182,11 +182,11 @@ class WP_Dynamic_Survey_Manager {
         );
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to update survey.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to update survey.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Trigger action hook
-        do_action('wp_dynamic_survey_updated', $survey_id, $update_data);
+        do_action('flowq_survey_updated', $survey_id, $update_data);
 
         return true;
     }
@@ -200,7 +200,7 @@ class WP_Dynamic_Survey_Manager {
     public function delete_survey($survey_id) {
         // Check if survey exists
         if (!$this->get_survey($survey_id)) {
-            return new WP_Error('survey_not_found', __('Survey not found.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('survey_not_found', __('Survey not found.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Delete related data first
@@ -217,11 +217,11 @@ class WP_Dynamic_Survey_Manager {
         );
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to delete survey.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to delete survey.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Trigger action hook
-        do_action('wp_dynamic_survey_deleted', $survey_id);
+        do_action('flowq_survey_deleted', $survey_id);
 
         return true;
     }
@@ -239,7 +239,7 @@ class WP_Dynamic_Survey_Manager {
         if (empty($questions)) {
             $issues[] = array(
                 'type' => 'error',
-                'message' => __('Survey has no questions.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)
+                'message' => __('Survey has no questions.', FLOWQ_TEXT_DOMAIN)
             );
             return $issues;
         }
@@ -264,7 +264,7 @@ class WP_Dynamic_Survey_Manager {
         foreach ($orphaned_refs as $orphaned_id) {
             $issues[] = array(
                 'type' => 'error',
-                'message' => sprintf(__('Reference to non-existent question ID: %d', WP_DYNAMIC_SURVEY_TEXT_DOMAIN), $orphaned_id)
+                'message' => sprintf(__('Reference to non-existent question ID: %d', FLOWQ_TEXT_DOMAIN), $orphaned_id)
             );
         }
 
@@ -558,7 +558,7 @@ class WP_Dynamic_Survey_Manager {
         if (in_array($question_id, $visited)) {
             $issues[] = array(
                 'type' => 'error',
-                'message' => sprintf(__('Circular reference detected involving question ID: %d', WP_DYNAMIC_SURVEY_TEXT_DOMAIN), $question_id)
+                'message' => sprintf(__('Circular reference detected involving question ID: %d', FLOWQ_TEXT_DOMAIN), $question_id)
             );
             return;
         }

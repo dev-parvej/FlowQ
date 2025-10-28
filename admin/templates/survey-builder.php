@@ -2,7 +2,7 @@
 /**
  * Survey Builder Template
  *
- * @package WP_Dynamic_Survey
+ * @package FlowQ
  */
 
 // Prevent direct access
@@ -17,11 +17,11 @@ if (!defined('ABSPATH')) {
         <div class="builder-actions">
             <button type="button" class="button button-secondary" id="preview-survey" data-survey-id="<?php echo esc_attr($survey['id']); ?>">
                 <span class="dashicons dashicons-visibility"></span>
-                <?php echo esc_html__('Preview Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                <?php echo esc_html__('Preview Survey', FLOWQ_TEXT_DOMAIN); ?>
             </button>
             <button type="button" class="button button-primary" id="add-question">
                 <span class="dashicons dashicons-plus-alt2"></span>
-                <?php echo esc_html__('Add Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                <?php echo esc_html__('Add Question', FLOWQ_TEXT_DOMAIN); ?>
             </button>
         </div>
     </div>
@@ -31,10 +31,10 @@ if (!defined('ABSPATH')) {
             <div class="no-questions-placeholder">
                 <div class="placeholder-content">
                     <span class="dashicons dashicons-clipboard"></span>
-                    <h3><?php echo esc_html__('No questions yet', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h3>
-                    <p><?php echo esc_html__('Start building your survey by adding your first question.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></p>
+                    <h3><?php echo esc_html__('No questions yet', FLOWQ_TEXT_DOMAIN); ?></h3>
+                    <p><?php echo esc_html__('Start building your survey by adding your first question.', FLOWQ_TEXT_DOMAIN); ?></p>
                     <button type="button" class="button button-primary" id="add-first-question">
-                        <?php echo esc_html__('Add First Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        <?php echo esc_html__('Add First Question', FLOWQ_TEXT_DOMAIN); ?>
                     </button>
                 </div>
             </div>
@@ -49,7 +49,7 @@ if (!defined('ABSPATH')) {
                             <div class="question-info">
                                 <div class="question-type">
                                     <span class="dashicons dashicons-list-view"></span>
-                                    <?php echo esc_html__('Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                    <?php echo esc_html__('Question', FLOWQ_TEXT_DOMAIN); ?>
                                 </div>
                                 <div class="question-order">
                                     #<?php echo esc_html($question['question_order']); ?>
@@ -58,11 +58,11 @@ if (!defined('ABSPATH')) {
                             <div class="question-actions">
                                 <button type="button" class="button button-small edit-question"
                                         data-question-id="<?php echo esc_attr($question['id']); ?>">
-                                    <?php echo esc_html__('Edit', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                    <?php echo esc_html__('Edit', FLOWQ_TEXT_DOMAIN); ?>
                                 </button>
                                 <button type="button" class="button button-small button-link-delete delete-question"
                                         data-question-id="<?php echo esc_attr($question['id']); ?>">
-                                    <?php echo esc_html__('Delete', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                    <?php echo esc_html__('Delete', FLOWQ_TEXT_DOMAIN); ?>
                                 </button>
                             </div>
                         </div>
@@ -105,11 +105,11 @@ if (!defined('ABSPATH')) {
                                                     <button type="button" class="button button-small edit-answer"
                                                             data-answer-id="<?php echo esc_attr($answer['id']); ?>"
                                                             data-question-id="<?php echo esc_attr($question['id']); ?>">
-                                                        <?php echo esc_html__('Edit', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                                        <?php echo esc_html__('Edit', FLOWQ_TEXT_DOMAIN); ?>
                                                     </button>
                                                     <button type="button" class="button button-small button-link-delete delete-answer"
                                                             data-answer-id="<?php echo esc_attr($answer['id']); ?>">
-                                                        <?php echo esc_html__('Delete', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                                        <?php echo esc_html__('Delete', FLOWQ_TEXT_DOMAIN); ?>
                                                     </button>
                                                 </div>
                                             </div>
@@ -119,7 +119,7 @@ if (!defined('ABSPATH')) {
                                     <button type="button" class="button button-secondary add-answer"
                                             data-question-id="<?php echo esc_attr($question['id']); ?>">
                                         <span class="dashicons dashicons-plus-alt2"></span>
-                                        <?php echo esc_html__('Add Answer', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                        <?php echo esc_html__('Add Answer', FLOWQ_TEXT_DOMAIN); ?>
                                     </button>
                                 </div>
                             <?php endif; ?>
@@ -132,7 +132,7 @@ if (!defined('ABSPATH')) {
             <div class="add-question-button-container">
                 <button type="button" class="button button-primary" id="add-question-bottom">
                     <span class="dashicons dashicons-plus-alt2"></span>
-                    <?php echo esc_html__('Add Another Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                    <?php echo esc_html__('Add Another Question', FLOWQ_TEXT_DOMAIN); ?>
                 </button>
             </div>
         <?php endif; ?>
@@ -153,7 +153,7 @@ if (!defined('ABSPATH')) {
 <div id="preview-modal" style="display: none;">
     <div class="preview-modal-content">
         <div class="preview-header">
-            <h3><?php echo esc_html__('Survey Preview', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h3>
+            <h3><?php echo esc_html__('Survey Preview', FLOWQ_TEXT_DOMAIN); ?></h3>
             <button type="button" class="preview-close">&times;</button>
         </div>
         <div class="preview-body">

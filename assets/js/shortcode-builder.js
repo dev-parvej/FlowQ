@@ -2,7 +2,7 @@
  * Shortcode Builder JavaScript
  * Enhanced shortcode generation and preview functionality
  *
- * @package WP_Dynamic_Survey
+ * @package FlowQ
  */
 
 (function($) {
@@ -11,11 +11,11 @@
     /**
      * Shortcode Builder Class
      */
-    class WPDynamicSurveyShortcodeBuilder {
+    class FlowQShortcodeBuilder {
 
         constructor() {
             this.currentTab = 'survey';
-            this.config = wpDynamicSurveyShortcode || {};
+            this.config = flowqShortcode || {};
             this.init();
         }
 
@@ -57,7 +57,7 @@
             });
 
             // Media button modal
-            $(document).on('click', '#wp-dynamic-survey-shortcode-button', () => {
+            $(document).on('click', '#flowq-shortcode-button', () => {
                 this.openModal();
             });
 
@@ -71,7 +71,7 @@
             });
 
             // Close modal on background click
-            $(document).on('click', '.wp-dynamic-survey-modal', (e) => {
+            $(document).on('click', '.flowq-modal', (e) => {
                 if (e.target === e.currentTarget) {
                     this.closeModal();
                 }
@@ -181,7 +181,7 @@
                 attributes.push(`css_class="${cssClass}"`);
             }
 
-            return `[wp_dynamic_survey ${attributes.join(' ')}]`;
+            return `[dynamic_survey ${attributes.join(' ')}]`;
         }
 
         /**
@@ -311,7 +311,7 @@
                 url: this.config.ajaxurl,
                 type: 'POST',
                 data: {
-                    action: 'wp_dynamic_survey_preview_shortcode',
+                    action: 'flowq_preview_shortcode',
                     shortcode: shortcode,
                     nonce: this.config.nonce
                 },
@@ -354,7 +354,7 @@
          * Open modal
          */
         openModal() {
-            $('#wp-dynamic-survey-shortcode-modal').show();
+            $('#flowq-shortcode-modal').show();
             $('body').addClass('modal-open');
         }
 
@@ -362,7 +362,7 @@
          * Close modal
          */
         closeModal() {
-            $('#wp-dynamic-survey-shortcode-modal').hide();
+            $('#flowq-shortcode-modal').hide();
             $('body').removeClass('modal-open');
         }
 
@@ -391,7 +391,7 @@
                 attributes.push('show_progress="false"');
             }
 
-            const shortcode = `[wp_dynamic_survey ${attributes.join(' ')}]`;
+            const shortcode = `[dynamic_survey ${attributes.join(' ')}]`;
 
             // Insert into editor
             if (typeof tinymce !== 'undefined' && tinymce.activeEditor && !tinymce.activeEditor.isHidden()) {
@@ -464,14 +464,14 @@
          */
         autoSave() {
             const formData = this.getFormData();
-            localStorage.setItem('wp_dynamic_survey_shortcode_builder', JSON.stringify(formData));
+            localStorage.setItem('flowq_shortcode_builder', JSON.stringify(formData));
         }
 
         /**
          * Load saved form data
          */
         loadSaved() {
-            const saved = localStorage.getItem('wp_dynamic_survey_shortcode_builder');
+            const saved = localStorage.getItem('flowq_shortcode_builder');
             if (saved) {
                 try {
                     const formData = JSON.parse(saved);
@@ -522,8 +522,8 @@
      * Initialize when document is ready
      */
     $(document).ready(function() {
-        if ($('.shortcode-builder-container').length || $('#wp-dynamic-survey-shortcode-button').length) {
-            window.WPDynamicSurveyShortcodeBuilder = new WPDynamicSurveyShortcodeBuilder();
+        if ($('.shortcode-builder-container').length || $('#flowq-shortcode-button').length) {
+            window.FlowQShortcodeBuilder = new FlowQShortcodeBuilder();
         }
     });
 

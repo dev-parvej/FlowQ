@@ -1,7 +1,7 @@
 /**
  * Admin JavaScript for WP Dynamic Survey Plugin
  *
- * @package WP_Dynamic_Survey
+ * @package FlowQ
  */
 
 (function($) {
@@ -57,16 +57,16 @@
             // Show loading state
             $button.prop('disabled', true);
             const originalText = $button.text();
-            $button.text(wpDynamicSurveyAdmin.strings.loading || 'Loading...');
+            $button.text(flowqAdmin.strings.loading || 'Loading...');
 
             const data = {
-                action: 'wp_dynamic_survey_admin_action',
+                action: 'flowq_admin_action',
                 admin_action: action,
                 survey_id: surveyId,
-                nonce: wpDynamicSurveyAdmin.nonce
+                nonce: flowqAdmin.nonce
             };
 
-            $.post(wpDynamicSurveyAdmin.ajaxurl, data)
+            $.post(flowqAdmin.ajaxurl, data)
                 .done(function(response) {
                     if (response.success) {
                         this.showNotice(response.data.message || 'Action completed successfully.', 'success');
@@ -79,7 +79,7 @@
                     }
                 }.bind(this))
                 .fail(function() {
-                    this.showNotice(wpDynamicSurveyAdmin.strings.error || 'An error occurred.', 'error');
+                    this.showNotice(flowqAdmin.strings.error || 'An error occurred.', 'error');
                 }.bind(this))
                 .always(function() {
                     $button.prop('disabled', false).text(originalText);
@@ -131,7 +131,7 @@
         },
 
         confirmDelete: function(e) {
-            const message = wpDynamicSurveyAdmin.strings.confirm_delete || 'Are you sure you want to delete this survey?';
+            const message = flowqAdmin.strings.confirm_delete || 'Are you sure you want to delete this survey?';
             return confirm(message);
         },
 
@@ -140,16 +140,16 @@
             const $button = $(e.target);
             const surveyId = $button.data('survey-id');
 
-            $button.prop('disabled', true).text(wpDynamicSurveyAdmin.strings.loading || 'Loading...');
+            $button.prop('disabled', true).text(flowqAdmin.strings.loading || 'Loading...');
 
             const data = {
-                action: 'wp_dynamic_survey_admin_action',
+                action: 'flowq_admin_action',
                 admin_action: 'get_survey_stats',
                 survey_id: surveyId,
-                nonce: wpDynamicSurveyAdmin.nonce
+                nonce: flowqAdmin.nonce
             };
 
-            $.post(wpDynamicSurveyAdmin.ajaxurl, data)
+            $.post(flowqAdmin.ajaxurl, data)
                 .done(function(response) {
                     if (response.success) {
                         this.updateAnalyticsDisplay(response.data);
@@ -159,10 +159,10 @@
                     }
                 }.bind(this))
                 .fail(function() {
-                    this.showNotice(wpDynamicSurveyAdmin.strings.error || 'An error occurred.', 'error');
+                    this.showNotice(flowqAdmin.strings.error || 'An error occurred.', 'error');
                 }.bind(this))
                 .always(function() {
-                    $button.prop('disabled', false).text(wpDynamicSurveyAdmin.strings.refresh || 'Refresh');
+                    $button.prop('disabled', false).text(flowqAdmin.strings.refresh || 'Refresh');
                 });
         },
 
@@ -171,16 +171,16 @@
             const $button = $(e.target);
             const surveyId = $button.data('survey-id');
 
-            $button.prop('disabled', true).text(wpDynamicSurveyAdmin.strings.exporting || 'Exporting...');
+            $button.prop('disabled', true).text(flowqAdmin.strings.exporting || 'Exporting...');
 
             const data = {
-                action: 'wp_dynamic_survey_admin_action',
+                action: 'flowq_admin_action',
                 admin_action: 'export_responses',
                 survey_id: surveyId,
-                nonce: wpDynamicSurveyAdmin.nonce
+                nonce: flowqAdmin.nonce
             };
 
-            $.post(wpDynamicSurveyAdmin.ajaxurl, data)
+            $.post(flowqAdmin.ajaxurl, data)
                 .done(function(response) {
                     if (response.success) {
                         this.downloadCSV(response.data.csv_data, `survey-${surveyId}-responses.csv`);
@@ -190,10 +190,10 @@
                     }
                 }.bind(this))
                 .fail(function() {
-                    this.showNotice(wpDynamicSurveyAdmin.strings.error || 'An error occurred.', 'error');
+                    this.showNotice(flowqAdmin.strings.error || 'An error occurred.', 'error');
                 }.bind(this))
                 .always(function() {
-                    $button.prop('disabled', false).text(wpDynamicSurveyAdmin.strings.export || 'Export');
+                    $button.prop('disabled', false).text(flowqAdmin.strings.export || 'Export');
                 });
         },
 

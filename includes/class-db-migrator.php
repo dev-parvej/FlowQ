@@ -2,7 +2,7 @@
 /**
  * Database Migration Handler for WP Dynamic Survey Plugin
  *
- * @package WP_Dynamic_Survey
+ * @package FlowQ
  */
 
 // Prevent direct access
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 /**
  * Database migrator class
  */
-class WP_Dynamic_Survey_DB_Migrator {
+class FlowQ_DB_Migrator {
 
     /**
      * Database version for migrations
@@ -36,7 +36,7 @@ class WP_Dynamic_Survey_DB_Migrator {
     public function __construct() {
         global $wpdb;
         $this->wpdb = $wpdb;
-        $this->table_prefix = $this->wpdb->prefix . 'wp_dynamic_survey_';
+        $this->table_prefix = $this->wpdb->prefix . 'flowq_';
     }
 
     /**
@@ -51,7 +51,7 @@ class WP_Dynamic_Survey_DB_Migrator {
         $this->create_templates_table();
 
         // Update database version
-        update_option('wp_dynamic_survey_db_version', self::DB_VERSION);
+        update_option('flowq_db_version', self::DB_VERSION);
     }
 
     /**
@@ -246,7 +246,7 @@ class WP_Dynamic_Survey_DB_Migrator {
                 'name' => 'Classic',
                 'description' => 'Traditional form-style survey with clean, professional design',
                 'is_default' => 1,
-                'preview_image' => WP_DYNAMIC_SURVEY_URL . 'assets/images/templates/classic.svg',
+                'preview_image' => FLOWQ_URL . 'assets/images/templates/classic.svg',
                 'styles' => json_encode(array(
                     'primary_color' => '#0073aa',
                     'background_color' => '#ffffff',
@@ -260,7 +260,7 @@ class WP_Dynamic_Survey_DB_Migrator {
                 'name' => 'Modern',
                 'description' => 'Clean, minimalist design with modern aesthetics',
                 'is_default' => 1,
-                'preview_image' => WP_DYNAMIC_SURVEY_URL . 'assets/images/templates/modern.svg',
+                'preview_image' => FLOWQ_URL . 'assets/images/templates/modern.svg',
                 'styles' => json_encode(array(
                     'primary_color' => '#6366f1',
                     'background_color' => '#f8f9fa',
@@ -274,7 +274,7 @@ class WP_Dynamic_Survey_DB_Migrator {
                 'name' => 'Card-based',
                 'description' => 'Each question displayed as an elegant card',
                 'is_default' => 1,
-                'preview_image' => WP_DYNAMIC_SURVEY_URL . 'assets/images/templates/card.svg',
+                'preview_image' => FLOWQ_URL . 'assets/images/templates/card.svg',
                 'styles' => json_encode(array(
                     'primary_color' => '#10b981',
                     'background_color' => '#f3f4f6',
@@ -289,7 +289,7 @@ class WP_Dynamic_Survey_DB_Migrator {
                 'name' => 'Dark Mode',
                 'description' => 'Sleek dark theme for modern surveys',
                 'is_default' => 1,
-                'preview_image' => WP_DYNAMIC_SURVEY_URL . 'assets/images/templates/dark.svg',
+                'preview_image' => FLOWQ_URL . 'assets/images/templates/dark.svg',
                 'styles' => json_encode(array(
                     'primary_color' => '#818cf8',
                     'background_color' => '#2d3748',
@@ -306,7 +306,7 @@ class WP_Dynamic_Survey_DB_Migrator {
                 'name' => 'Colorful',
                 'description' => 'Vibrant, engaging design with bold colors',
                 'is_default' => 1,
-                'preview_image' => WP_DYNAMIC_SURVEY_URL . 'assets/images/templates/colorful.svg',
+                'preview_image' => FLOWQ_URL . 'assets/images/templates/colorful.svg',
                 'styles' => json_encode(array(
                     'primary_color' => '#ec4899',
                     'background_color' => '#fef3c7',
@@ -325,7 +325,7 @@ class WP_Dynamic_Survey_DB_Migrator {
         }
 
         // Set default active template to Classic (ID: 1)
-        update_option('wp_dynamic_survey_active_template', 1);
+        update_option('flowq_active_template', 1);
     }
 
 
@@ -386,14 +386,14 @@ class WP_Dynamic_Survey_DB_Migrator {
         }
 
         // Remove database version option
-        delete_option('wp_dynamic_survey_db_version');
+        delete_option('flowq_db_version');
     }
 
     /**
      * Check database version and run migrations if needed
      */
     public function check_version() {
-        $current_version = get_option('wp_dynamic_survey_db_version', '0.0.0');
+        $current_version = get_option('flowq_db_version', '0.0.0');
 
         if (version_compare($current_version, self::DB_VERSION, '<')) {
             $this->run_migrations($current_version);
@@ -416,7 +416,7 @@ class WP_Dynamic_Survey_DB_Migrator {
         }
 
         // Update to current version
-        update_option('wp_dynamic_survey_db_version', self::DB_VERSION);
+        update_option('flowq_db_version', self::DB_VERSION);
     }
 
     /**

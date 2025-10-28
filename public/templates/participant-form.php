@@ -2,7 +2,7 @@
 /**
  * Participant Information Form Template
  *
- * @package WP_Dynamic_Survey
+ * @package FlowQ
  */
 
 // Prevent direct access
@@ -11,24 +11,24 @@ if (!defined('ABSPATH')) {
 }
 
 // Get template handler
-$template_handler = new WP_Dynamic_Survey_Template_Handler();
+$template_handler = new FlowQ_Template_Handler();
 $template_styles = $template_handler->get_template_styles();
 
 // Get form settings
-$two_stage_form = get_option('wp_dynamic_survey_two_stage_form', '1');
-$field_address = get_option('wp_dynamic_survey_field_address', '1');
-$field_zipcode = get_option('wp_dynamic_survey_field_zipcode', '1');
-$field_phone = get_option('wp_dynamic_survey_field_phone', '1');
-$phone_optional = get_option('wp_dynamic_survey_phone_optional', '0');
+$two_stage_form = get_option('flowq_two_stage_form', '1');
+$field_address = get_option('flowq_field_address', '1');
+$field_zipcode = get_option('flowq_field_zipcode', '1');
+$field_phone = get_option('flowq_field_phone', '1');
+$phone_optional = get_option('flowq_phone_optional', '0');
 
 // Default privacy policy texts
 $default_privacy_single = '<p>We respect your privacy and are committed to protecting your personal information. By submitting this form, you agree that your data will be used solely for the purpose of this survey and will be handled in accordance with our <a href="/privacy-policy" target="_blank">Privacy Policy</a>.</p>';
 $default_privacy_stage1 = '<p>We respect your privacy. Your contact information will be used only for this survey and handled securely according to our <a href="/privacy-policy" target="_blank">Privacy Policy</a>.</p>';
 $default_privacy_stage2 = '<p>Your phone number will be kept confidential and used only for survey-related communication. See our <a href="/privacy-policy" target="_blank">Privacy Policy</a> for details.</p>';
 
-$privacy_policy = get_option('wp_dynamic_survey_privacy_policy', $default_privacy_single);
-$privacy_policy_stage1 = get_option('wp_dynamic_survey_privacy_policy_stage1', $default_privacy_stage1);
-$privacy_policy_stage2 = get_option('wp_dynamic_survey_privacy_policy_stage2', $default_privacy_stage2);
+$privacy_policy = get_option('flowq_privacy_policy', $default_privacy_single);
+$privacy_policy_stage1 = get_option('flowq_privacy_policy_stage1', $default_privacy_stage1);
+$privacy_policy_stage2 = get_option('flowq_privacy_policy_stage2', $default_privacy_stage2);
 
 // If phone is disabled, force single-stage form
 if ($field_phone == '0') {
@@ -65,7 +65,7 @@ $stage2_privacy_text = $privacy_policy_stage2;
             <div class="form-row">
                 <div class="form-group">
                     <label for="participant_name" class="form-label">
-                        <?php echo esc_html__('Full Name', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?> <span class="required">*</span>
+                        <?php echo esc_html__('Full Name', FLOWQ_TEXT_DOMAIN); ?> <span class="required">*</span>
                     </label>
                     <input
                         type="text"
@@ -74,7 +74,7 @@ $stage2_privacy_text = $privacy_policy_stage2;
                         class="form-control"
                         style="text-align: left !important;"
                         required
-                        placeholder="<?php echo esc_attr__('John Smith', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>"
+                        placeholder="<?php echo esc_attr__('John Smith', FLOWQ_TEXT_DOMAIN); ?>"
                     >
                     <div class="error-message" id="error-participant_name"></div>
                 </div>
@@ -84,7 +84,7 @@ $stage2_privacy_text = $privacy_policy_stage2;
             <div class="form-row">
                 <div class="form-group">
                     <label for="participant_email" class="form-label">
-                        <?php echo esc_html__('Email Address', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?> <span class="required">*</span>
+                        <?php echo esc_html__('Email Address', FLOWQ_TEXT_DOMAIN); ?> <span class="required">*</span>
                     </label>
                     <input
                         type="email"
@@ -92,7 +92,7 @@ $stage2_privacy_text = $privacy_policy_stage2;
                         name="participant_email"
                         class="form-control"
                         required
-                        placeholder="<?php echo esc_attr__('john@example.com', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>"
+                        placeholder="<?php echo esc_attr__('john@example.com', FLOWQ_TEXT_DOMAIN); ?>"
                     >
                     <div class="error-message" id="error-participant_email"></div>
                 </div>
@@ -102,14 +102,14 @@ $stage2_privacy_text = $privacy_policy_stage2;
             <div class="form-row">
                 <div class="form-group">
                     <label for="participant_address" class="form-label">
-                        <?php echo esc_html__('Address', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?> <span class="optional"><?php echo esc_html__('(Optional)', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
+                        <?php echo esc_html__('Address', FLOWQ_TEXT_DOMAIN); ?> <span class="optional"><?php echo esc_html__('(Optional)', FLOWQ_TEXT_DOMAIN); ?></span>
                     </label>
                     <input
                         type="text"
                         id="participant_address"
                         name="participant_address"
                         class="form-control"
-                        placeholder="<?php echo esc_attr__('123 Main St, City, State', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>"
+                        placeholder="<?php echo esc_attr__('123 Main St, City, State', FLOWQ_TEXT_DOMAIN); ?>"
                     >
                     <div class="error-message" id="error-participant_address"></div>
                 </div>
@@ -120,14 +120,14 @@ $stage2_privacy_text = $privacy_policy_stage2;
             <div class="form-row">
                 <div class="form-group">
                     <label for="participant_zip_code" class="form-label">
-                        <?php echo esc_html__('Zip Code', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?> <span class="optional"><?php echo esc_html__('(Optional)', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
+                        <?php echo esc_html__('Zip Code', FLOWQ_TEXT_DOMAIN); ?> <span class="optional"><?php echo esc_html__('(Optional)', FLOWQ_TEXT_DOMAIN); ?></span>
                     </label>
                     <input
                         type="text"
                         id="participant_zip_code"
                         name="participant_zip_code"
                         class="form-control"
-                        placeholder="<?php echo esc_attr__('12345', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>"
+                        placeholder="<?php echo esc_attr__('12345', FLOWQ_TEXT_DOMAIN); ?>"
                         maxlength="10"
                     >
                     <div class="error-message" id="error-participant_zip_code"></div>
@@ -139,7 +139,7 @@ $stage2_privacy_text = $privacy_policy_stage2;
             <div class="form-row">
                 <div class="form-group">
                     <label for="participant_phone_single" class="form-label">
-                        <?php echo esc_html__('Phone Number', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        <?php echo esc_html__('Phone Number', FLOWQ_TEXT_DOMAIN); ?>
                         <span class="required">*</span>
                     </label>
                     <input
@@ -149,7 +149,7 @@ $stage2_privacy_text = $privacy_policy_stage2;
                         class="form-control"
                         required
                         maxlength="13"
-                        placeholder="<?php echo esc_attr__('Enter your phone number', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>"
+                        placeholder="<?php echo esc_attr__('Enter your phone number', FLOWQ_TEXT_DOMAIN); ?>"
                     >
                     <div class="error-message" id="error-participant_phone_single"></div>
                 </div>
@@ -166,7 +166,7 @@ $stage2_privacy_text = $privacy_policy_stage2;
                     <label>
                         <input type="checkbox" id="privacy_agreement_stage1" name="privacy_agreement" value="1" required>
                         <span class="privacy-checkbox-text">
-                            <?php echo esc_html__('I agree to the privacy policy', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?> <span class="required">*</span>
+                            <?php echo esc_html__('I agree to the privacy policy', FLOWQ_TEXT_DOMAIN); ?> <span class="required">*</span>
                         </span>
                     </label>
                     <div class="error-message" id="error-privacy_agreement"></div>
@@ -177,25 +177,25 @@ $stage2_privacy_text = $privacy_policy_stage2;
             <div class="form-error-container" id="form-error-container" style="display: none;">
                 <div class="error-alert">
                     <span class="error-text"></span>
-                    <button type="button" class="error-close" aria-label="<?php echo esc_attr__('Close error message', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">&times;</button>
+                    <button type="button" class="error-close" aria-label="<?php echo esc_attr__('Close error message', FLOWQ_TEXT_DOMAIN); ?>">&times;</button>
                 </div>
             </div>
 
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary <?php echo $two_stage_form == '1' ? 'btn-continue' : 'btn-start-survey'; ?>">
                     <span class="btn-text">
-                        <?php echo $two_stage_form == '1' ? esc_html__('Continue', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : esc_html__('Start Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        <?php echo $two_stage_form == '1' ? esc_html__('Continue', FLOWQ_TEXT_DOMAIN) : esc_html__('Start Survey', FLOWQ_TEXT_DOMAIN); ?>
                     </span>
                     <span class="btn-loading" style="display: none;">
                         <span class="spinner"></span>
-                        <?php echo $two_stage_form == '1' ? esc_html__('Continuing...', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : esc_html__('Starting...', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        <?php echo $two_stage_form == '1' ? esc_html__('Continuing...', FLOWQ_TEXT_DOMAIN) : esc_html__('Starting...', FLOWQ_TEXT_DOMAIN); ?>
                     </span>
                 </button>
             </div>
 
             <input type="hidden" name="survey_id" value="<?php echo esc_attr($survey['id']); ?>">
-            <input type="hidden" name="action" value="wp_dynamic_survey_submit_stage1_info">
-            <input type="hidden" name="nonce" value="<?php echo wp_create_nonce('wp_dynamic_survey_frontend_nonce'); ?>">
+            <input type="hidden" name="action" value="flowq_submit_stage1_info">
+            <input type="hidden" name="nonce" value="<?php echo wp_create_nonce('flowq_frontend_nonce'); ?>">
         </form>
 
         <!-- Stage 2 Form (Hidden Initially) -->
@@ -204,7 +204,7 @@ $stage2_privacy_text = $privacy_policy_stage2;
             <div class="form-row">
                 <div class="form-group">
                     <label for="participant_phone" class="form-label">
-                        <?php echo esc_html__('Phone Number', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        <?php echo esc_html__('Phone Number', FLOWQ_TEXT_DOMAIN); ?>
                         <?php if ($phone_optional != '1'): ?>
                         <span class="required">*</span>
                         <?php endif; ?>
@@ -216,7 +216,7 @@ $stage2_privacy_text = $privacy_policy_stage2;
                         class="form-control"
                         <?php echo $phone_optional != '1' ? 'required' : ''; ?>
                         maxlength="13"
-                        placeholder="<?php echo esc_attr__('Enter your phone number', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>"
+                        placeholder="<?php echo esc_attr__('Enter your phone number', FLOWQ_TEXT_DOMAIN); ?>"
                     >
                     <div class="error-message" id="error-participant_phone"></div>
                 </div>
@@ -232,7 +232,7 @@ $stage2_privacy_text = $privacy_policy_stage2;
                     <label>
                         <input type="checkbox" id="privacy_agreement_stage2" name="privacy_agreement_stage2" value="1" required>
                         <span class="privacy-checkbox-text">
-                            <?php echo esc_html__('I agree to the privacy policy', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?> <span class="required">*</span>
+                            <?php echo esc_html__('I agree to the privacy policy', FLOWQ_TEXT_DOMAIN); ?> <span class="required">*</span>
                         </span>
                     </label>
                     <div class="error-message" id="error-privacy_agreement_stage2"></div>
@@ -243,35 +243,35 @@ $stage2_privacy_text = $privacy_policy_stage2;
             <div class="form-error-container" id="form-error-container-stage2" style="display: none;">
                 <div class="error-alert">
                     <span class="error-text"></span>
-                    <button type="button" class="error-close" aria-label="<?php echo esc_attr__('Close error message', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">&times;</button>
+                    <button type="button" class="error-close" aria-label="<?php echo esc_attr__('Close error message', FLOWQ_TEXT_DOMAIN); ?>">&times;</button>
                 </div>
             </div>
 
             <div class="form-actions">
                 <button type="button" class="btn btn-secondary btn-back">
-                    <?php echo esc_html__('Back', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                    <?php echo esc_html__('Back', FLOWQ_TEXT_DOMAIN); ?>
                 </button>
                 <button type="submit" class="btn btn-primary btn-start-survey">
-                    <span class="btn-text"><?php echo esc_html__('Start Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
+                    <span class="btn-text"><?php echo esc_html__('Start Survey', FLOWQ_TEXT_DOMAIN); ?></span>
                     <span class="btn-loading" style="display: none;">
                         <span class="spinner"></span>
-                        <?php echo esc_html__('Starting...', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        <?php echo esc_html__('Starting...', FLOWQ_TEXT_DOMAIN); ?>
                     </span>
                 </button>
 
                 <?php if ($phone_optional == '1'): ?>
                 <div class="or-divider">
-                    <span><?php echo esc_html__('or', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
+                    <span><?php echo esc_html__('or', FLOWQ_TEXT_DOMAIN); ?></span>
                 </div>
                 <button type="button" class="btn-skip-link" id="btn-skip-phone">
-                    <?php echo esc_html__('Continue without phone number', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                    <?php echo esc_html__('Continue without phone number', FLOWQ_TEXT_DOMAIN); ?>
                 </button>
                 <?php endif; ?>
             </div>
 
             <input type="hidden" name="survey_id" value="<?php echo esc_attr($survey['id']); ?>">
-            <input type="hidden" name="action" value="wp_dynamic_survey_submit_stage2_info">
-            <input type="hidden" name="nonce" value="<?php echo wp_create_nonce('wp_dynamic_survey_frontend_nonce'); ?>">
+            <input type="hidden" name="action" value="flowq_submit_stage2_info">
+            <input type="hidden" name="nonce" value="<?php echo wp_create_nonce('flowq_frontend_nonce'); ?>">
             <input type="hidden" name="stage1_data" id="stage1_data" value="">
         </form>
         <?php endif; ?>
@@ -310,6 +310,7 @@ $stage2_privacy_text = $privacy_policy_stage2;
     border: none;
     border-radius: 8px;
     box-shadow: none;
+    padding: 20px;
 }
 
 /* Survey Header Section */

@@ -2,7 +2,7 @@
 /**
  * REST API Handler for WP Dynamic Survey Plugin
  *
- * @package WP_Dynamic_Survey
+ * @package FlowQ
  */
 
 // Prevent direct access
@@ -13,12 +13,12 @@ if (!defined('ABSPATH')) {
 /**
  * REST API Handler class
  */
-class WP_Dynamic_Survey_REST_API {
+class FlowQ_REST_API {
 
     /**
      * API namespace
      */
-    const NAMESPACE = 'wp-dynamic-survey/v1';
+    const NAMESPACE = 'flowq/v1';
 
     /**
      * Constructor
@@ -48,7 +48,7 @@ class WP_Dynamic_Survey_REST_API {
                 'permission_callback' => array($this, 'check_survey_permissions'),
                 'args' => array(
                     'id' => array(
-                        'description' => __('Survey ID', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+                        'description' => __('Survey ID', FLOWQ_TEXT_DOMAIN),
                         'type' => 'integer',
                         'required' => true
                     )
@@ -63,7 +63,7 @@ class WP_Dynamic_Survey_REST_API {
             'permission_callback' => array($this, 'check_view_permissions'),
             'args' => array(
                 'id' => array(
-                    'description' => __('Survey ID', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+                    'description' => __('Survey ID', FLOWQ_TEXT_DOMAIN),
                     'type' => 'integer',
                     'required' => true
                 )
@@ -78,7 +78,7 @@ class WP_Dynamic_Survey_REST_API {
                 'permission_callback' => array($this, 'check_survey_permissions'),
                 'args' => array(
                     'survey_id' => array(
-                        'description' => __('Survey ID', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+                        'description' => __('Survey ID', FLOWQ_TEXT_DOMAIN),
                         'type' => 'integer',
                         'required' => true
                     )
@@ -95,7 +95,7 @@ class WP_Dynamic_Survey_REST_API {
             'permission_callback' => '__return_true', // Public endpoint
             'args' => array(
                 'session_id' => array(
-                    'description' => __('Session ID to validate', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+                    'description' => __('Session ID to validate', FLOWQ_TEXT_DOMAIN),
                     'type' => 'string',
                     'required' => true
                 )
@@ -107,7 +107,7 @@ class WP_Dynamic_Survey_REST_API {
      * Get surveys
      */
     public function get_surveys($request) {
-        $survey_manager = new WP_Dynamic_Survey_Manager();
+        $survey_manager = new FlowQ_Survey_Manager();
 
         $args = array(
             'status' => $request->get_param('status'),
@@ -134,17 +134,17 @@ class WP_Dynamic_Survey_REST_API {
      */
     public function get_survey($request) {
         $survey_id = $request->get_param('id');
-        $survey_manager = new WP_Dynamic_Survey_Manager();
+        $survey_manager = new FlowQ_Survey_Manager();
 
         $survey = $survey_manager->get_survey($survey_id);
 
         if (!$survey) {
-            return new WP_Error('survey_not_found', __('Survey not found.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN), array('status' => 404));
+            return new WP_Error('survey_not_found', __('Survey not found.', FLOWQ_TEXT_DOMAIN), array('status' => 404));
         }
 
         // Include questions if requested
         if ($request->get_param('include_questions')) {
-            $question_manager = new WP_Dynamic_Survey_Question_Manager();
+            $question_manager = new FlowQ_Question_Manager();
             $survey['questions'] = $question_manager->get_survey_questions($survey_id, true);
         }
 
@@ -159,7 +159,7 @@ class WP_Dynamic_Survey_REST_API {
      */
     public function get_survey_statistics($request) {
         $survey_id = $request->get_param('id');
-        $survey_manager = new WP_Dynamic_Survey_Manager();
+        $survey_manager = new FlowQ_Survey_Manager();
 
         $statistics = $survey_manager->get_survey_statistics($survey_id);
 
@@ -176,7 +176,7 @@ class WP_Dynamic_Survey_REST_API {
      */
     public function validate_session($request) {
         $session_id = $request->get_param('session_id');
-        $participant_manager = new WP_Dynamic_Survey_Participant_Manager();
+        $participant_manager = new FlowQ_Participant_Manager();
 
         $participant = $participant_manager->validate_session($session_id);
 
@@ -197,7 +197,7 @@ class WP_Dynamic_Survey_REST_API {
      */
     public function get_questions($request) {
         $survey_id = $request->get_param('survey_id');
-        $question_manager = new WP_Dynamic_Survey_Question_Manager();
+        $question_manager = new FlowQ_Question_Manager();
 
         $questions = $question_manager->get_survey_questions($survey_id, true);
 
@@ -240,19 +240,19 @@ class WP_Dynamic_Survey_REST_API {
         // Public surveys can be accessed by anyone
         $survey_id = $request->get_param('id');
         if ($survey_id) {
-            $survey_manager = new WP_Dynamic_Survey_Manager();
+            $survey_manager = new FlowQ_Survey_Manager();
             $survey = $survey_manager->get_survey($survey_id);
             if ($survey && $survey['status'] === 'published') {
                 return true;
             }
         }
 
-        return current_user_can('view_wp_dynamic_survey_responses');
+        return current_user_can('view_flowq_responses');
     }
 
 
     public function check_view_permissions($request) {
-        return current_user_can('view_wp_dynamic_survey_responses');
+        return current_user_can('view_flowq_responses');
     }
 
 
@@ -263,18 +263,18 @@ class WP_Dynamic_Survey_REST_API {
     private function get_survey_collection_params() {
         return array(
             'status' => array(
-                'description' => __('Filter by status', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+                'description' => __('Filter by status', FLOWQ_TEXT_DOMAIN),
                 'type' => 'string',
                 'enum' => array('draft', 'published', 'archived')
             ),
             'page' => array(
-                'description' => __('Page number', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+                'description' => __('Page number', FLOWQ_TEXT_DOMAIN),
                 'type' => 'integer',
                 'default' => 1,
                 'minimum' => 1
             ),
             'per_page' => array(
-                'description' => __('Items per page', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+                'description' => __('Items per page', FLOWQ_TEXT_DOMAIN),
                 'type' => 'integer',
                 'default' => 10,
                 'minimum' => 1,

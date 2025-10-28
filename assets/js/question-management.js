@@ -1,7 +1,7 @@
 /**
  * Question Management JavaScript for WP Dynamic Survey Plugin
  *
- * @package WP_Dynamic_Survey
+ * @package FlowQ
  */
 
 (function($) {
@@ -81,7 +81,7 @@
             e.preventDefault();
             this.currentQuestionId = null;            
             this.resetForm();
-            $('#wp-dynamic-survey-modal-title').text(wpDynamicSurveyAdmin.strings.add_question || 'Add New Question');
+            $('#wp-dynamic-survey-modal-title').text(flowqAdmin.strings.add_question || 'Add New Question');
             this.showModal();
             this.handleQuestionTypeChange();
         },
@@ -90,7 +90,7 @@
             e.preventDefault();
             const questionId = $(e.target).data('question-id');
             this.currentQuestionId = questionId;
-            $('#wp-dynamic-survey-modal-title').text(wpDynamicSurveyAdmin.strings.edit_question || 'Edit Question');
+            $('#wp-dynamic-survey-modal-title').text(flowqAdmin.strings.edit_question || 'Edit Question');
             this.loadQuestionData(questionId);
             this.showModal();
         },
@@ -176,21 +176,21 @@
 
         loadQuestionData: function(questionId) {
             const data = {
-                action: 'wp_dynamic_survey_get_question',
+                action: 'flowq_get_question',
                 question_id: questionId,
-                nonce: wpDynamicSurveyAdmin.nonce
+                nonce: flowqAdmin.nonce
             };
 
-            $.post(wpDynamicSurveyAdmin.ajaxurl, data)
+            $.post(flowqAdmin.ajaxurl, data)
                 .done(function(response) {
                     if (response.success) {
                         this.populateForm(response.data);
                     } else {
-                        alert(response.data || wpDynamicSurveyAdmin.strings.error);
+                        alert(response.data || flowqAdmin.strings.error);
                     }
                 }.bind(this))
                 .fail(function() {
-                    alert(wpDynamicSurveyAdmin.strings.error);
+                    alert(flowqAdmin.strings.error);
                 });
         },
 
@@ -227,27 +227,27 @@
             }
 
             const formData = this.form.serialize();
-            const action = this.currentQuestionId ? 'wp_dynamic_survey_update_question' : 'wp_dynamic_survey_create_question';
+            const action = this.currentQuestionId ? 'flowq_update_question' : 'flowq_create_question';
 
-            const data = formData + `&action=${action}&nonce=${wpDynamicSurveyAdmin.nonce}`;
+            const data = formData + `&action=${action}&nonce=${flowqAdmin.nonce}`;
 
-            $('#wp-dynamic-survey-save-question').prop('disabled', true).text(wpDynamicSurveyAdmin.strings.saving || 'Saving...');
+            $('#wp-dynamic-survey-save-question').prop('disabled', true).text(flowqAdmin.strings.saving || 'Saving...');
 
-            $.post(wpDynamicSurveyAdmin.ajaxurl, data)
+            $.post(flowqAdmin.ajaxurl, data)
                 .done(function(response) {
                     if (response.success) {
                         this.closeModal();
                         this.refreshQuestionsList();
-                        this.showNotice(wpDynamicSurveyAdmin.strings.saved || 'Question saved successfully!', 'success');
+                        this.showNotice(flowqAdmin.strings.saved || 'Question saved successfully!', 'success');
                     } else {
-                        alert(response.data || wpDynamicSurveyAdmin.strings.error);
+                        alert(response.data || flowqAdmin.strings.error);
                     }
                 }.bind(this))
                 .fail(function() {
-                    alert(wpDynamicSurveyAdmin.strings.error);
+                    alert(flowqAdmin.strings.error);
                 })
                 .always(function() {
-                    $('#wp-dynamic-survey-save-question').prop('disabled', false).text(wpDynamicSurveyAdmin.strings.save_question || 'Save Question');
+                    $('#wp-dynamic-survey-save-question').prop('disabled', false).text(flowqAdmin.strings.save_question || 'Save Question');
                 });
         },
 
@@ -285,22 +285,22 @@
             const questionId = $(e.target).data('question-id');
 
             const data = {
-                action: 'wp_dynamic_survey_duplicate_question',
+                action: 'flowq_duplicate_question',
                 question_id: questionId,
-                nonce: wpDynamicSurveyAdmin.nonce
+                nonce: flowqAdmin.nonce
             };
 
-            $.post(wpDynamicSurveyAdmin.ajaxurl, data)
+            $.post(flowqAdmin.ajaxurl, data)
                 .done(function(response) {
                     if (response.success) {
                         this.refreshQuestionsList();
                         this.showNotice('Question duplicated successfully!', 'success');
                     } else {
-                        alert(response.data || wpDynamicSurveyAdmin.strings.error);
+                        alert(response.data || flowqAdmin.strings.error);
                     }
                 }.bind(this))
                 .fail(function() {
-                    alert(wpDynamicSurveyAdmin.strings.error);
+                    alert(flowqAdmin.strings.error);
                 });
         },
 
@@ -308,17 +308,17 @@
             e.preventDefault();
             const questionId = $(e.target).data('question-id');
 
-            if (!confirm(wpDynamicSurveyAdmin.strings.confirm_delete_question || 'Are you sure you want to delete this question? This action cannot be undone.')) {
+            if (!confirm(flowqAdmin.strings.confirm_delete_question || 'Are you sure you want to delete this question? This action cannot be undone.')) {
                 return;
             }
 
             const data = {
-                action: 'wp_dynamic_survey_delete_question',
+                action: 'flowq_delete_question',
                 question_id: questionId,
-                nonce: wpDynamicSurveyAdmin.nonce
+                nonce: flowqAdmin.nonce
             };
 
-            $.post(wpDynamicSurveyAdmin.ajaxurl, data)
+            $.post(flowqAdmin.ajaxurl, data)
                 .done(function(response) {
                     if (response.success) {
                         $(e.target).closest('tr').fadeOut(function() {
@@ -327,11 +327,11 @@
                         }.bind(this));
                         this.showNotice('Question deleted successfully!', 'success');
                     } else {
-                        alert(response.data || wpDynamicSurveyAdmin.strings.error);
+                        alert(response.data || flowqAdmin.strings.error);
                     }
                 }.bind(this))
                 .fail(function() {
-                    alert(wpDynamicSurveyAdmin.strings.error);
+                    alert(flowqAdmin.strings.error);
                 });
         },
 
@@ -345,23 +345,23 @@
             });
 
             const data = {
-                action: 'wp_dynamic_survey_reorder_questions',
+                action: 'flowq_reorder_questions',
                 survey_id: this.surveyId,
                 question_orders: JSON.stringify(questionIds),
-                nonce: wpDynamicSurveyAdmin.nonce
+                nonce: flowqAdmin.nonce
             };
 
-            $.post(wpDynamicSurveyAdmin.ajaxurl, data)
+            $.post(flowqAdmin.ajaxurl, data)
                 .done(function(response) {
                     if (response.success) {
                         this.updateQuestionNumbers();
                         this.showNotice('Questions reordered successfully!', 'success');
                     } else {
-                        alert(response.data || wpDynamicSurveyAdmin.strings.error);
+                        alert(response.data || flowqAdmin.strings.error);
                     }
                 }.bind(this))
                 .fail(function() {
-                    alert(wpDynamicSurveyAdmin.strings.error);
+                    alert(flowqAdmin.strings.error);
                 });
         },
 

@@ -1,14 +1,14 @@
 <?php
 /**
- * Plugin Name: WordPress Survey Plugin
- * Plugin URI: https://example.com/wordpress-survey-plugin
- * Description: A WordPress plugin that adds dynamic survey functionality with conditional branching, question sequencing, and external redirections.
+ * Plugin Name: FlowQ
+ * Plugin URI: https://github.com/dev-parvej/FlowQ
+ * Description: Create intelligent, dynamic surveys that adapt in real-time to user responses. Engage your audience with interactive question flows built right inside WordPress.
  * Version: 1.0.0
  * Author: Your Name
- * Author URI: https://example.com
+ * Author URI: https://github.com/dev-parvej/FlowQ
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: wp-dynamic-survey
+ * Text Domain: https://github.com/dev-parvej/FlowQ
  * Domain Path: /languages
  * Requires at least: 5.0
  * Tested up to: 6.3
@@ -22,15 +22,15 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants with unique prefix
-define('WP_DYNAMIC_SURVEY_VERSION', '1.0.0');
-define('WP_DYNAMIC_SURVEY_FILE', __FILE__);
-define('WP_DYNAMIC_SURVEY_PATH', plugin_dir_path(__FILE__));
-define('WP_DYNAMIC_SURVEY_URL', plugin_dir_url(__FILE__));
-define('WP_DYNAMIC_SURVEY_BASENAME', plugin_basename(__FILE__));
-define('WP_DYNAMIC_SURVEY_TEXT_DOMAIN', 'wp-dynamic-survey');
+define('FLOWQ_VERSION', '1.0.0');
+define('FLOWQ_FILE', __FILE__);
+define('FLOWQ_PATH', plugin_dir_path(__FILE__));
+define('FLOWQ_URL', plugin_dir_url(__FILE__));
+define('FLOWQ_BASENAME', plugin_basename(__FILE__));
+define('FLOWQ_TEXT_DOMAIN', 'flowq');
 
 // Main plugin class with unique prefix
-class WP_Dynamic_Survey_Plugin {
+class FlowQ_Plugin {
 
     /**
      * Single instance of the plugin
@@ -40,7 +40,7 @@ class WP_Dynamic_Survey_Plugin {
     /**
      * Plugin version
      */
-    public $version = WP_DYNAMIC_SURVEY_VERSION;
+    public $version = FLOWQ_VERSION;
 
     /**
      * Get single instance
@@ -65,8 +65,8 @@ class WP_Dynamic_Survey_Plugin {
      */
     private function init_hooks() {
         // Activation and deactivation hooks
-        register_activation_hook(WP_DYNAMIC_SURVEY_FILE, array($this, 'activate'));
-        register_deactivation_hook(WP_DYNAMIC_SURVEY_FILE, array($this, 'deactivate'));
+        register_activation_hook(FLOWQ_FILE, array($this, 'activate'));
+        register_deactivation_hook(FLOWQ_FILE, array($this, 'deactivate'));
 
         // Initialize plugin after WordPress loads
         add_action('plugins_loaded', array($this, 'init'), 10);
@@ -80,14 +80,14 @@ class WP_Dynamic_Survey_Plugin {
      */
     private function load_dependencies() {
         // Autoloader
-        require_once WP_DYNAMIC_SURVEY_PATH . 'includes/class-autoloader.php';
+        require_once FLOWQ_PATH . 'includes/class-autoloader.php';
 
         // Core classes
-        require_once WP_DYNAMIC_SURVEY_PATH . 'includes/class-survey-manager.php';
-        require_once WP_DYNAMIC_SURVEY_PATH . 'includes/class-participant-manager.php';
-        require_once WP_DYNAMIC_SURVEY_PATH . 'includes/class-question-manager.php';
-        require_once WP_DYNAMIC_SURVEY_PATH . 'includes/class-session-manager.php';
-        require_once WP_DYNAMIC_SURVEY_PATH . 'includes/class-template-handler.php';
+        require_once FLOWQ_PATH . 'includes/class-survey-manager.php';
+        require_once FLOWQ_PATH . 'includes/class-participant-manager.php';
+        require_once FLOWQ_PATH . 'includes/class-question-manager.php';
+        require_once FLOWQ_PATH . 'includes/class-session-manager.php';
+        require_once FLOWQ_PATH . 'includes/class-template-handler.php';
     }
 
     /**
@@ -129,7 +129,7 @@ class WP_Dynamic_Survey_Plugin {
         if (version_compare(PHP_VERSION, '7.4', '<')) {
             add_action('admin_notices', function() {
                 echo '<div class="notice notice-error"><p>';
-                echo __('WordPress Survey Plugin requires PHP 7.4 or higher.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN);
+                echo __('FlowQ requires PHP 7.4 or higher.', FLOWQ_TEXT_DOMAIN);
                 echo '</p></div>';
             });
             return false;
@@ -140,7 +140,7 @@ class WP_Dynamic_Survey_Plugin {
         if (version_compare($wp_version, '5.0', '<')) {
             add_action('admin_notices', function() {
                 echo '<div class="notice notice-error"><p>';
-                echo __('WordPress Survey Plugin requires WordPress 5.0 or higher.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN);
+                echo __('FlowQ requires WordPress 5.0 or higher.', FLOWQ_TEXT_DOMAIN);
                 echo '</p></div>';
             });
             return false;
@@ -154,16 +154,16 @@ class WP_Dynamic_Survey_Plugin {
      */
     private function init_admin() {
         // Load admin class
-        require_once WP_DYNAMIC_SURVEY_PATH . 'admin/class-admin.php';
-        new WP_Dynamic_Survey_Admin();
+        require_once FLOWQ_PATH . 'admin/class-admin.php';
+        new FlowQ_Admin();
 
         // Load question admin class for AJAX handlers
-        require_once WP_DYNAMIC_SURVEY_PATH . 'admin/class-question-admin.php';
-        new WP_Dynamic_Survey_Question_Admin();
+        require_once FLOWQ_PATH . 'admin/class-question-admin.php';
+        new FlowQ_Question_Admin();
 
         // Load settings admin class
-        require_once WP_DYNAMIC_SURVEY_PATH . 'admin/class-settings-admin.php';
-        new WP_Dynamic_Survey_Settings_Admin();
+        require_once FLOWQ_PATH . 'admin/class-settings-admin.php';
+        new FlowQ_Settings_Admin();
 
     }
 
@@ -172,20 +172,20 @@ class WP_Dynamic_Survey_Plugin {
      */
     private function init_frontend() {
         // Load frontend class
-        require_once WP_DYNAMIC_SURVEY_PATH . 'public/class-frontend.php';
-        new WP_Dynamic_Survey_Frontend();
+        require_once FLOWQ_PATH . 'public/class-frontend.php';
+        new FlowQ_Frontend();
     }
 
     /**
      * Initialize enhanced shortcode system
      */
     private function init_shortcodes() {
-        require_once WP_DYNAMIC_SURVEY_PATH . 'includes/class-shortcode.php';
-        new WP_Dynamic_Survey_Shortcode();
+        require_once FLOWQ_PATH . 'includes/class-shortcode.php';
+        new FlowQ_Shortcode();
 
         if (is_admin()) {
-            require_once WP_DYNAMIC_SURVEY_PATH . 'admin/class-shortcode-builder.php';
-            new WP_Dynamic_Survey_Shortcode_Builder();
+            require_once FLOWQ_PATH . 'admin/class-shortcode-builder.php';
+            new FlowQ_Shortcode_Builder();
         }
     }
 
@@ -194,8 +194,8 @@ class WP_Dynamic_Survey_Plugin {
      */
     private function init_ajax() {
         // Include and initialize centralized AJAX handler
-        require_once WP_DYNAMIC_SURVEY_PATH . 'includes/class-ajax-handler.php';
-        new WP_Dynamic_Survey_Ajax_Handler();
+        require_once FLOWQ_PATH . 'includes/class-ajax-handler.php';
+        new FlowQ_Ajax_Handler();
 
         // AJAX handlers are now handled in the frontend class
         // Frontend class registers all necessary AJAX handlers
@@ -206,8 +206,8 @@ class WP_Dynamic_Survey_Plugin {
      */
     private function init_rest_api() {
         // Include and initialize REST API handler
-        require_once WP_DYNAMIC_SURVEY_PATH . 'includes/class-rest-api.php';
-        new WP_Dynamic_Survey_REST_API();
+        require_once FLOWQ_PATH . 'includes/class-rest-api.php';
+        new FlowQ_REST_API();
     }
 
 
@@ -236,7 +236,7 @@ class WP_Dynamic_Survey_Plugin {
         flush_rewrite_rules();
 
         // Clear any scheduled events
-        wp_clear_scheduled_hook('wp_dynamic_survey_cleanup_sessions');
+        wp_clear_scheduled_hook('flowq_cleanup_sessions');
     }
 
     /**
@@ -244,8 +244,8 @@ class WP_Dynamic_Survey_Plugin {
      */
     private function create_tables() {
         // Load and run database migrator
-        require_once WP_DYNAMIC_SURVEY_PATH . 'includes/class-db-migrator.php';
-        $migrator = new WP_Dynamic_Survey_DB_Migrator();
+        require_once FLOWQ_PATH . 'includes/class-db-migrator.php';
+        $migrator = new FlowQ_DB_Migrator();
         $migrator->create_tables();
     }
 
@@ -254,7 +254,7 @@ class WP_Dynamic_Survey_Plugin {
      */
     private function set_default_options() {
         $default_settings = array(
-            'version' => WP_DYNAMIC_SURVEY_VERSION,
+            'version' => FLOWQ_VERSION,
             'session_timeout' => 3600, // 1 hour
             'auto_save_interval' => 30, // 30 seconds
             'enable_progress_bar' => true,
@@ -262,8 +262,8 @@ class WP_Dynamic_Survey_Plugin {
             'require_all_fields' => true
         );
 
-        add_option('wp_dynamic_survey_settings', $default_settings);
-        add_option('wp_dynamic_survey_version', WP_DYNAMIC_SURVEY_VERSION);
+        add_option('flowq_settings', $default_settings);
+        add_option('flowq_version', FLOWQ_VERSION);
     }
 
     /**
@@ -271,7 +271,7 @@ class WP_Dynamic_Survey_Plugin {
      */
     private function create_directories() {
         $upload_dir = wp_upload_dir();
-        $survey_dir = $upload_dir['basedir'] . '/wp-dynamic-surveys';
+        $survey_dir = $upload_dir['basedir'] . '/flowq-surveys';
 
         if (!file_exists($survey_dir)) {
             wp_mkdir_p($survey_dir);
@@ -291,9 +291,9 @@ class WP_Dynamic_Survey_Plugin {
      */
     public function load_textdomain() {
         load_plugin_textdomain(
-            WP_DYNAMIC_SURVEY_TEXT_DOMAIN,
+            FLOWQ_TEXT_DOMAIN,
             false,
-            dirname(WP_DYNAMIC_SURVEY_BASENAME) . '/languages'
+            dirname(FLOWQ_BASENAME) . '/languages'
         );
     }
 
@@ -301,7 +301,7 @@ class WP_Dynamic_Survey_Plugin {
      * Get plugin option
      */
     public function get_option($key, $default = null) {
-        $options = get_option('wp_dynamic_survey_settings', array());
+        $options = get_option('flowq_settings', array());
         return isset($options[$key]) ? $options[$key] : $default;
     }
 
@@ -309,17 +309,17 @@ class WP_Dynamic_Survey_Plugin {
      * Update plugin option
      */
     public function update_option($key, $value) {
-        $options = get_option('wp_dynamic_survey_settings', array());
+        $options = get_option('flowq_settings', array());
         $options[$key] = $value;
-        update_option('wp_dynamic_survey_settings', $options);
+        update_option('flowq_settings', $options);
     }
 
     /**
      * Check database version and run migrations if needed
      */
     private function check_database_version() {
-        require_once WP_DYNAMIC_SURVEY_PATH . 'includes/class-db-migrator.php';
-        $migrator = new WP_Dynamic_Survey_DB_Migrator();
+        require_once FLOWQ_PATH . 'includes/class-db-migrator.php';
+        $migrator = new FlowQ_DB_Migrator();
         $migrator->check_version();
     }
 
@@ -328,18 +328,18 @@ class WP_Dynamic_Survey_Plugin {
      */
     public static function uninstall() {
         // Remove all plugin options
-        delete_option('wp_dynamic_survey_settings');
-        delete_option('wp_dynamic_survey_version');
-        delete_option('wp_dynamic_survey_db_version');
+        delete_option('flowq_settings');
+        delete_option('flowq_version');
+        delete_option('flowq_db_version');
 
         // Drop all plugin tables
-        require_once WP_DYNAMIC_SURVEY_PATH . 'includes/class-db-migrator.php';
-        $migrator = new WP_Dynamic_Survey_DB_Migrator();
+        require_once FLOWQ_PATH . 'includes/class-db-migrator.php';
+        $migrator = new FlowQ_DB_Migrator();
         $migrator->drop_tables();
 
         // Remove upload directory
         $upload_dir = wp_upload_dir();
-        $survey_dir = $upload_dir['basedir'] . '/wp-dynamic-surveys';
+        $survey_dir = $upload_dir['basedir'] . '/flowq-surveys';
 
         if (file_exists($survey_dir)) {
             // Remove all files in directory
@@ -354,14 +354,14 @@ class WP_Dynamic_Survey_Plugin {
         }
 
         // Clear any scheduled events
-        wp_clear_scheduled_hook('wp_dynamic_survey_cleanup_sessions');
+        wp_clear_scheduled_hook('flowq_cleanup_sessions');
     }
 }
 
 /**
  * Initialize the plugin
  */
-function wp_dynamic_survey_plugin() {
+function flowq_plugin() {
     add_action('pre_get_posts', function($query) {
         if (is_admin()) {
             return;
@@ -373,7 +373,7 @@ function wp_dynamic_survey_plugin() {
         if ($exclude_ids === null) {
             // Get thank you page IDs from database (only once per request)
             global $wpdb;
-            $thank_you_slugs = $wpdb->get_col("SELECT DISTINCT thank_you_page_slug FROM {$wpdb->prefix}wp_dynamic_survey_surveys WHERE thank_you_page_slug IS NOT NULL AND thank_you_page_slug != ''");
+            $thank_you_slugs = $wpdb->get_col("SELECT DISTINCT thank_you_page_slug FROM {$wpdb->prefix}flowq_surveys WHERE thank_you_page_slug IS NOT NULL AND thank_you_page_slug != ''");
 
             if (empty($thank_you_slugs)) {
                 $exclude_ids = array(); // Cache empty result
@@ -406,11 +406,11 @@ function wp_dynamic_survey_plugin() {
 
     });
 
-    return WP_Dynamic_Survey_Plugin::get_instance();
+    return FlowQ_Plugin::get_instance();
 }
 
 // Register uninstall hook
-register_uninstall_hook(WP_DYNAMIC_SURVEY_FILE, array('WP_Dynamic_Survey_Plugin', 'uninstall'));
+register_uninstall_hook(FLOWQ_FILE, array('FlowQ_Plugin', 'uninstall'));
 
 // Start the plugin
-wp_dynamic_survey_plugin();
+flowq_plugin();

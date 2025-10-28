@@ -28,7 +28,7 @@ Add a General Settings tab to the Settings page where administrators can configu
   - Single submission before starting survey questions
 
 **Technical Details**:
-- Store setting in WordPress options: `wp_dynamic_survey_two_stage_form`
+- Store setting in WordPress options: `flowq_two_stage_form`
 - Default value: `1` (enabled)
 - Frontend form (`public/class-frontend.php` or participant form handler) should check this setting
 - Conditionally render form as single-stage or two-stage based on setting value
@@ -66,9 +66,9 @@ Add a General Settings tab to the Settings page where administrators can configu
 - Validation: Must be valid URL format
 
 **Technical Details**:
-- Global setting option: `wp_dynamic_survey_two_page_mode`
+- Global setting option: `flowq_two_page_mode`
 - Default value: `0` (disabled)
-- Survey-level setting: Store in `wp_dynamic_survey_surveys` table
+- Survey-level setting: Store in `flowq_surveys` table
   - Add new column: `second_page_url` (VARCHAR 255, nullable)
   - Database migration required
 - Session tracking: Use existing session system to maintain state across pages
@@ -90,15 +90,15 @@ Add a General Settings tab to the Settings page where administrators can configu
 
 - **When Disabled (unchecked - default)**:
   - Email addresses must be unique per survey
-  - Before allowing survey start, check if email already exists in `wp_dynamic_survey_participants` for this survey
+  - Before allowing survey start, check if email already exists in `flowq_participants` for this survey
   - If email exists: Display error message "You have already submitted this survey with this email address"
   - Prevent duplicate submissions from same email
 
 **Technical Details**:
-- Global setting option: `wp_dynamic_survey_allow_duplicate_emails`
+- Global setting option: `flowq_allow_duplicate_emails`
 - Default value: `0` (disabled)
 - Validation logic: Check before creating participant record
-  - Query: `SELECT COUNT(*) FROM wp_dynamic_survey_participants WHERE survey_id = ? AND email = ?`
+  - Query: `SELECT COUNT(*) FROM flowq_participants WHERE survey_id = ? AND email = ?`
   - If count > 0 and setting disabled: Block submission
   - If count > 0 and setting enabled: Allow submission
 - Error handling: Display user-friendly message when blocked
@@ -140,14 +140,14 @@ Add a General Settings tab to the Settings page where administrators can configu
 
 **Technical Details**:
 - Global settings options:
-  - `wp_dynamic_survey_field_address` - Default: `1`
-  - `wp_dynamic_survey_field_zipcode` - Default: `1`
-  - `wp_dynamic_survey_field_phone` - Default: `1`
+  - `flowq_field_address` - Default: `1`
+  - `flowq_field_zipcode` - Default: `1`
+  - `flowq_field_phone` - Default: `1`
 - Frontend form rendering checks these options to determine which fields to display
 - JavaScript/jQuery on settings page: Monitor phone number checkbox
   - When unchecked: Disable and uncheck two-stage form checkbox
   - When checked: Enable two-stage form checkbox
-- Database: Only save enabled fields to `wp_dynamic_survey_participants` table
+- Database: Only save enabled fields to `flowq_participants` table
 - Validation: Only validate fields that are enabled
 
 ### 5. Privacy Policy Text
@@ -196,9 +196,9 @@ Add a General Settings tab to the Settings page where administrators can configu
 
 **Technical Details**:
 - Global settings options:
-  - `wp_dynamic_survey_privacy_policy` - Single privacy policy text (HTML)
-  - `wp_dynamic_survey_privacy_policy_stage1` - Stage 1 privacy policy text (HTML)
-  - `wp_dynamic_survey_privacy_policy_stage2` - Stage 2 privacy policy text (HTML)
+  - `flowq_privacy_policy` - Single privacy policy text (HTML)
+  - `flowq_privacy_policy_stage1` - Stage 1 privacy policy text (HTML)
+  - `flowq_privacy_policy_stage2` - Stage 2 privacy policy text (HTML)
 - Use `wp_editor()` for rich text editing in admin
 - Sanitize HTML on save using `wp_kses_post()` to allow safe HTML tags
 - Frontend:
@@ -251,10 +251,10 @@ Add a General Settings tab to the Settings page where administrators can configu
   - Allow admin to enable/disable
 
 **Technical Details**:
-- Global setting option: `wp_dynamic_survey_phone_optional`
+- Global setting option: `flowq_phone_optional`
 - Default value: `0` (disabled - phone required)
 - Frontend Stage 2 logic:
-  - Check `wp_dynamic_survey_phone_optional`
+  - Check `flowq_phone_optional`
   - If enabled: Show "Skip" button, remove required validation from phone field
   - If disabled: Hide "Skip" button, add required validation to phone field
 - Skip button handler: Proceed to survey questions without saving phone number
@@ -339,62 +339,62 @@ Add a General Settings tab to the Settings page where administrators can configu
 ### Storage
 
 **Global Settings (WordPress Options)**:
-1. `wp_dynamic_survey_two_stage_form`
+1. `flowq_two_stage_form`
    - Value: `1` (enabled) or `0` (disabled)
    - Default: `1`
 
-2. `wp_dynamic_survey_two_page_mode`
+2. `flowq_two_page_mode`
    - Value: `1` (enabled) or `0` (disabled)
    - Default: `0`
 
-3. `wp_dynamic_survey_allow_duplicate_emails`
+3. `flowq_allow_duplicate_emails`
    - Value: `1` (enabled) or `0` (disabled)
    - Default: `0`
 
-4. `wp_dynamic_survey_field_address`
+4. `flowq_field_address`
    - Value: `1` (enabled) or `0` (disabled)
    - Default: `1`
 
-5. `wp_dynamic_survey_field_zipcode`
+5. `flowq_field_zipcode`
    - Value: `1` (enabled) or `0` (disabled)
    - Default: `1`
 
-6. `wp_dynamic_survey_field_phone`
+6. `flowq_field_phone`
    - Value: `1` (enabled) or `0` (disabled)
    - Default: `1`
 
-7. `wp_dynamic_survey_privacy_policy`
+7. `flowq_privacy_policy`
    - Value: HTML string
    - Default: Empty string
 
-8. `wp_dynamic_survey_privacy_policy_stage1`
+8. `flowq_privacy_policy_stage1`
    - Value: HTML string
    - Default: Empty string
 
-9. `wp_dynamic_survey_privacy_policy_stage2`
+9. `flowq_privacy_policy_stage2`
    - Value: HTML string
    - Default: Empty string
 
-10. `wp_dynamic_survey_phone_optional`
+10. `flowq_phone_optional`
     - Value: `1` (enabled) or `0` (disabled)
     - Default: `0`
 
 - Use `update_option()` and `get_option()` WordPress functions
 
 **Survey-Level Settings (Database Table)**:
-- Table: `wp_dynamic_survey_surveys`
+- Table: `flowq_surveys`
 - New column: `second_page_url` (VARCHAR 255, NULL)
 - Stored per survey, only used when two-page mode is globally enabled
 
 ### Frontend Integration
 
 **Two-Stage Form**:
-- Modify participant form rendering logic to check `wp_dynamic_survey_two_stage_form`
+- Modify participant form rendering logic to check `flowq_two_stage_form`
 - If enabled: show two-stage form (current behavior)
 - If disabled: combine all fields into single form stage
 
 **Two-Page Survey**:
-- Check `wp_dynamic_survey_two_page_mode` global setting
+- Check `flowq_two_page_mode` global setting
 - If enabled:
   - After participant info submission, redirect to `second_page_url` from survey settings
   - On page load, check for existing session
@@ -403,7 +403,7 @@ Add a General Settings tab to the Settings page where administrators can configu
 - If disabled: Current single-page behavior
 
 **Multiple Submissions with Same Email**:
-- Check `wp_dynamic_survey_allow_duplicate_emails` before creating participant
+- Check `flowq_allow_duplicate_emails` before creating participant
 - If disabled (default):
   - Query database for existing participant with same email and survey_id
   - If found: Return error, prevent form submission
@@ -413,27 +413,27 @@ Add a General Settings tab to the Settings page where administrators can configu
 
 **Participant Information Fields**:
 - Check field settings before rendering participant form:
-  - `wp_dynamic_survey_field_address` - Show/hide address field
-  - `wp_dynamic_survey_field_zipcode` - Show/hide zipcode field
-  - `wp_dynamic_survey_field_phone` - Show/hide phone number field
+  - `flowq_field_address` - Show/hide address field
+  - `flowq_field_zipcode` - Show/hide zipcode field
+  - `flowq_field_phone` - Show/hide phone number field
 - Name and email always shown (hardcoded, no option check needed)
 - Only validate and save fields that are enabled
-- Database columns remain unchanged (all fields still exist in `wp_dynamic_survey_participants`)
+- Database columns remain unchanged (all fields still exist in `flowq_participants`)
 - Store NULL or empty string for disabled fields
 - Frontend JavaScript validation: Only validate enabled fields
 
 **Privacy Policy**:
 - Check two-stage form setting to determine which privacy policy to display
 - If two-stage form disabled:
-  - Get `wp_dynamic_survey_privacy_policy`
+  - Get `flowq_privacy_policy`
   - If not empty: Display privacy policy text + required checkbox below form
   - Checkbox label: "I agree to the privacy policy"
   - Validate checkbox is checked before form submission
 - If two-stage form enabled:
-  - Stage 1: Get `wp_dynamic_survey_privacy_policy_stage1`
+  - Stage 1: Get `flowq_privacy_policy_stage1`
     - If not empty: Display + required checkbox
     - Validate before allowing continue to Stage 2
-  - Stage 2: Get `wp_dynamic_survey_privacy_policy_stage2`
+  - Stage 2: Get `flowq_privacy_policy_stage2`
     - If not empty: Display + required checkbox
     - Validate before allowing survey submission
 - Frontend validation: JavaScript prevents form submission if checkbox unchecked
@@ -441,7 +441,7 @@ Add a General Settings tab to the Settings page where administrators can configu
 
 **Optional Phone Number Stage**:
 - Only applies when two-stage form is enabled
-- Check `wp_dynamic_survey_phone_optional` setting
+- Check `flowq_phone_optional` setting
 - If enabled (phone optional):
   - Stage 2 phone number field: Remove required attribute
   - Display two buttons: "Submit" and "Skip"
@@ -456,9 +456,9 @@ Add a General Settings tab to the Settings page where administrators can configu
 - Button styling: "Skip" button should be secondary/text style (less prominent than "Submit")
 
 ### Database Migration
-- Create migration to add `second_page_url` column to `wp_dynamic_survey_surveys` table
+- Create migration to add `second_page_url` column to `flowq_surveys` table
 - Migration class: `includes/class-db-migrator.php`
-- SQL: `ALTER TABLE wp_dynamic_survey_surveys ADD COLUMN second_page_url VARCHAR(255) NULL AFTER thank_you_message;`
+- SQL: `ALTER TABLE flowq_surveys ADD COLUMN second_page_url VARCHAR(255) NULL AFTER thank_you_message;`
 
 ### Code Locations
 - Settings admin class: `admin/class-settings-admin.php`
@@ -487,8 +487,8 @@ Add a General Settings tab to the Settings page where administrators can configu
 **Privacy Policy Editor Toggling**:
 - Listen for changes on "Enable two-stage participant form" checkbox
 - When checked (two-stage enabled):
-  - Hide single privacy policy editor (`wp_dynamic_survey_privacy_policy`)
-  - Show two stage-specific editors (`wp_dynamic_survey_privacy_policy_stage1` and `wp_dynamic_survey_privacy_policy_stage2`)
+  - Hide single privacy policy editor (`flowq_privacy_policy`)
+  - Show two stage-specific editors (`flowq_privacy_policy_stage1` and `flowq_privacy_policy_stage2`)
 - When unchecked (two-stage disabled):
   - Hide both stage-specific editors
   - Show single privacy policy editor

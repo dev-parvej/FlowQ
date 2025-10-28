@@ -2,7 +2,7 @@
 /**
  * Participant Manager for WP Dynamic Survey Plugin
  *
- * @package WP_Dynamic_Survey
+ * @package FlowQ
  */
 
 // Prevent direct access
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 /**
  * Survey Participant Manager class
  */
-class WP_Dynamic_Survey_Participant_Manager {
+class FlowQ_Participant_Manager {
 
     /**
      * WordPress database object
@@ -36,8 +36,8 @@ class WP_Dynamic_Survey_Participant_Manager {
     public function __construct() {
         global $wpdb;
         $this->wpdb = $wpdb;
-        $this->table_prefix = $this->wpdb->prefix . 'wp_dynamic_survey_';
-        $this->session_timeout = wp_dynamic_survey_plugin()->get_option('session_timeout', 3600);
+        $this->table_prefix = $this->wpdb->prefix . 'flowq_';
+        $this->session_timeout = flowq_plugin()->get_option('session_timeout', 3600);
     }
 
     /**
@@ -54,36 +54,36 @@ class WP_Dynamic_Survey_Participant_Manager {
             if (empty($participant_data[$field])) {
                 return new WP_Error(
                     'missing_field',
-                    sprintf(__('Required field missing: %s', WP_DYNAMIC_SURVEY_TEXT_DOMAIN), $field)
+                    sprintf(__('Required field missing: %s', FLOWQ_TEXT_DOMAIN), $field)
                 );
             }
         }
 
         // Validate email format
         if (!is_email($participant_data['email'])) {
-            return new WP_Error('invalid_email', __('Invalid email address.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('invalid_email', __('Invalid email address.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Check if survey exists
-        $survey_manager = new WP_Dynamic_Survey_Manager();
+        $survey_manager = new FlowQ_Survey_Manager();
         $survey = $survey_manager->get_survey($survey_id);
         if (!$survey) {
-            return new WP_Error('survey_not_found', __('Survey not found.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('survey_not_found', __('Survey not found.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Check if survey is accessible
         if ($survey['status'] !== 'published') {
-            return new WP_Error('survey_not_published', __('Survey is not published.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('survey_not_published', __('Survey is not published.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Check for duplicate email if setting is disabled
-        $allow_duplicate_emails = get_option('wp_dynamic_survey_allow_duplicate_emails', '0');
+        $allow_duplicate_emails = get_option('flowq_allow_duplicate_emails', '0');
         if ($allow_duplicate_emails != '1') {
             $email_exists = $this->email_exists_for_survey($survey_id, $participant_data['email']);
             if ($email_exists) {
                 return new WP_Error(
                     'duplicate_email',
-                    __('You have already submitted this survey with this email address.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)
+                    __('You have already submitted this survey with this email address.', FLOWQ_TEXT_DOMAIN)
                 );
             }
         }
@@ -115,13 +115,13 @@ class WP_Dynamic_Survey_Participant_Manager {
         $result = $this->wpdb->insert($table_name, $participant_record);
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to create participant record.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to create participant record.', FLOWQ_TEXT_DOMAIN));
         }
 
         $participant_id = $this->wpdb->insert_id;
 
         // Trigger action hook
-        do_action('wp_dynamic_survey_participant_registered', $participant_id, $participant_data, $survey_id);
+        do_action('flowq_participant_registered', $participant_id, $participant_data, $survey_id);
 
         return array(
             'session_id' => $session_id,
@@ -172,7 +172,7 @@ class WP_Dynamic_Survey_Participant_Manager {
         // Validate session
         $participant = $this->get_participant($session_id);
         if (!$participant) {
-            return new WP_Error('invalid_session', __('Invalid or expired session.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('invalid_session', __('Invalid or expired session.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Update current question
@@ -186,7 +186,7 @@ class WP_Dynamic_Survey_Participant_Manager {
         );
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to update current question.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to update current question.', FLOWQ_TEXT_DOMAIN));
         }
 
         return true;
@@ -203,7 +203,7 @@ class WP_Dynamic_Survey_Participant_Manager {
         // Get current participant
         $participant = $this->get_participant($session_id);
         if (!$participant) {
-            return new WP_Error('invalid_session', __('Invalid or expired session.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('invalid_session', __('Invalid or expired session.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Add to question chain if not already present
@@ -223,7 +223,7 @@ class WP_Dynamic_Survey_Participant_Manager {
         );
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to update question chain.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to update question chain.', FLOWQ_TEXT_DOMAIN));
         }
 
         return true;
@@ -311,7 +311,7 @@ class WP_Dynamic_Survey_Participant_Manager {
         // Validate session
         $participant = $this->get_participant($session_id);
         if (!$participant) {
-            return new WP_Error('invalid_session', __('Invalid or expired session.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('invalid_session', __('Invalid or expired session.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Update completion timestamp
@@ -325,7 +325,7 @@ class WP_Dynamic_Survey_Participant_Manager {
         );
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to mark participant as completed.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to mark participant as completed.', FLOWQ_TEXT_DOMAIN));
         }
 
         return true;
@@ -342,12 +342,12 @@ class WP_Dynamic_Survey_Participant_Manager {
         // Validate session exists
         $participant = $this->get_participant($session_id);
         if (!$participant) {
-            return new WP_Error('invalid_session', __('Invalid or expired session.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('invalid_session', __('Invalid or expired session.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Validate phone number
         if (empty($phone_number)) {
-            return new WP_Error('missing_phone', __('Phone number is required.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('missing_phone', __('Phone number is required.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Update phone number
@@ -361,7 +361,7 @@ class WP_Dynamic_Survey_Participant_Manager {
         );
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to update phone number.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to update phone number.', FLOWQ_TEXT_DOMAIN));
         }
 
         return true;
@@ -392,12 +392,12 @@ class WP_Dynamic_Survey_Participant_Manager {
      */
     public function validate_session($session_id) {
         if (empty($session_id)) {
-            return new WP_Error('missing_session', __('Session ID is required.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('missing_session', __('Session ID is required.', FLOWQ_TEXT_DOMAIN));
         }
 
         $participant = $this->get_participant($session_id);
         if (!$participant) {
-            return new WP_Error('invalid_session', __('Invalid or expired session.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('invalid_session', __('Invalid or expired session.', FLOWQ_TEXT_DOMAIN));
         }
 
         return $participant;
@@ -498,7 +498,7 @@ class WP_Dynamic_Survey_Participant_Manager {
         // Validate session exists
         $participant = $this->get_participant($session_id);
         if (!$participant) {
-            return new WP_Error('invalid_session', __('Invalid session.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('invalid_session', __('Invalid session.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Generate unique token
@@ -519,7 +519,7 @@ class WP_Dynamic_Survey_Participant_Manager {
         );
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to generate completion token.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to generate completion token.', FLOWQ_TEXT_DOMAIN));
         }
 
         return $token;
@@ -533,7 +533,7 @@ class WP_Dynamic_Survey_Participant_Manager {
      */
     public function validate_completion_token($token) {
         if (empty($token)) {
-            return new WP_Error('missing_token', __('Token is required.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('missing_token', __('Token is required.', FLOWQ_TEXT_DOMAIN));
         }
 
         $table_name = $this->table_prefix . 'participants';
@@ -546,7 +546,7 @@ class WP_Dynamic_Survey_Participant_Manager {
         );
 
         if (!$participant) {
-            return new WP_Error('invalid_token', __('Invalid or expired token.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('invalid_token', __('Invalid or expired token.', FLOWQ_TEXT_DOMAIN));
         }
 
         return $participant;

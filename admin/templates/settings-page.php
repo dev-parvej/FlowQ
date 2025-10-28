@@ -2,7 +2,7 @@
 /**
  * Settings Page Template
  *
- * @package WP_Dynamic_Survey
+ * @package FlowQ
  */
 
 // Prevent direct access
@@ -16,17 +16,17 @@ if (!defined('ABSPATH')) {
         <div class="settings-header">
             <div class="header-content">
                 <h1 class="page-title">
-                    <?php echo esc_html__('Settings', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                    <?php echo esc_html__('Settings', FLOWQ_TEXT_DOMAIN); ?>
                 </h1>
                 <p class="page-subtitle">
-                    <?php echo esc_html__('Configure your survey plugin settings', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                    <?php echo esc_html__('Configure your survey plugin settings', FLOWQ_TEXT_DOMAIN); ?>
                 </p>
             </div>
         </div>
 
         <?php if (isset($_GET['settings-updated']) && $_GET['settings-updated'] === 'true'): ?>
             <div class="notice notice-success is-dismissible">
-                <p><?php echo esc_html__('Settings saved successfully.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></p>
+                <p><?php echo esc_html__('Settings saved successfully.', FLOWQ_TEXT_DOMAIN); ?></p>
             </div>
         <?php endif; ?>
 

@@ -2,7 +2,7 @@
 /**
  * Survey Builder Admin Interface for WP Dynamic Survey Plugin
  *
- * @package WP_Dynamic_Survey
+ * @package FlowQ
  */
 
 // Prevent direct access
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 /**
  * Survey Builder Admin class
  */
-class WP_Dynamic_Survey_Builder_Admin {
+class FlowQ_Builder_Admin {
 
     /**
      * Survey manager instance
@@ -29,8 +29,8 @@ class WP_Dynamic_Survey_Builder_Admin {
      * Constructor
      */
     public function __construct() {
-        $this->survey_manager = new WP_Dynamic_Survey_Manager();
-        $this->question_manager = new WP_Dynamic_Survey_Question_Manager();
+        $this->survey_manager = new FlowQ_Survey_Manager();
+        $this->question_manager = new FlowQ_Question_Manager();
         $this->init_hooks();
     }
 
@@ -39,13 +39,13 @@ class WP_Dynamic_Survey_Builder_Admin {
      */
     private function init_hooks() {
         // AJAX handlers for builder
-        add_action('wp_ajax_wp_dynamic_survey_save_question', array($this, 'ajax_save_question'));
-        add_action('wp_ajax_wp_dynamic_survey_delete_question', array($this, 'ajax_delete_question'));
-        add_action('wp_ajax_wp_dynamic_survey_save_answer', array($this, 'ajax_save_answer'));
-        add_action('wp_ajax_wp_dynamic_survey_delete_answer', array($this, 'ajax_delete_answer'));
-        add_action('wp_ajax_wp_dynamic_survey_reorder_questions', array($this, 'ajax_reorder_questions'));
-        add_action('wp_ajax_wp_dynamic_survey_reorder_answers', array($this, 'ajax_reorder_answers'));
-        add_action('wp_ajax_wp_dynamic_survey_preview', array($this, 'ajax_preview_survey'));
+        add_action('wp_ajax_flowq_save_question', array($this, 'ajax_save_question'));
+        add_action('wp_ajax_flowq_delete_question', array($this, 'ajax_delete_question'));
+        add_action('wp_ajax_flowq_save_answer', array($this, 'ajax_save_answer'));
+        add_action('wp_ajax_flowq_delete_answer', array($this, 'ajax_delete_answer'));
+        add_action('wp_ajax_flowq_reorder_questions', array($this, 'ajax_reorder_questions'));
+        add_action('wp_ajax_flowq_reorder_answers', array($this, 'ajax_reorder_answers'));
+        add_action('wp_ajax_flowq_preview', array($this, 'ajax_preview_survey'));
 
         // Enqueue builder assets
         add_action('admin_enqueue_scripts', array($this, 'enqueue_builder_assets'));
@@ -59,20 +59,20 @@ class WP_Dynamic_Survey_Builder_Admin {
     public function render_survey_builder($survey_id) {
         $survey = $this->survey_manager->get_survey($survey_id);
         if (!$survey) {
-            echo '<div class="notice notice-error"><p>' . esc_html__('Survey not found.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) . '</p></div>';
+            echo '<div class="notice notice-error"><p>' . esc_html__('Survey not found.', FLOWQ_TEXT_DOMAIN) . '</p></div>';
             return;
         }
 
         $questions = $this->question_manager->get_survey_questions($survey_id, true);
 
-        include WP_DYNAMIC_SURVEY_PATH . 'admin/templates/survey-builder.php';
+        include FLOWQ_PATH . 'admin/templates/survey-builder.php';
     }
 
     /**
      * Enqueue builder-specific assets
      */
     public function enqueue_builder_assets($hook) {
-        if (strpos($hook, 'wp-dynamic-surveys') === false) {
+        if (strpos($hook, 'flowq') === false) {
             return;
         }
 
@@ -84,38 +84,38 @@ class WP_Dynamic_Survey_Builder_Admin {
         // Builder JavaScript
         wp_enqueue_script(
             'wp-dynamic-survey-builder',
-            WP_DYNAMIC_SURVEY_URL . 'assets/js/survey-builder.js',
+            FLOWQ_URL . 'assets/js/survey-builder.js',
             array('jquery', 'jquery-ui-sortable', 'wp-util'),
-            WP_DYNAMIC_SURVEY_VERSION,
+            FLOWQ_VERSION,
             true
         );
 
         // Builder CSS
         wp_enqueue_style(
             'wp-dynamic-survey-builder',
-            WP_DYNAMIC_SURVEY_URL . 'assets/css/survey-builder.css',
+            FLOWQ_URL . 'assets/css/survey-builder.css',
             array(),
-            WP_DYNAMIC_SURVEY_VERSION
+            FLOWQ_VERSION
         );
 
         // Localize builder script
         wp_localize_script('wp-dynamic-survey-builder', 'wpSurveyBuilder', array(
             'ajaxurl' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('wp_dynamic_survey_builder_nonce'),
+            'nonce' => wp_create_nonce('flowq_builder_nonce'),
             'strings' => array(
-                'add_question' => __('Add Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                'edit_question' => __('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                'delete_question' => __('Delete Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                'add_answer' => __('Add Answer', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                'edit_answer' => __('Edit Answer', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                'delete_answer' => __('Delete Answer', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                'confirm_delete_question' => __('Are you sure you want to delete this question?', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                'confirm_delete_answer' => __('Are you sure you want to delete this answer?', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                'saving' => __('Saving...', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                'saved' => __('Saved!', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                'error' => __('Error occurred. Please try again.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                'required_field' => __('This field is required.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                'invalid_url' => __('Please enter a valid URL.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)
+                'add_question' => __('Add Question', FLOWQ_TEXT_DOMAIN),
+                'edit_question' => __('Edit Question', FLOWQ_TEXT_DOMAIN),
+                'delete_question' => __('Delete Question', FLOWQ_TEXT_DOMAIN),
+                'add_answer' => __('Add Answer', FLOWQ_TEXT_DOMAIN),
+                'edit_answer' => __('Edit Answer', FLOWQ_TEXT_DOMAIN),
+                'delete_answer' => __('Delete Answer', FLOWQ_TEXT_DOMAIN),
+                'confirm_delete_question' => __('Are you sure you want to delete this question?', FLOWQ_TEXT_DOMAIN),
+                'confirm_delete_answer' => __('Are you sure you want to delete this answer?', FLOWQ_TEXT_DOMAIN),
+                'saving' => __('Saving...', FLOWQ_TEXT_DOMAIN),
+                'saved' => __('Saved!', FLOWQ_TEXT_DOMAIN),
+                'error' => __('Error occurred. Please try again.', FLOWQ_TEXT_DOMAIN),
+                'required_field' => __('This field is required.', FLOWQ_TEXT_DOMAIN),
+                'invalid_url' => __('Please enter a valid URL.', FLOWQ_TEXT_DOMAIN)
             ),
             'question_types' => array()
         ));
@@ -125,7 +125,7 @@ class WP_Dynamic_Survey_Builder_Admin {
      * AJAX: Save question
      */
     public function ajax_save_question() {
-        check_ajax_referer('wp_dynamic_survey_builder_nonce', 'nonce');
+        check_ajax_referer('flowq_builder_nonce', 'nonce');
 
         if (!current_user_can('manage_options')) {
             wp_send_json_error('Permission denied');
@@ -161,7 +161,7 @@ class WP_Dynamic_Survey_Builder_Admin {
 
         wp_send_json_success(array(
             'question' => $question,
-            'message' => __('Question saved successfully.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)
+            'message' => __('Question saved successfully.', FLOWQ_TEXT_DOMAIN)
         ));
     }
 
@@ -169,7 +169,7 @@ class WP_Dynamic_Survey_Builder_Admin {
      * AJAX: Delete question
      */
     public function ajax_delete_question() {
-        check_ajax_referer('wp_dynamic_survey_builder_nonce', 'nonce');
+        check_ajax_referer('flowq_builder_nonce', 'nonce');
 
         if (!current_user_can('manage_options')) {
             wp_send_json_error('Permission denied');
@@ -183,7 +183,7 @@ class WP_Dynamic_Survey_Builder_Admin {
         }
 
         wp_send_json_success(array(
-            'message' => __('Question deleted successfully.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)
+            'message' => __('Question deleted successfully.', FLOWQ_TEXT_DOMAIN)
         ));
     }
 
@@ -191,7 +191,7 @@ class WP_Dynamic_Survey_Builder_Admin {
      * AJAX: Save answer
      */
     public function ajax_save_answer() {
-        check_ajax_referer('wp_dynamic_survey_builder_nonce', 'nonce');
+        check_ajax_referer('flowq_builder_nonce', 'nonce');
 
         if (!current_user_can('manage_options')) {
             wp_send_json_error('Permission denied');
@@ -229,7 +229,7 @@ class WP_Dynamic_Survey_Builder_Admin {
         wp_send_json_success(array(
             'answer_id' => $answer_id,
             'answers' => $answers,
-            'message' => __('Answer saved successfully.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)
+            'message' => __('Answer saved successfully.', FLOWQ_TEXT_DOMAIN)
         ));
     }
 
@@ -237,7 +237,7 @@ class WP_Dynamic_Survey_Builder_Admin {
      * AJAX: Delete answer
      */
     public function ajax_delete_answer() {
-        check_ajax_referer('wp_dynamic_survey_builder_nonce', 'nonce');
+        check_ajax_referer('flowq_builder_nonce', 'nonce');
 
         if (!current_user_can('manage_options')) {
             wp_send_json_error('Permission denied');
@@ -251,7 +251,7 @@ class WP_Dynamic_Survey_Builder_Admin {
         }
 
         wp_send_json_success(array(
-            'message' => __('Answer deleted successfully.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)
+            'message' => __('Answer deleted successfully.', FLOWQ_TEXT_DOMAIN)
         ));
     }
 
@@ -259,7 +259,7 @@ class WP_Dynamic_Survey_Builder_Admin {
      * AJAX: Reorder questions
      */
     public function ajax_reorder_questions() {
-        check_ajax_referer('wp_dynamic_survey_builder_nonce', 'nonce');
+        check_ajax_referer('flowq_builder_nonce', 'nonce');
 
         if (!current_user_can('manage_options')) {
             wp_send_json_error('Permission denied');
@@ -274,7 +274,7 @@ class WP_Dynamic_Survey_Builder_Admin {
         }
 
         wp_send_json_success(array(
-            'message' => __('Questions reordered successfully.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)
+            'message' => __('Questions reordered successfully.', FLOWQ_TEXT_DOMAIN)
         ));
     }
 
@@ -282,7 +282,7 @@ class WP_Dynamic_Survey_Builder_Admin {
      * AJAX: Reorder answers
      */
     public function ajax_reorder_answers() {
-        check_ajax_referer('wp_dynamic_survey_builder_nonce', 'nonce');
+        check_ajax_referer('flowq_builder_nonce', 'nonce');
 
         if (!current_user_can('manage_options')) {
             wp_send_json_error('Permission denied');
@@ -300,7 +300,7 @@ class WP_Dynamic_Survey_Builder_Admin {
         }
 
         wp_send_json_success(array(
-            'message' => __('Answers reordered successfully.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)
+            'message' => __('Answers reordered successfully.', FLOWQ_TEXT_DOMAIN)
         ));
     }
 
@@ -308,7 +308,7 @@ class WP_Dynamic_Survey_Builder_Admin {
      * AJAX: Preview survey
      */
     public function ajax_preview_survey() {
-        check_ajax_referer('wp_dynamic_survey_builder_nonce', 'nonce');
+        check_ajax_referer('flowq_builder_nonce', 'nonce');
 
         if (!current_user_can('manage_options')) {
             wp_send_json_error('Permission denied');
@@ -326,7 +326,7 @@ class WP_Dynamic_Survey_Builder_Admin {
         $validation_result = $this->survey_manager->validate_survey_flow($survey_id);
 
         ob_start();
-        include WP_DYNAMIC_SURVEY_PATH . 'admin/templates/survey-preview.php';
+        include FLOWQ_PATH . 'admin/templates/survey-preview.php';
         $preview_html = ob_get_clean();
 
         wp_send_json_success(array(
@@ -342,8 +342,8 @@ class WP_Dynamic_Survey_Builder_Admin {
     private function get_question_types() {
         return array(
             'single_choice' => array(
-                'label' => __('Single Choice', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                'description' => __('Single selection from multiple options', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+                'label' => __('Single Choice', FLOWQ_TEXT_DOMAIN),
+                'description' => __('Single selection from multiple options', FLOWQ_TEXT_DOMAIN),
                 'icon' => 'dashicons-list-view',
                 'has_answers' => true
             )
@@ -365,12 +365,12 @@ class WP_Dynamic_Survey_Builder_Admin {
         $errors = array();
 
         if (empty($data['title'])) {
-            $errors[] = __('Question title is required.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN);
+            $errors[] = __('Question title is required.', FLOWQ_TEXT_DOMAIN);
         }
 
 
         if (!empty($data['redirect_url']) && !filter_var($data['redirect_url'], FILTER_VALIDATE_URL)) {
-            $errors[] = __('Invalid redirect URL.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN);
+            $errors[] = __('Invalid redirect URL.', FLOWQ_TEXT_DOMAIN);
         }
 
         return $errors;
@@ -383,11 +383,11 @@ class WP_Dynamic_Survey_Builder_Admin {
         $errors = array();
 
         if (empty($data['answer_text'])) {
-            $errors[] = __('Answer text is required.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN);
+            $errors[] = __('Answer text is required.', FLOWQ_TEXT_DOMAIN);
         }
 
         if (!empty($data['redirect_url']) && !filter_var($data['redirect_url'], FILTER_VALIDATE_URL)) {
-            $errors[] = __('Invalid redirect URL.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN);
+            $errors[] = __('Invalid redirect URL.', FLOWQ_TEXT_DOMAIN);
         }
 
         return $errors;
@@ -398,8 +398,8 @@ class WP_Dynamic_Survey_Builder_Admin {
      */
     public function get_default_answers($question_type = 'single_choice') {
         return array(
-            array('answer_text' => __('Option 1', WP_DYNAMIC_SURVEY_TEXT_DOMAIN), 'answer_value' => 'option1'),
-            array('answer_text' => __('Option 2', WP_DYNAMIC_SURVEY_TEXT_DOMAIN), 'answer_value' => 'option2')
+            array('answer_text' => __('Option 1', FLOWQ_TEXT_DOMAIN), 'answer_value' => 'option1'),
+            array('answer_text' => __('Option 2', FLOWQ_TEXT_DOMAIN), 'answer_value' => 'option2')
         );
     }
 
@@ -418,7 +418,7 @@ class WP_Dynamic_Survey_Builder_Admin {
             'survey' => $survey,
             'questions' => $questions,
             'export_date' => current_time('mysql'),
-            'plugin_version' => WP_DYNAMIC_SURVEY_VERSION
+            'plugin_version' => FLOWQ_VERSION
         );
     }
 }

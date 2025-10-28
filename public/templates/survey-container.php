@@ -2,7 +2,7 @@
 /**
  * Survey Container Template
  *
- * @package WP_Dynamic_Survey
+ * @package FlowQ
  */
 
 // Prevent direct access
@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Get template handler
-$template_handler = new WP_Dynamic_Survey_Template_Handler();
+$template_handler = new FlowQ_Template_Handler();
 $template_styles = $template_handler->get_template_styles();
 ?>
 
@@ -60,7 +60,7 @@ $template_styles = $template_handler->get_template_styles();
                 <div class="question-skip-section">
                     <button type="button" class="skip-question-btn" data-question-id="{{questionId}}">
                         <span class="skip-icon">⏭️</span>
-                        <span class="skip-text"><?php echo esc_html__('Skip', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
+                        <span class="skip-text"><?php echo esc_html__('Skip', FLOWQ_TEXT_DOMAIN); ?></span>
                     </button>
                 </div>
                 {{/if}}
@@ -83,10 +83,10 @@ $template_styles = $template_handler->get_template_styles();
                 <!-- Thank You Message -->
                 <div class="completion-header">
                     <h2 class="completion-title">
-                        <?php echo esc_html__('Thank You!', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        <?php echo esc_html__('Thank You!', FLOWQ_TEXT_DOMAIN); ?>
                     </h2>
                     <p class="completion-subtitle">
-                        <?php echo esc_html__('Your survey has been completed successfully.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        <?php echo esc_html__('Your survey has been completed successfully.', FLOWQ_TEXT_DOMAIN); ?>
                     </p>
                 </div>
             </div>
@@ -107,7 +107,7 @@ $template_styles = $template_handler->get_template_styles();
     <div id="survey-loading-overlay" class="loading-overlay" style="display: none;">
         <div class="loading-content">
             <div class="loading-spinner"></div>
-            <p class="loading-text"><?php echo esc_html__('Loading...', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></p>
+            <p class="loading-text"><?php echo esc_html__('Loading...', FLOWQ_TEXT_DOMAIN); ?></p>
         </div>
     </div>
 </div>
@@ -219,6 +219,7 @@ $template_styles = $template_handler->get_template_styles();
     border-radius: 8px;
     box-shadow: none;
     margin-bottom: 20px;
+    padding: 20px;
 }
 
 /* Progress Bar */

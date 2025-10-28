@@ -2,7 +2,7 @@
  * Enhanced WP Dynamic Survey Frontend JavaScript
  * Core Implementation with Advanced Features
  *
- * @package WP_Dynamic_Survey
+ * @package FlowQ
  * @version 2.0.0
  */
 

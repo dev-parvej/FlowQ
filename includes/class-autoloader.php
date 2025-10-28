@@ -2,7 +2,7 @@
 /**
  * Autoloader for WP Dynamic Survey Plugin
  *
- * @package WP_Dynamic_Survey
+ * @package FlowQ
  */
 
 // Prevent direct access
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 /**
  * Autoloader class for the plugin
  */
-class WP_Dynamic_Survey_Autoloader {
+class FlowQ_Autoloader {
 
     /**
      * File extension as a string. Defaults to ".php".
@@ -34,7 +34,7 @@ class WP_Dynamic_Survey_Autoloader {
      * Registers the autoloader with SPL.
      */
     public static function register() {
-        self::$directory = WP_DYNAMIC_SURVEY_PATH;
+        self::$directory = FLOWQ_PATH;
         spl_autoload_register(array(__CLASS__, 'autoload'));
     }
 
@@ -46,7 +46,7 @@ class WP_Dynamic_Survey_Autoloader {
      */
     public static function autoload($class_name) {
         // Check if this is a plugin class
-        if (strpos($class_name, 'WP_Dynamic_Survey') !== 0) {
+        if (strpos($class_name, 'FlowQ') !== 0) {
             return false;
         }
 
@@ -69,8 +69,8 @@ class WP_Dynamic_Survey_Autoloader {
      * @return string|false The file path or false if not found.
      */
     protected static function get_file_path_from_class($class_name) {
-        // Remove WP_Dynamic_Survey prefix
-        $class_name = str_replace('WP_Dynamic_Survey_', '', $class_name);
+        // Remove FlowQ prefix
+        $class_name = str_replace('FlowQ_', '', $class_name);
 
         // Convert to lowercase and replace underscores with hyphens
         $file_name = 'class-' . strtolower(str_replace('_', '-', $class_name)) . self::$file_extension;
@@ -130,16 +130,16 @@ class WP_Dynamic_Survey_Autoloader {
      */
     public static function load_core_classes() {
         $core_classes = array(
-            'WP_Dynamic_Survey_DB_Migrator',
-            'WP_Dynamic_Survey_Manager',
-            'WP_Dynamic_Survey_Participant_Manager',
-            'WP_Dynamic_Survey_Question_Flow_Handler',
-            'WP_Dynamic_Survey_Session_Manager',
-            'WP_Dynamic_Survey_Security',
-            'WP_Dynamic_Survey_Admin',
-            'WP_Dynamic_Survey_Frontend',
-            'WP_Dynamic_Survey_Shortcode',
-            'WP_Dynamic_Survey_Assets',
+            'FlowQ_DB_Migrator',
+            'FlowQ_Survey_Manager',
+            'FlowQ_Participant_Manager',
+            'FlowQ_Question_Flow_Handler',
+            'FlowQ_Session_Manager',
+            'FlowQ_Security',
+            'FlowQ_Admin',
+            'FlowQ_Frontend',
+            'FlowQ_Shortcode',
+            'FlowQ_Assets',
         );
 
         foreach ($core_classes as $class_name) {
@@ -163,4 +163,4 @@ class WP_Dynamic_Survey_Autoloader {
 }
 
 // Register the autoloader immediately
-WP_Dynamic_Survey_Autoloader::register();
+FlowQ_Autoloader::register();

@@ -12,7 +12,7 @@ Add a toggle setting to each survey to control the display of a custom header an
 - **Location:** Survey settings/edit page in admin
 - **Label:** "Show Custom Header and Subtitle"
 - **Description:** "Display a custom header and subtitle at the top of the participant form instead of the survey title"
-- **Storage:** `wp_dynamic_survey_surveys` table
+- **Storage:** `flowq_surveys` table
 
 ### 2. Survey Form Header Field (Per Survey)
 **Field Name:** Survey Form Header
@@ -23,7 +23,7 @@ Add a toggle setting to each survey to control the display of a custom header an
 - **Description:** "Main heading displayed at the top of the participant form"
 - **Visibility:** Only shown when toggle is enabled
 - **Validation:** Required field validation when toggle is enabled
-- **Storage:** `wp_dynamic_survey_surveys` table
+- **Storage:** `flowq_surveys` table
 
 ### 3. Survey Form Subtitle Field (Per Survey)
 **Field Name:** Survey Form Subtitle
@@ -33,12 +33,12 @@ Add a toggle setting to each survey to control the display of a custom header an
 - **Label:** "Survey Form Subtitle"
 - **Description:** "Subtitle displayed below the header (optional)"
 - **Visibility:** Only shown when toggle is enabled
-- **Storage:** `wp_dynamic_survey_surveys` table
+- **Storage:** `flowq_surveys` table
 
 ## Current Behavior vs New Behavior
 
 ### Current Behavior
-- Survey title (from `wp_dynamic_survey_surveys.title`) is always displayed at the top of the participant form
+- Survey title (from `flowq_surveys.title`) is always displayed at the top of the participant form
 - No option to hide or customize the header
 - No subtitle support
 
@@ -53,17 +53,17 @@ Add a toggle setting to each survey to control the display of a custom header an
 #### When Toggle is ON
 - Display custom "Survey Form Header" at the top of the participant form
 - Display custom "Survey Form Subtitle" below the header (if provided)
-- Survey title from `wp_dynamic_survey_surveys.title` is NOT displayed
+- Survey title from `flowq_surveys.title` is NOT displayed
 - Header field is required; subtitle is optional
 
 ## Database Schema Changes
 
-### Table: `wp_dynamic_survey_surveys`
+### Table: `flowq_surveys`
 
 Add three new columns:
 
 ```sql
-ALTER TABLE wp_dynamic_survey_surveys
+ALTER TABLE flowq_surveys
 ADD COLUMN show_header TINYINT(1) DEFAULT 0 AFTER thank_you_message,
 ADD COLUMN form_header VARCHAR(255) DEFAULT '' AFTER show_header,
 ADD COLUMN form_subtitle TEXT DEFAULT '' AFTER form_header;

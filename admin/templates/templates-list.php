@@ -2,7 +2,7 @@
 /**
  * Templates List Template
  *
- * @package WP_Dynamic_Survey
+ * @package FlowQ
  */
 
 // Prevent direct access
@@ -230,16 +230,16 @@ if (!defined('ABSPATH')) {
 <div class="templates-list-wrapper">
     <div class="templates-header">
         <div class="header-content">
-            <h2><?php echo esc_html__('Survey Templates', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h2>
+            <h2><?php echo esc_html__('Survey Templates', FLOWQ_TEXT_DOMAIN); ?></h2>
             <p class="description">
-                <?php echo esc_html__('Choose a template to apply to all your surveys. The selected template will define the visual appearance and styling.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                <?php echo esc_html__('Choose a template to apply to all your surveys. The selected template will define the visual appearance and styling.', FLOWQ_TEXT_DOMAIN); ?>
             </p>
         </div>
     </div>
 
     <?php if (empty($templates)): ?>
         <div class="templates-empty-state">
-            <p><?php echo esc_html__('No templates found.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></p>
+            <p><?php echo esc_html__('No templates found.', FLOWQ_TEXT_DOMAIN); ?></p>
         </div>
     <?php else: ?>
         <div class="templates-grid">
@@ -263,7 +263,7 @@ if (!defined('ABSPATH')) {
                         <?php if ($template['id'] == $active_template_id): ?>
                             <div class="template-active-badge">
                                 <span class="dashicons dashicons-yes-alt"></span>
-                                <?php echo esc_html__('Active', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                <?php echo esc_html__('Active', FLOWQ_TEXT_DOMAIN); ?>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -274,7 +274,7 @@ if (!defined('ABSPATH')) {
                             <h3 class="template-name">
                                 <?php echo esc_html($template['name']); ?>
                                 <?php if ($template['is_default']): ?>
-                                    <span class="default-badge"><?php echo esc_html__('Default', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
+                                    <span class="default-badge"><?php echo esc_html__('Default', FLOWQ_TEXT_DOMAIN); ?></span>
                                 <?php endif; ?>
                             </h3>
                         </div>
@@ -290,13 +290,13 @@ if (!defined('ABSPATH')) {
                             <?php if ($template['id'] == $active_template_id): ?>
                                 <button type="button" class="button button-primary" disabled>
                                     <span class="dashicons dashicons-yes"></span>
-                                    <?php echo esc_html__('Selected', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                    <?php echo esc_html__('Selected', FLOWQ_TEXT_DOMAIN); ?>
                                 </button>
                             <?php else: ?>
                                 <button type="button" class="button button-secondary select-template-btn"
                                         data-template-id="<?php echo esc_attr($template['id']); ?>"
                                         data-template-name="<?php echo esc_attr($template['name']); ?>">
-                                    <?php echo esc_html__('Select', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                    <?php echo esc_html__('Select', FLOWQ_TEXT_DOMAIN); ?>
                                 </button>
                             <?php endif; ?>
                         </div>
@@ -319,21 +319,21 @@ jQuery(document).ready(function($) {
         const card = button.closest('.template-card');
 
         // Confirm before selecting
-        if (!confirm('<?php echo esc_js(__('Are you sure you want to activate this template?', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>')) {
+        if (!confirm('<?php echo esc_js(__('Are you sure you want to activate this template?', FLOWQ_TEXT_DOMAIN)); ?>')) {
             return;
         }
 
         // Disable button and show loading state
-        button.prop('disabled', true).text('<?php echo esc_js(__('Activating...', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>');
+        button.prop('disabled', true).text('<?php echo esc_js(__('Activating...', FLOWQ_TEXT_DOMAIN)); ?>');
 
         // AJAX request to select template
         $.ajax({
             url: ajaxurl,
             type: 'POST',
             data: {
-                action: 'wp_dynamic_survey_select_template',
+                action: 'flowq_select_template',
                 template_id: templateId,
-                nonce: '<?php echo wp_create_nonce('wp_dynamic_survey_admin_nonce'); ?>'
+                nonce: '<?php echo wp_create_nonce('flowq_admin_nonce'); ?>'
             },
             success: function(response) {
                 if (response.success) {
@@ -345,7 +345,7 @@ jQuery(document).ready(function($) {
                     $('.select-template-btn').each(function() {
                         $(this).removeClass('button-primary').addClass('button-secondary')
                             .prop('disabled', false)
-                            .html('<?php echo esc_js(__('Select', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>');
+                            .html('<?php echo esc_js(__('Select', FLOWQ_TEXT_DOMAIN)); ?>');
                     });
 
                     // Add active class to selected card
@@ -355,16 +355,16 @@ jQuery(document).ready(function($) {
                     card.find('.template-preview').append(
                         '<div class="template-active-badge">' +
                         '<span class="dashicons dashicons-yes-alt"></span>' +
-                        '<?php echo esc_js(__('Active', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>' +
+                        '<?php echo esc_js(__('Active', FLOWQ_TEXT_DOMAIN)); ?>' +
                         '</div>'
                     );
 
-                    buttonExist.prop('disabled', false).addClass('button-primary select-template-btn').text('<?php echo esc_js(__('Select', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>');
+                    buttonExist.prop('disabled', false).addClass('button-primary select-template-btn').text('<?php echo esc_js(__('Select', FLOWQ_TEXT_DOMAIN)); ?>');
 
                     // Update button to selected state
                     button.removeClass('button-secondary').addClass('button-primary')
                         .prop('disabled', true)
-                        .html('<span class="dashicons dashicons-yes"></span><?php echo esc_js(__('Selected', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>');
+                        .html('<span class="dashicons dashicons-yes"></span><?php echo esc_js(__('Selected', FLOWQ_TEXT_DOMAIN)); ?>');
 
                     // Show success notice
                     const notice = $('<div class="notice notice-success is-dismissible"><p>' +
@@ -380,13 +380,13 @@ jQuery(document).ready(function($) {
                         });
                     }, 500);
                 } else {
-                    alert('<?php echo esc_js(__('Error:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?> ' + response.data);
-                    button.prop('disabled', false).text('<?php echo esc_js(__('Select', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>');
+                    alert('<?php echo esc_js(__('Error:', FLOWQ_TEXT_DOMAIN)); ?> ' + response.data);
+                    button.prop('disabled', false).text('<?php echo esc_js(__('Select', FLOWQ_TEXT_DOMAIN)); ?>');
                 }
             },
             error: function(xhr, status, error) {
-                alert('<?php echo esc_js(__('An error occurred. Please try again.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>');
-                button.prop('disabled', false).text('<?php echo esc_js(__('Select', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>');
+                alert('<?php echo esc_js(__('An error occurred. Please try again.', FLOWQ_TEXT_DOMAIN)); ?>');
+                button.prop('disabled', false).text('<?php echo esc_js(__('Select', FLOWQ_TEXT_DOMAIN)); ?>');
             }
         });
     });

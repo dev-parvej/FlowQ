@@ -11,9 +11,9 @@
          * Configuration
          */
         config: {
-            ajaxUrl: wpDynamicSurveyAdmin.ajaxurl || ajaxurl,
-            nonce: wpDynamicSurveyAdmin.nonce,
-            strings: wpDynamicSurveyAdmin.strings || {}
+            ajaxUrl: flowqAdmin.ajaxurl || ajaxurl,
+            nonce: flowqAdmin.nonce,
+            strings: flowqAdmin.strings || {}
         },
 
         /**
@@ -56,7 +56,7 @@
                 url: this.config.ajaxUrl,
                 type: 'POST',
                 data: {
-                    action: 'wp_dynamic_survey_heartbeat',
+                    action: 'flowq_heartbeat',
                     nonce: this.config.nonce
                 },
                 success: function(response) {
@@ -91,7 +91,7 @@
                 url: this.config.ajaxUrl,
                 type: 'POST',
                 data: {
-                    action: 'wp_dynamic_survey_get_survey_statistics',
+                    action: 'flowq_get_survey_statistics',
                     survey_id: surveyId,
                     nonce: this.config.nonce
                 },
@@ -143,7 +143,7 @@
                 url: this.config.ajaxUrl,
                 type: 'POST',
                 data: {
-                    action: 'wp_dynamic_survey_bulk_export_responses',
+                    action: 'flowq_bulk_export_responses',
                     survey_ids: surveyIds,
                     format: format,
                     nonce: this.config.nonce
@@ -210,7 +210,7 @@
                 url: this.config.ajaxUrl,
                 type: 'POST',
                 data: {
-                    action: 'wp_dynamic_survey_cleanup_sessions',
+                    action: 'flowq_cleanup_sessions',
                     days_old: daysOld,
                     nonce: this.config.nonce
                 },
@@ -242,7 +242,7 @@
                 url: this.config.ajaxUrl,
                 type: 'POST',
                 data: {
-                    action: 'wp_dynamic_survey_check_permissions'
+                    action: 'flowq_check_permissions'
                 },
                 success: function(response) {
                     if (response.success) {

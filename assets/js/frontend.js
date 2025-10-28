@@ -1,7 +1,7 @@
 /**
  * WP Dynamic Survey Frontend JavaScript
  *
- * @package WP_Dynamic_Survey
+ * @package FlowQ
  */
 
 (function($) {
@@ -14,9 +14,9 @@
 
         // Configuration
         config: {
-            ajaxUrl: wpDynamicSurvey.ajaxurl,
-            nonce: wpDynamicSurvey.nonce,
-            strings: wpDynamicSurvey.strings
+            ajaxUrl: flowq.ajaxurl,
+            nonce: flowq.nonce,
+            strings: flowq.strings
         },
 
         // Current survey data
@@ -199,7 +199,7 @@
                 formData.append('survey_id', this.stage1Data.survey_id || $('#wp-dynamic-survey-participant-form-stage2 input[name="survey_id"]').val());
                 formData.append('session_id', this.stage1Data.session_id);
                 formData.append('participant_phone', ''); // Empty phone
-                formData.append('action', 'wp_dynamic_survey_submit_stage2_info');
+                formData.append('action', 'flowq_submit_stage2_info');
                 formData.append('nonce', this.config.nonce);
                 formData.append('stage1_data', JSON.stringify(this.stage1Data));
 
@@ -455,7 +455,7 @@
             const formData = new FormData();
             formData.append('session_id', this.currentSurvey.sessionId);
             formData.append('question_id', this.currentSurvey.currentQuestionId);
-            formData.append('action', 'wp_dynamic_survey_submit_answer');
+            formData.append('action', 'flowq_submit_answer');
             formData.append('nonce', this.config.nonce);
 
             if (answerId) {
@@ -562,7 +562,7 @@
             const formData = new FormData();
             formData.append('session_id', this.currentSurvey.sessionId);
             formData.append('question_id', this.currentSurvey.currentQuestionId);
-            formData.append('action', 'wp_dynamic_survey_skip_question');
+            formData.append('action', 'flowq_skip_question');
             formData.append('nonce', this.config.nonce);
 
             // Submit via AJAX
@@ -915,7 +915,7 @@
                     url: this.config.ajaxUrl,
                     type: 'POST',
                     data: {
-                        action: 'wp_dynamic_survey_get_completion_data',
+                        action: 'flowq_get_completion_data',
                         session_id: this.currentSurvey.sessionId,
                         nonce: this.config.nonce
                     },
@@ -1031,7 +1031,7 @@
                 url: this.config.ajaxUrl,
                 type: 'POST',
                 data: {
-                    action: 'wp_dynamic_survey_track_completion',
+                    action: 'flowq_track_completion',
                     session_id: data.sessionId,
                     completion_time: data.completionTime,
                     questions_answered: data.questionsAnswered,
@@ -1046,7 +1046,7 @@
             });
 
             // Fire completion event for external integrations
-            $(document).trigger('wp_dynamic_survey_completed', [data]);
+            $(document).trigger('flowq_survey_completed', [data]);
         },
 
         /**
@@ -1072,7 +1072,7 @@
          */
         saveCompletionStateToLocalStorage: function(data) {
             try {
-                localStorage.setItem('wp_dynamic_survey_last_completion', JSON.stringify(data));
+                localStorage.setItem('flowq_last_completion', JSON.stringify(data));
                 // Also save completion state to database
                 this.saveCompletionStateToDatabase(data);
             } catch (error) {
@@ -1085,11 +1085,11 @@
          */
         saveCompletionStateToDatabase: function(data) {
             $.ajax({
-                url: wpDynamicSurvey.ajaxurl,
+                url: flowq.ajaxurl,
                 type: 'POST',
                 data: {
-                    action: 'wp_dynamic_survey_track_completion',
-                    nonce: wpDynamicSurvey.nonce,
+                    action: 'flowq_track_completion',
+                    nonce: flowq.nonce,
                     session_id: data.sessionId
                 },
                 success: function(response) {
@@ -1118,7 +1118,7 @@
                 url: this.config.ajaxUrl,
                 type: 'POST',
                 data: {
-                    action: 'wp_dynamic_survey_download_summary',
+                    action: 'flowq_download_summary',
                     session_id: this.completionData.sessionId,
                     format: 'pdf',
                     nonce: this.config.nonce

@@ -55,9 +55,9 @@ Create at least 3-5 default templates:
 
 ## Database Schema
 
-### New Table: `wp_dynamic_survey_templates`
+### New Table: `flowq_templates`
 ```sql
-CREATE TABLE wp_dynamic_survey_templates (
+CREATE TABLE flowq_templates (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
@@ -71,7 +71,7 @@ CREATE TABLE wp_dynamic_survey_templates (
 
 ### Global Template Setting
 - Template is applied globally to all surveys (not per-survey)
-- Store active template ID in WordPress options table: `wp_dynamic_survey_active_template`
+- Store active template ID in WordPress options table: `flowq_active_template`
 - Default: 1 (Classic template)
 
 ## Technical Requirements
@@ -87,7 +87,7 @@ CREATE TABLE wp_dynamic_survey_templates (
 - Fallback to default Classic template (ID: 1) if active template is deleted
 
 ### Migration Strategy
-- Create migration to add `wp_dynamic_survey_templates` table
+- Create migration to add `flowq_templates` table
 - Seed default templates
 - Set global active template option to default "Classic" template (ID: 1)
 

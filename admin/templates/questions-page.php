@@ -2,7 +2,7 @@
 /**
  * Questions Management Page Template
  *
- * @package WP_Dynamic_Survey
+ * @package FlowQ
  */
 
 // Prevent direct access
@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 $is_editing = !empty($question_data);
-$page_title = $is_editing ? __('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('Manage Questions', WP_DYNAMIC_SURVEY_TEXT_DOMAIN);
+$page_title = $is_editing ? __('Edit Question', FLOWQ_TEXT_DOMAIN) : __('Manage Questions', FLOWQ_TEXT_DOMAIN);
 ?>
 <div class="wrap">
     <div class="page-header-with-back">
@@ -18,11 +18,11 @@ $page_title = $is_editing ? __('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) :
         <?php
         // Determine back button URL and text
         if ($selected_survey_id && !empty($survey)) {
-            $back_url = admin_url('admin.php?page=wp-dynamic-surveys-add&survey_id=' . $selected_survey_id);
-            $back_text = sprintf(__('← Back to Edit "%s"', WP_DYNAMIC_SURVEY_TEXT_DOMAIN), esc_html($survey['title']));
+            $back_url = admin_url('admin.php?page=flowq-add&survey_id=' . $selected_survey_id);
+            $back_text = sprintf(__('← Back to Edit "%s"', FLOWQ_TEXT_DOMAIN), esc_html($survey['title']));
         } else {
-            $back_url = admin_url('admin.php?page=wp-dynamic-surveys');
-            $back_text = __('← Back to Surveys', WP_DYNAMIC_SURVEY_TEXT_DOMAIN);
+            $back_url = admin_url('admin.php?page=flowq');
+            $back_text = __('← Back to Surveys', FLOWQ_TEXT_DOMAIN);
         }
         ?>
         <a href="<?php echo esc_url($back_url); ?>" class="page-title-action back-button">
@@ -32,8 +32,8 @@ $page_title = $is_editing ? __('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) :
 
     <?php if (empty($surveys)): ?>
         <div class="notice notice-warning">
-            <p><?php echo esc_html__('No surveys found. Please create a survey first.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></p>
-            <p><a href="<?php echo esc_url(admin_url('admin.php?page=wp-dynamic-surveys-add')); ?>" class="button button-primary"><?php echo esc_html__('Create Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></a></p>
+            <p><?php echo esc_html__('No surveys found. Please create a survey first.', FLOWQ_TEXT_DOMAIN); ?></p>
+            <p><a href="<?php echo esc_url(admin_url('admin.php?page=flowq-add')); ?>" class="button button-primary"><?php echo esc_html__('Create Survey', FLOWQ_TEXT_DOMAIN); ?></a></p>
         </div>
     <?php else: ?>
 
@@ -43,12 +43,12 @@ $page_title = $is_editing ? __('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) :
                 <div class="filter-section">
                     <label for="survey_id" class="filter-label">
                         <span class="dashicons dashicons-filter"></span>
-                        <?php echo esc_html__('Filter by Survey:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        <?php echo esc_html__('Filter by Survey:', FLOWQ_TEXT_DOMAIN); ?>
                     </label>
                     <form method="get" action="" class="filter-form">
-                        <input type="hidden" name="page" value="wp-dynamic-surveys-questions">
+                        <input type="hidden" name="page" value="flowq-questions">
                         <select name="survey_id" id="survey_id" class="filter-dropdown">
-                            <option value=""><?php echo esc_html__('-- Select a Survey --', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></option>
+                            <option value=""><?php echo esc_html__('-- Select a Survey --', FLOWQ_TEXT_DOMAIN); ?></option>
                             <?php foreach ($surveys as $survey_option): ?>
                                 <option value="<?php echo esc_attr($survey_option['id']); ?>" <?php selected($selected_survey_id, $survey_option['id']); ?>>
                                     <?php echo esc_html($survey_option['title']); ?>
@@ -61,10 +61,10 @@ $page_title = $is_editing ? __('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) :
 
                 <?php if ($selected_survey_id && $survey): ?>
                 <div class="action-section">
-                    <a href="<?php echo esc_url(admin_url('admin.php?page=wp-dynamic-surveys-questions&survey_id=' . $selected_survey_id . '&action=add')); ?>"
+                    <a href="<?php echo esc_url(admin_url('admin.php?page=flowq-questions&survey_id=' . $selected_survey_id . '&action=add')); ?>"
                        class="add-question-button">
                         <span class="dashicons dashicons-plus-alt2"></span>
-                        <?php echo esc_html__('Add New Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        <?php echo esc_html__('Add New Question', FLOWQ_TEXT_DOMAIN); ?>
                     </a>
                 </div>
                 <?php endif; ?>
@@ -75,17 +75,17 @@ $page_title = $is_editing ? __('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) :
             <?php if ($is_editing): ?>
                 <!-- Edit Question Form -->
                 <div class="question-form-section">
-                    <h2><?php echo esc_html__('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h2>
+                    <h2><?php echo esc_html__('Edit Question', FLOWQ_TEXT_DOMAIN); ?></h2>
                     <?php include 'question-form.php'; ?>
                 </div>
             <?php else: ?>
                 <!-- Questions List -->
                 <div class="questions-list-section">
-                    <h2><?php echo esc_html__('Questions', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h2>
+                    <h2><?php echo esc_html__('Questions', FLOWQ_TEXT_DOMAIN); ?></h2>
 
                     <?php if (empty($questions)): ?>
                         <div class="notice notice-info inline">
-                            <p><?php echo esc_html__('No questions added yet.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></p>
+                            <p><?php echo esc_html__('No questions added yet.', FLOWQ_TEXT_DOMAIN); ?></p>
                         </div>
                     <?php else: ?>
                         <div class="questions-cards-container">
@@ -101,7 +101,7 @@ $page_title = $is_editing ? __('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) :
                                             <?php endif; ?>
                                             <?php if ($question['extra_message']): ?>
                                                 <p class="question-extra-message">
-                                                    <span class="extra-message-label"><?php echo esc_html__('Optional Message:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
+                                                    <span class="extra-message-label"><?php echo esc_html__('Optional Message:', FLOWQ_TEXT_DOMAIN); ?></span>
                                                     <?php echo esc_html($question['extra_message']); ?>
                                                 </p>
                                             <?php endif; ?>
@@ -110,7 +110,7 @@ $page_title = $is_editing ? __('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) :
                                                 <?php if (isset($question['is_required']) && !$question['is_required']): ?>
                                                     <span class="question-badge optional-badge">
                                                         <span class="dashicons dashicons-yes"></span>
-                                                        <?php echo esc_html__('Optional', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                                        <?php echo esc_html__('Optional', FLOWQ_TEXT_DOMAIN); ?>
                                                     </span>
 
                                                     <?php
@@ -127,20 +127,20 @@ $page_title = $is_editing ? __('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) :
 
                                                     <div class="skip-destination-badge">
                                                         <span class="dashicons dashicons-arrow-right-alt2"></span>
-                                                        <strong><?php echo esc_html__('Skip to:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></strong>
+                                                        <strong><?php echo esc_html__('Skip to:', FLOWQ_TEXT_DOMAIN); ?></strong>
                                                         <?php if (!empty($skip_question_title)): ?>
                                                             <span class="skip-destination-text"><?php echo esc_html($skip_question_title); ?></span>
                                                         <?php else: ?>
                                                             <span class="skip-destination-text warning">
                                                                 <span class="dashicons dashicons-warning"></span>
-                                                                <?php echo esc_html__('End survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                                                <?php echo esc_html__('End survey', FLOWQ_TEXT_DOMAIN); ?>
                                                             </span>
                                                         <?php endif; ?>
                                                     </div>
                                                 <?php else: ?>
                                                     <span class="question-badge required-badge">
                                                         <span class="dashicons dashicons-admin-network"></span>
-                                                        <?php echo esc_html__('Required', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                                        <?php echo esc_html__('Required', FLOWQ_TEXT_DOMAIN); ?>
                                                     </span>
                                                 <?php endif; ?>
                                             </div>
@@ -149,12 +149,12 @@ $page_title = $is_editing ? __('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) :
                                                 <div class="skip-destination-section">
                                                     <div class="skip-destination-header">
                                                         <span class="dashicons dashicons-admin-generic"></span>
-                                                        <strong><?php echo esc_html__('Change Skip Destination:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></strong>
+                                                        <strong><?php echo esc_html__('Change Skip Destination:', FLOWQ_TEXT_DOMAIN); ?></strong>
                                                     </div>
                                                     <div class="skip-destination-content">
                                                         <div class="skip-destination-selector" data-question-id="<?php echo esc_attr($question['id']); ?>">
                                                             <select class="skip-destination-dropdown" data-original-value="<?php echo esc_attr($question['skip_next_question_id'] ?? ''); ?>">
-                                                                <option value=""><?php echo esc_html__('— End survey —', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></option>
+                                                                <option value=""><?php echo esc_html__('— End survey —', FLOWQ_TEXT_DOMAIN); ?></option>
                                                                 <?php foreach ($questions as $q): ?>
                                                                     <?php if ($q['id'] != $question['id']): ?>
                                                                         <option value="<?php echo esc_attr($q['id']); ?>" <?php selected($question['skip_next_question_id'] ?? '', $q['id']); ?>>
@@ -164,10 +164,10 @@ $page_title = $is_editing ? __('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) :
                                                                 <?php endforeach; ?>
                                                             </select>
                                                             <button type="button" class="button button-small save-skip-destination" style="display: none;">
-                                                                <?php echo esc_html__('Save', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                                                <?php echo esc_html__('Save', FLOWQ_TEXT_DOMAIN); ?>
                                                             </button>
                                                             <button type="button" class="button button-small cancel-skip-destination" style="display: none;">
-                                                                <?php echo esc_html__('Cancel', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                                                <?php echo esc_html__('Cancel', FLOWQ_TEXT_DOMAIN); ?>
                                                             </button>
                                                         </div>
                                                     </div>
@@ -175,23 +175,23 @@ $page_title = $is_editing ? __('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) :
                                             <?php endif; ?>
                                         </div>
                                         <div class="question-actions">
-                                            <a href="<?php echo esc_url(admin_url('admin.php?page=wp-dynamic-surveys-questions&survey_id=' . $selected_survey_id . '&question_id=' . $question['id'])); ?>"
+                                            <a href="<?php echo esc_url(admin_url('admin.php?page=flowq-questions&survey_id=' . $selected_survey_id . '&question_id=' . $question['id'])); ?>"
                                                class="action-button edit-button"
-                                               title="<?php echo esc_attr__('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
+                                               title="<?php echo esc_attr__('Edit Question', FLOWQ_TEXT_DOMAIN); ?>">
                                                 <span class="dashicons dashicons-edit"></span>
                                             </a>
                                             <?php if ($question['response_count'] == 0): ?>
                                                 <button type="button"
                                                         class="action-button delete-button"
-                                                        title="<?php echo esc_attr__('Delete Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>"
+                                                        title="<?php echo esc_attr__('Delete Question', FLOWQ_TEXT_DOMAIN); ?>"
                                                         data-question-id="<?php echo esc_attr($question['id']); ?>"
                                                         data-question-title="<?php echo esc_attr($question['title']); ?>"
-                                                        data-delete-url="<?php echo esc_url(wp_nonce_url(admin_url('admin-post.php?action=wp_dynamic_survey_delete_question&survey_id=' . $selected_survey_id . '&question_id=' . $question['id']), 'wp_dynamic_survey_question_action')); ?>">
+                                                        data-delete-url="<?php echo esc_url(wp_nonce_url(admin_url('admin-post.php?action=flowq_delete_question&survey_id=' . $selected_survey_id . '&question_id=' . $question['id']), 'flowq_question_action')); ?>">
                                                     <span class="dashicons dashicons-trash"></span>
                                                 </button>
                                             <?php else: ?>
                                                 <span class="action-button delete-button disabled"
-                                                      title="<?php echo esc_attr__('Cannot delete question with responses', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
+                                                      title="<?php echo esc_attr__('Cannot delete question with responses', FLOWQ_TEXT_DOMAIN); ?>">
                                                     <span class="dashicons dashicons-trash"></span>
                                                 </span>
                                             <?php endif; ?>
@@ -202,7 +202,7 @@ $page_title = $is_editing ? __('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) :
                                         <div class="answers-section">
                                             <h4 class="answers-title">
                                                 <span class="dashicons dashicons-list-view"></span>
-                                                <?php echo esc_html__('Answer Options', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                                <?php echo esc_html__('Answer Options', FLOWQ_TEXT_DOMAIN); ?>
                                             </h4>
                                             <?php if (!empty($question['answers'])): ?>
                                                 <ol class="answers-list">
@@ -238,7 +238,7 @@ $page_title = $is_editing ? __('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) :
                                                                                 <?php echo esc_html($next_question_title); ?>
                                                                             <?php else: ?>
                                                                                 <span class="dashicons dashicons-flag"></span>
-                                                                                <?php echo esc_html__('End Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                                                                <?php echo esc_html__('End Survey', FLOWQ_TEXT_DOMAIN); ?>
                                                                             <?php endif; ?>
                                                                             <span class="edit-indicator dashicons dashicons-edit"></span>
                                                                         </span>
@@ -246,7 +246,7 @@ $page_title = $is_editing ? __('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) :
                                                                         <select class="next-question-dropdown hidden"
                                                                                 data-answer-id="<?php echo esc_attr($answer['id']); ?>"
                                                                                 data-original-value="<?php echo esc_attr($answer['next_question_id'] ?? ''); ?>">
-                                                                            <option value=""><?php echo esc_html__('— End survey —', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></option>
+                                                                            <option value=""><?php echo esc_html__('— End survey —', FLOWQ_TEXT_DOMAIN); ?></option>
                                                                             <?php if (count($questions) > 1): ?>
                                                                                 <?php foreach ($questions as $q): ?>
                                                                                     <?php if ($q['id'] != $question['id']): ?>
@@ -256,7 +256,7 @@ $page_title = $is_editing ? __('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) :
                                                                                     <?php endif; ?>
                                                                                 <?php endforeach; ?>
                                                                             <?php else: ?>
-                                                                                <option disabled><?php echo esc_html__('No other questions available', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></option>
+                                                                                <option disabled><?php echo esc_html__('No other questions available', FLOWQ_TEXT_DOMAIN); ?></option>
                                                                             <?php endif; ?>
                                                                         </select>
                                                                     </div>
@@ -264,7 +264,7 @@ $page_title = $is_editing ? __('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) :
                                                                     <?php if ($answer['redirect_url']): ?>
                                                                         <div class="redirect-url-badge">
                                                                             <span class="dashicons dashicons-external"></span>
-                                                                            <span class="redirect-text"><?php echo esc_html__('Redirects to:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
+                                                                            <span class="redirect-text"><?php echo esc_html__('Redirects to:', FLOWQ_TEXT_DOMAIN); ?></span>
                                                                             <span class="redirect-value"><?php echo esc_html($answer['redirect_url']); ?></span>
                                                                         </div>
                                                                     <?php endif; ?>
@@ -274,7 +274,7 @@ $page_title = $is_editing ? __('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) :
                                                     <?php endforeach; ?>
                                                 </ol>
                                             <?php else: ?>
-                                                <p class="no-answers"><?php echo esc_html__('No answers configured', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></p>
+                                                <p class="no-answers"><?php echo esc_html__('No answers configured', FLOWQ_TEXT_DOMAIN); ?></p>
                                             <?php endif; ?>
                                         </div>
                                     </div>
@@ -289,7 +289,7 @@ $page_title = $is_editing ? __('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) :
                 <!-- Add Question Form -->
                 <hr>
                 <div class="question-form-section">
-                    <h2><?php echo esc_html__('Add New Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h2>
+                    <h2><?php echo esc_html__('Add New Question', FLOWQ_TEXT_DOMAIN); ?></h2>
                     <?php $question_data = null; // Reset for new question ?>
                     <?php include 'question-form.php'; ?>
                 </div>
@@ -307,31 +307,31 @@ $page_title = $is_editing ? __('Edit Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) :
         <div class="modal-header">
             <h3 class="modal-title">
                 <span class="dashicons dashicons-warning"></span>
-                <?php echo esc_html__('Delete Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                <?php echo esc_html__('Delete Question', FLOWQ_TEXT_DOMAIN); ?>
             </h3>
-            <button type="button" class="modal-close" aria-label="<?php echo esc_attr__('Close', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
+            <button type="button" class="modal-close" aria-label="<?php echo esc_attr__('Close', FLOWQ_TEXT_DOMAIN); ?>">
                 <span class="dashicons dashicons-no-alt"></span>
             </button>
         </div>
 
         <div class="modal-body">
             <div class="warning-message">
-                <p><?php echo esc_html__('Are you sure you want to delete this question?', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></p>
+                <p><?php echo esc_html__('Are you sure you want to delete this question?', FLOWQ_TEXT_DOMAIN); ?></p>
                 <p class="question-title-display"></p>
                 <p class="warning-note">
                     <span class="dashicons dashicons-info"></span>
-                    <?php echo esc_html__('This action cannot be undone.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                    <?php echo esc_html__('This action cannot be undone.', FLOWQ_TEXT_DOMAIN); ?>
                 </p>
             </div>
         </div>
 
         <div class="modal-footer">
             <button type="button" class="button button-secondary modal-cancel">
-                <?php echo esc_html__('Cancel', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                <?php echo esc_html__('Cancel', FLOWQ_TEXT_DOMAIN); ?>
             </button>
             <button type="button" class="button button-danger modal-confirm">
                 <span class="dashicons dashicons-trash"></span>
-                <?php echo esc_html__('Delete Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                <?php echo esc_html__('Delete Question', FLOWQ_TEXT_DOMAIN); ?>
             </button>
         </div>
     </div>
@@ -441,7 +441,7 @@ jQuery(document).ready(function($) {
         if (deleteUrl) {
             // Add loading state
             $(this).prop('disabled', true).addClass('loading');
-            $(this).html('<span class="dashicons dashicons-update spin"></span> <?php echo esc_html__('Deleting...', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>');
+            $(this).html('<span class="dashicons dashicons-update spin"></span> <?php echo esc_html__('Deleting...', FLOWQ_TEXT_DOMAIN); ?>');
 
             // Redirect to delete URL
             window.location.href = deleteUrl;
@@ -507,8 +507,8 @@ jQuery(document).ready(function($) {
 
         // Prepare AJAX data
         const ajaxData = {
-            action: 'wp_dynamic_survey_update_answer_next_question',
-            nonce: '<?php echo wp_create_nonce('wp_dynamic_survey_admin_nonce'); ?>',
+            action: 'flowq_update_answer_next_question',
+            nonce: '<?php echo wp_create_nonce('flowq_admin_nonce'); ?>',
             answer_id: answerId,
             next_question_id: nextQuestionId
         };
@@ -528,7 +528,7 @@ jQuery(document).ready(function($) {
                     if (nextQuestionId) {
                         $badge.html('<span class="dashicons dashicons-arrow-right-alt2"></span>' + selectedText + '<span class="edit-indicator dashicons dashicons-edit"></span>');
                     } else {
-                        $badge.html('<span class="dashicons dashicons-flag"></span><?php echo esc_html__('End Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?><span class="edit-indicator dashicons dashicons-edit"></span>');
+                        $badge.html('<span class="dashicons dashicons-flag"></span><?php echo esc_html__('End Survey', FLOWQ_TEXT_DOMAIN); ?><span class="edit-indicator dashicons dashicons-edit"></span>');
                     }
 
                     // Hide dropdown and show updated badge
@@ -608,14 +608,14 @@ jQuery(document).ready(function($) {
         var questionId = $selector.data('question-id');
         var skipQuestionId = $dropdown.val();
 
-        $button.prop('disabled', true).text('<?php echo esc_js(__('Saving...', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>');
+        $button.prop('disabled', true).text('<?php echo esc_js(__('Saving...', FLOWQ_TEXT_DOMAIN)); ?>');
 
         $.ajax({
             url: ajaxurl,
             type: 'POST',
             data: {
-                action: 'wp_dynamic_survey_update_question_skip_destination',
-                nonce: '<?php echo wp_create_nonce('wp_dynamic_survey_admin_nonce'); ?>',
+                action: 'flowq_update_question_skip_destination',
+                nonce: '<?php echo wp_create_nonce('flowq_admin_nonce'); ?>',
                 question_id: questionId,
                 skip_next_question_id: skipQuestionId
             },
@@ -634,18 +634,18 @@ jQuery(document).ready(function($) {
                     }
 
                     // Show success message briefly
-                    $button.text('<?php echo esc_js(__('Saved!', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>').prop('disabled', false);
+                    $button.text('<?php echo esc_js(__('Saved!', FLOWQ_TEXT_DOMAIN)); ?>').prop('disabled', false);
                     setTimeout(function() {
-                        $button.text('<?php echo esc_js(__('Save', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>');
+                        $button.text('<?php echo esc_js(__('Save', FLOWQ_TEXT_DOMAIN)); ?>');
                     }, 2000);
                 } else {
-                    alert('<?php echo esc_js(__('Error saving skip destination.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>');
-                    $button.text('<?php echo esc_js(__('Save', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>').prop('disabled', false);
+                    alert('<?php echo esc_js(__('Error saving skip destination.', FLOWQ_TEXT_DOMAIN)); ?>');
+                    $button.text('<?php echo esc_js(__('Save', FLOWQ_TEXT_DOMAIN)); ?>').prop('disabled', false);
                 }
             },
             error: function() {
-                alert('<?php echo esc_js(__('Error saving skip destination.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>');
-                $button.text('<?php echo esc_js(__('Save', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>').prop('disabled', false);
+                alert('<?php echo esc_js(__('Error saving skip destination.', FLOWQ_TEXT_DOMAIN)); ?>');
+                $button.text('<?php echo esc_js(__('Save', FLOWQ_TEXT_DOMAIN)); ?>').prop('disabled', false);
             }
         });
     });

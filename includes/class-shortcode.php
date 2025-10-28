@@ -2,7 +2,7 @@
 /**
  * Enhanced Shortcode Handler for WP Dynamic Survey Plugin
  *
- * @package WP_Dynamic_Survey
+ * @package FlowQ
  */
 
 // Prevent direct access
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 /**
  * Shortcode Handler class
  */
-class WP_Dynamic_Survey_Shortcode {
+class FlowQ_Shortcode {
 
     /**
      * Available themes
@@ -40,7 +40,7 @@ class WP_Dynamic_Survey_Shortcode {
      * Register all shortcodes
      */
     public function register_shortcodes() {
-        add_shortcode('wp_dynamic_survey', array($this, 'render_survey'));
+        add_shortcode('dynamic_survey', array($this, 'render_survey'));
         add_shortcode('survey_list', array($this, 'render_survey_list'));
         add_shortcode('survey_stats', array($this, 'render_survey_stats'));
         add_shortcode('survey_button', array($this, 'render_survey_button'));
@@ -68,7 +68,7 @@ class WP_Dynamic_Survey_Shortcode {
             'custom_css' => '',
             'lang' => '',
             'track_analytics' => 'true'
-        ), $atts, 'wp_dynamic_survey');
+        ), $atts, 'dynamic_survey');
 
         // Validate and sanitize attributes
         $survey_id = intval($atts['id']);
@@ -89,21 +89,21 @@ class WP_Dynamic_Survey_Shortcode {
         $track_analytics = filter_var($atts['track_analytics'], FILTER_VALIDATE_BOOLEAN);
 
         if (!$survey_id) {
-            return $this->render_error(__('Survey ID is required.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return $this->render_error(__('Survey ID is required.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Validate survey exists and is published
-        $survey_manager = new WP_Dynamic_Survey_Manager();
+        $survey_manager = new FlowQ_Survey_Manager();
         $survey = $survey_manager->get_survey($survey_id, true);
 
         if (!$survey) {
-            return $this->render_error(__('Survey not found.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return $this->render_error(__('Survey not found.', FLOWQ_TEXT_DOMAIN));
         }
 
         if ($survey['status'] !== 'published') {
             // Show message for admins, nothing for regular users
-            if (current_user_can('manage_wp_dynamic_surveys')) {
-                return $this->render_error(__('Survey is not published. Only administrators can see this message.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            if (current_user_can('manage_flowq_surveys')) {
+                return $this->render_error(__('Survey is not published. Only administrators can see this message.', FLOWQ_TEXT_DOMAIN));
             }
             return '';
         }
@@ -178,7 +178,7 @@ class WP_Dynamic_Survey_Shortcode {
             <div class="survey-content">
                 <?php
                 // Include the actual survey interface
-                $frontend = new WP_Dynamic_Survey_Frontend();
+                $frontend = new FlowQ_Frontend();
                 echo $frontend->render_survey($survey_id, $theme);
                 ?>
             </div>
@@ -186,7 +186,7 @@ class WP_Dynamic_Survey_Shortcode {
             <?php if ($enable_print): ?>
             <div class="survey-print-options">
                 <button type="button" class="survey-print-btn" onclick="window.print()">
-                    <?php echo esc_html__('Print Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                    <?php echo esc_html__('Print Survey', FLOWQ_TEXT_DOMAIN); ?>
                 </button>
             </div>
             <?php endif; ?>
@@ -238,7 +238,7 @@ class WP_Dynamic_Survey_Shortcode {
         $order_dir = sanitize_text_field($atts['order_dir']);
         $template = sanitize_text_field($atts['template']);
 
-        $survey_manager = new WP_Dynamic_Survey_Manager();
+        $survey_manager = new FlowQ_Survey_Manager();
         $surveys = $survey_manager->get_surveys(array(
             'status' => $status,
             'limit' => $limit,
@@ -248,7 +248,7 @@ class WP_Dynamic_Survey_Shortcode {
 
         if (empty($surveys)) {
             return '<div class="survey-list-empty">' .
-                   esc_html__('No surveys found.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) .
+                   esc_html__('No surveys found.', FLOWQ_TEXT_DOMAIN) .
                    '</div>';
         }
 
@@ -306,10 +306,10 @@ class WP_Dynamic_Survey_Shortcode {
         $format = sanitize_text_field($atts['format']);
 
         if (!$survey_id) {
-            return $this->render_error(__('Survey ID is required for statistics.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return $this->render_error(__('Survey ID is required for statistics.', FLOWQ_TEXT_DOMAIN));
         }
 
-        $survey_manager = new WP_Dynamic_Survey_Manager();
+        $survey_manager = new FlowQ_Survey_Manager();
         $stats = $survey_manager->get_survey_statistics($survey_id);
 
         if (is_wp_error($stats)) {
@@ -320,21 +320,21 @@ class WP_Dynamic_Survey_Shortcode {
 
         if ($show === 'all' || $show === 'participants') {
             $display_stats['participants'] = array(
-                'label' => __('Total Participants', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+                'label' => __('Total Participants', FLOWQ_TEXT_DOMAIN),
                 'value' => number_format($stats['total_participants'])
             );
         }
 
         if ($show === 'all' || $show === 'completion') {
             $display_stats['completion'] = array(
-                'label' => __('Completion Rate', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+                'label' => __('Completion Rate', FLOWQ_TEXT_DOMAIN),
                 'value' => number_format($stats['completion_rate'], 1) . '%'
             );
         }
 
         if ($show === 'all' || $show === 'average_time') {
             $display_stats['average_time'] = array(
-                'label' => __('Average Completion Time', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+                'label' => __('Average Completion Time', FLOWQ_TEXT_DOMAIN),
                 'value' => $this->format_duration($stats['average_completion_time'])
             );
         }
@@ -399,7 +399,7 @@ class WP_Dynamic_Survey_Shortcode {
         $new_window = filter_var($atts['new_window'], FILTER_VALIDATE_BOOLEAN);
 
         if (!$survey_id) {
-            return $this->render_error(__('Survey ID is required for button.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return $this->render_error(__('Survey ID is required for button.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Build URL
@@ -461,7 +461,7 @@ class WP_Dynamic_Survey_Shortcode {
         $sandbox = sanitize_text_field($atts['sandbox']);
 
         if (!$survey_id) {
-            return $this->render_error(__('Survey ID is required for embed.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return $this->render_error(__('Survey ID is required for embed.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Build iframe URL
@@ -476,7 +476,7 @@ class WP_Dynamic_Survey_Shortcode {
             'height' => esc_attr($height),
             'frameborder' => esc_attr($frameborder),
             'scrolling' => esc_attr($scrolling),
-            'title' => esc_attr__('Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)
+            'title' => esc_attr__('Survey', FLOWQ_TEXT_DOMAIN)
         );
 
         if (!empty($sandbox)) {
@@ -504,18 +504,18 @@ class WP_Dynamic_Survey_Shortcode {
         if ($theme !== 'default') {
             wp_enqueue_style(
                 'wp-dynamic-survey-theme-' . $theme,
-                WP_DYNAMIC_SURVEY_URL . 'assets/css/themes/' . $theme . '.css',
+                FLOWQ_URL . 'assets/css/themes/' . $theme . '.css',
                 array('wp-dynamic-survey-frontend'),
-                WP_DYNAMIC_SURVEY_VERSION
+                FLOWQ_VERSION
             );
         }
 
         // Enqueue shortcode-specific styles
         wp_enqueue_style(
             'wp-dynamic-survey-shortcode',
-            WP_DYNAMIC_SURVEY_URL . 'assets/css/shortcode.css',
+            FLOWQ_URL . 'assets/css/shortcode.css',
             array('wp-dynamic-survey-frontend'),
-            WP_DYNAMIC_SURVEY_VERSION
+            FLOWQ_VERSION
         );
     }
 
@@ -531,7 +531,7 @@ class WP_Dynamic_Survey_Shortcode {
 
         // Check for any survey shortcodes
         $shortcodes = array(
-            'wp_dynamic_survey',
+            'dynamic_survey',
             'survey_list',
             'survey_stats',
             'survey_button',
@@ -551,7 +551,7 @@ class WP_Dynamic_Survey_Shortcode {
      */
     private function render_error($message) {
         return '<div class="wp-dynamic-survey-error" role="alert">' .
-               '<strong>' . esc_html__('Survey Error:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) . '</strong> ' .
+               '<strong>' . esc_html__('Survey Error:', FLOWQ_TEXT_DOMAIN) . '</strong> ' .
                esc_html($message) .
                '</div>';
     }
@@ -561,14 +561,14 @@ class WP_Dynamic_Survey_Shortcode {
      */
     private function format_duration($seconds) {
         if ($seconds < 60) {
-            return sprintf(__('%d seconds', WP_DYNAMIC_SURVEY_TEXT_DOMAIN), $seconds);
+            return sprintf(__('%d seconds', FLOWQ_TEXT_DOMAIN), $seconds);
         } elseif ($seconds < 3600) {
             $minutes = floor($seconds / 60);
-            return sprintf(__('%d minutes', WP_DYNAMIC_SURVEY_TEXT_DOMAIN), $minutes);
+            return sprintf(__('%d minutes', FLOWQ_TEXT_DOMAIN), $minutes);
         } else {
             $hours = floor($seconds / 3600);
             $minutes = floor(($seconds % 3600) / 60);
-            return sprintf(__('%d hours %d minutes', WP_DYNAMIC_SURVEY_TEXT_DOMAIN), $hours, $minutes);
+            return sprintf(__('%d hours %d minutes', FLOWQ_TEXT_DOMAIN), $hours, $minutes);
         }
     }
 
@@ -584,57 +584,57 @@ class WP_Dynamic_Survey_Shortcode {
      */
     public static function get_shortcode_docs() {
         return array(
-            'wp_dynamic_survey' => array(
-                'description' => __('Display a survey form', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+            'dynamic_survey' => array(
+                'description' => __('Display a survey form', FLOWQ_TEXT_DOMAIN),
                 'attributes' => array(
-                    'id' => __('Survey ID (required)', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                    'theme' => __('Theme name (default, minimal, modern, card, full-width)', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                    'width' => __('Container width (100%, 500px, etc.)', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                    'height' => __('Container height (auto, 600px, etc.)', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                    'show_title' => __('Show survey title (true/false)', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                    'show_description' => __('Show survey description (true/false)', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                    'show_progress' => __('Show progress bar (true/false)', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                    'auto_start' => __('Auto-scroll to survey (true/false)', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                    'css_class' => __('Additional CSS class', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)
+                    'id' => __('Survey ID (required)', FLOWQ_TEXT_DOMAIN),
+                    'theme' => __('Theme name (default, minimal, modern, card, full-width)', FLOWQ_TEXT_DOMAIN),
+                    'width' => __('Container width (100%, 500px, etc.)', FLOWQ_TEXT_DOMAIN),
+                    'height' => __('Container height (auto, 600px, etc.)', FLOWQ_TEXT_DOMAIN),
+                    'show_title' => __('Show survey title (true/false)', FLOWQ_TEXT_DOMAIN),
+                    'show_description' => __('Show survey description (true/false)', FLOWQ_TEXT_DOMAIN),
+                    'show_progress' => __('Show progress bar (true/false)', FLOWQ_TEXT_DOMAIN),
+                    'auto_start' => __('Auto-scroll to survey (true/false)', FLOWQ_TEXT_DOMAIN),
+                    'css_class' => __('Additional CSS class', FLOWQ_TEXT_DOMAIN)
                 ),
-                'example' => '[wp_dynamic_survey id="1" theme="modern" show_progress="true"]'
+                'example' => '[dynamic_survey id="1" theme="modern" show_progress="true"]'
             ),
             'survey_list' => array(
-                'description' => __('Display a list of surveys', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+                'description' => __('Display a list of surveys', FLOWQ_TEXT_DOMAIN),
                 'attributes' => array(
-                    'status' => __('Survey status filter (published, draft)', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                    'limit' => __('Number of surveys to show', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                    'show_description' => __('Show descriptions (true/false)', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                    'show_stats' => __('Show statistics (true/false)', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)
+                    'status' => __('Survey status filter (published, draft)', FLOWQ_TEXT_DOMAIN),
+                    'limit' => __('Number of surveys to show', FLOWQ_TEXT_DOMAIN),
+                    'show_description' => __('Show descriptions (true/false)', FLOWQ_TEXT_DOMAIN),
+                    'show_stats' => __('Show statistics (true/false)', FLOWQ_TEXT_DOMAIN)
                 ),
                 'example' => '[survey_list limit="5" show_stats="true"]'
             ),
             'survey_stats' => array(
-                'description' => __('Display survey statistics', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+                'description' => __('Display survey statistics', FLOWQ_TEXT_DOMAIN),
                 'attributes' => array(
-                    'id' => __('Survey ID (required)', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                    'show' => __('What to show (all, participants, completion, average_time)', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                    'format' => __('Display format (inline, table, cards)', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)
+                    'id' => __('Survey ID (required)', FLOWQ_TEXT_DOMAIN),
+                    'show' => __('What to show (all, participants, completion, average_time)', FLOWQ_TEXT_DOMAIN),
+                    'format' => __('Display format (inline, table, cards)', FLOWQ_TEXT_DOMAIN)
                 ),
                 'example' => '[survey_stats id="1" format="cards"]'
             ),
             'survey_button' => array(
-                'description' => __('Display a survey button/link', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+                'description' => __('Display a survey button/link', FLOWQ_TEXT_DOMAIN),
                 'attributes' => array(
-                    'id' => __('Survey ID (required)', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                    'text' => __('Button text', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                    'style' => __('Style (button, link)', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                    'size' => __('Size (small, medium, large)', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                    'color' => __('Color (primary, secondary, success, warning, danger)', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)
+                    'id' => __('Survey ID (required)', FLOWQ_TEXT_DOMAIN),
+                    'text' => __('Button text', FLOWQ_TEXT_DOMAIN),
+                    'style' => __('Style (button, link)', FLOWQ_TEXT_DOMAIN),
+                    'size' => __('Size (small, medium, large)', FLOWQ_TEXT_DOMAIN),
+                    'color' => __('Color (primary, secondary, success, warning, danger)', FLOWQ_TEXT_DOMAIN)
                 ),
                 'example' => '[survey_button id="1" text="Start Survey" style="button" size="large"]'
             ),
             'survey_embed' => array(
-                'description' => __('Embed survey in iframe', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+                'description' => __('Embed survey in iframe', FLOWQ_TEXT_DOMAIN),
                 'attributes' => array(
-                    'id' => __('Survey ID (required)', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                    'width' => __('Iframe width', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
-                    'height' => __('Iframe height', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)
+                    'id' => __('Survey ID (required)', FLOWQ_TEXT_DOMAIN),
+                    'width' => __('Iframe width', FLOWQ_TEXT_DOMAIN),
+                    'height' => __('Iframe height', FLOWQ_TEXT_DOMAIN)
                 ),
                 'example' => '[survey_embed id="1" width="100%" height="600px"]'
             )

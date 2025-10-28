@@ -2,7 +2,7 @@
 /**
  * Participants Dashboard Template
  *
- * @package WP_Dynamic_Survey
+ * @package FlowQ
  */
 
 // Prevent direct access
@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
 }
 ?>
 <div class="wrap">
-    <h1 class="heading-primary"><?php echo esc_html__('Survey Participants', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h1>
+    <h1 class="heading-primary"><?php echo esc_html__('Survey Participants', FLOWQ_TEXT_DOMAIN); ?></h1>
 
     <div class="participants-wrapper">
         <!-- Survey Selection -->
@@ -24,9 +24,9 @@ if (!defined('ABSPATH')) {
                         <svg class="filter-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
                         </svg>
-                        <label for="survey_id"><?php echo esc_html__('Filter by Survey:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></label>
+                        <label for="survey_id"><?php echo esc_html__('Filter by Survey:', FLOWQ_TEXT_DOMAIN); ?></label>
                         <select name="survey_id" id="survey_id" onchange="this.form.submit()">
-                            <option value=""><?php echo esc_html__('-- Choose a Survey --', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></option>
+                            <option value=""><?php echo esc_html__('-- Choose a Survey --', FLOWQ_TEXT_DOMAIN); ?></option>
                             <?php foreach ($surveys as $survey): ?>
                                 <option value="<?php echo esc_attr($survey['id']); ?>"
                                         <?php selected($selected_survey_id, $survey['id']); ?>>
@@ -43,17 +43,17 @@ if (!defined('ABSPATH')) {
                         <a href="<?php echo esc_url(add_query_arg(array('page' => $_GET['page'], 'survey_id' => $selected_survey_id, 'status' => 'all'), admin_url('admin.php'))); ?>"
                            class="stat-item <?php echo ($status_filter === 'all') ? 'active' : ''; ?>">
                             <strong><?php echo esc_html($stats['total']); ?></strong>
-                            <?php echo esc_html__('Total Participants', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                            <?php echo esc_html__('Total Participants', FLOWQ_TEXT_DOMAIN); ?>
                         </a>
                         <a href="<?php echo esc_url(add_query_arg(array('page' => $_GET['page'], 'survey_id' => $selected_survey_id, 'status' => 'completed'), admin_url('admin.php'))); ?>"
                            class="stat-item <?php echo ($status_filter === 'completed') ? 'active' : ''; ?>">
                             <strong><?php echo esc_html($stats['completed']); ?></strong>
-                            <?php echo esc_html__('Completed', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                            <?php echo esc_html__('Completed', FLOWQ_TEXT_DOMAIN); ?>
                         </a>
                         <a href="<?php echo esc_url(add_query_arg(array('page' => $_GET['page'], 'survey_id' => $selected_survey_id, 'status' => 'in_progress'), admin_url('admin.php'))); ?>"
                            class="stat-item <?php echo ($status_filter === 'in_progress') ? 'active' : ''; ?>">
                             <strong><?php echo esc_html($stats['in_progress']); ?></strong>
-                            <?php echo esc_html__('Incomplete', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                            <?php echo esc_html__('Incomplete', FLOWQ_TEXT_DOMAIN); ?>
                         </a>
                     </div>
                 <?php endif; ?>
@@ -64,11 +64,11 @@ if (!defined('ABSPATH')) {
             <!-- Participants List -->
             <div class="participants-list">
                 <div class="participants-list-header">
-                    <h2 class="heading-secondary"><?php echo esc_html__('Participant Responses', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h2>
+                    <h2 class="heading-secondary"><?php echo esc_html__('Participant Responses', FLOWQ_TEXT_DOMAIN); ?></h2>
                     <?php if ($status_filter !== 'all'): ?>
                         <span class="filter-indicator">
                             <?php
-                            $filter_text = $status_filter === 'completed' ? __('Completed Only', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('Incomplete Only', WP_DYNAMIC_SURVEY_TEXT_DOMAIN);
+                            $filter_text = $status_filter === 'completed' ? __('Completed Only', FLOWQ_TEXT_DOMAIN) : __('Incomplete Only', FLOWQ_TEXT_DOMAIN);
                             echo esc_html($filter_text);
                             ?>
                         </span>
@@ -94,7 +94,7 @@ if (!defined('ABSPATH')) {
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="opacity: 0.6;">
                                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                                         </svg>
-                                        <?php echo esc_html__('Started:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                        <?php echo esc_html__('Started:', FLOWQ_TEXT_DOMAIN); ?>
                                         <span class="local-time" data-utc="<?php echo esc_attr($participant['started_at']); ?>">
                                             <?php echo esc_html(date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($participant['started_at']))); ?>
                                         </span>
@@ -104,7 +104,7 @@ if (!defined('ABSPATH')) {
                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="opacity: 0.6;">
                                                 <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
                                             </svg>
-                                            <?php echo esc_html__('Completed:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                            <?php echo esc_html__('Completed:', FLOWQ_TEXT_DOMAIN); ?>
                                             <span class="local-time" data-utc="<?php echo esc_attr($participant['completed_at']); ?>">
                                                 <?php echo esc_html(date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($participant['completed_at']))); ?>
                                             </span>
@@ -118,7 +118,7 @@ if (!defined('ABSPATH')) {
                                             <?php echo esc_html(ucfirst(str_replace('_', ' ', $participant_data['completion_status']))); ?>
                                         </span>
                                         <span class="response-count">
-                                            <?php echo esc_html($participant_data['response_count']); ?> <?php echo esc_html__('responses', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                            <?php echo esc_html($participant_data['response_count']); ?> <?php echo esc_html__('responses', FLOWQ_TEXT_DOMAIN); ?>
                                         </span>
                                     </div>
                                     <span class="accordion-arrow">
@@ -132,22 +132,22 @@ if (!defined('ABSPATH')) {
                         <div class="participant-content" id="participant-content-<?php echo $index; ?>" style="display: none;">
                             <div class="participant-details">
                                 <div class="contact-info">
-                                    <h4><?php echo esc_html__('Contact Information', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h4>
-                                    <p><strong><?php echo esc_html__('Phone:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></strong> <?php echo esc_html($participant['participant_phone']); ?></p>
+                                    <h4><?php echo esc_html__('Contact Information', FLOWQ_TEXT_DOMAIN); ?></h4>
+                                    <p><strong><?php echo esc_html__('Phone:', FLOWQ_TEXT_DOMAIN); ?></strong> <?php echo esc_html($participant['participant_phone']); ?></p>
                                     <?php if ($participant['participant_address']): ?>
-                                        <p><strong><?php echo esc_html__('Address:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></strong> <?php echo esc_html($participant['participant_address']); ?></p>
+                                        <p><strong><?php echo esc_html__('Address:', FLOWQ_TEXT_DOMAIN); ?></strong> <?php echo esc_html($participant['participant_address']); ?></p>
                                     <?php endif; ?>
                                     <?php if (!empty($participant['participant_zip_code'])): ?>
-                                        <p><strong><?php echo esc_html__('Zip Code:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></strong> <?php echo esc_html($participant['participant_zip_code']); ?></p>
+                                        <p><strong><?php echo esc_html__('Zip Code:', FLOWQ_TEXT_DOMAIN); ?></strong> <?php echo esc_html($participant['participant_zip_code']); ?></p>
                                     <?php endif; ?>
                                 </div>
 
                                 <div class="responses-section">
                                     <div class="responses-header">
-                                        <h4><?php echo esc_html__('Survey Responses', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h4>
+                                        <h4><?php echo esc_html__('Survey Responses', FLOWQ_TEXT_DOMAIN); ?></h4>
                                         <?php if (!empty($responses)): ?>
                                             <div class="responses-meta">
-                                                <span class="response-count-badge"><?php echo count($responses); ?> <?php echo esc_html__('responses', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
+                                                <span class="response-count-badge"><?php echo count($responses); ?> <?php echo esc_html__('responses', FLOWQ_TEXT_DOMAIN); ?></span>
                                             </div>
                                         <?php endif; ?>
                                     </div>
@@ -177,11 +177,11 @@ if (!defined('ABSPATH')) {
                                                                     <span class="response-type-label">
                                                                         <?php
                                                                         if (isset($response['custom_answer']) && !empty($response['custom_answer'])) {
-                                                                            echo esc_html__('Text Response', WP_DYNAMIC_SURVEY_TEXT_DOMAIN);
+                                                                            echo esc_html__('Text Response', FLOWQ_TEXT_DOMAIN);
                                                                         } elseif (isset($response['answer'])) {
-                                                                            echo esc_html__('Multiple Choice', WP_DYNAMIC_SURVEY_TEXT_DOMAIN);
+                                                                            echo esc_html__('Multiple Choice', FLOWQ_TEXT_DOMAIN);
                                                                         } else {
-                                                                            echo esc_html__('Question', WP_DYNAMIC_SURVEY_TEXT_DOMAIN);
+                                                                            echo esc_html__('Question', FLOWQ_TEXT_DOMAIN);
                                                                         }
                                                                         ?>
                                                                     </span>
@@ -198,14 +198,14 @@ if (!defined('ABSPATH')) {
                                                     <div class="response-card-body">
                                                         <?php if (isset($response['answer']) && !empty($response['answer'])): ?>
                                                             <div class="selected-answer">
-                                                                <span class="answer-label"><?php echo esc_html__('Selected:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
+                                                                <span class="answer-label"><?php echo esc_html__('Selected:', FLOWQ_TEXT_DOMAIN); ?></span>
                                                                 <span class="answer-value"><?php echo esc_html($response['answer']); ?></span>
                                                             </div>
                                                         <?php endif; ?>
 
                                                         <?php if (isset($response['custom_answer']) && !empty($response['custom_answer'])): ?>
                                                             <div class="custom-answer">
-                                                                <span class="answer-label"><?php echo esc_html__('Response:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
+                                                                <span class="answer-label"><?php echo esc_html__('Response:', FLOWQ_TEXT_DOMAIN); ?></span>
                                                                 <div class="custom-text"><?php echo esc_html($response['custom_answer']); ?></div>
                                                             </div>
                                                         <?php endif; ?>
@@ -220,8 +220,8 @@ if (!defined('ABSPATH')) {
                                                     <path d="M9,5V9H15V5H9M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M12,4L13.09,8.26L17,7L14.74,10.74L19,12L14.74,13.26L17,17L13.09,15.74L12,20L10.91,15.74L7,17L9.26,13.26L5,12L9.26,10.74L7,7L10.91,8.26L12,4Z"/>
                                                 </svg>
                                             </div>
-                                            <h5><?php echo esc_html__('No responses recorded yet', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h5>
-                                            <p><?php echo esc_html__('Responses will appear here as the participant answers questions.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></p>
+                                            <h5><?php echo esc_html__('No responses recorded yet', FLOWQ_TEXT_DOMAIN); ?></h5>
+                                            <p><?php echo esc_html__('Responses will appear here as the participant answers questions.', FLOWQ_TEXT_DOMAIN); ?></p>
                                         </div>
                                     <?php endif; ?>
                                 </div>
@@ -242,12 +242,12 @@ if (!defined('ABSPATH')) {
 
                         if ($pagination['per_page'] === 'all') {
                             echo sprintf(
-                                esc_html__('Showing all %d participants', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+                                esc_html__('Showing all %d participants', FLOWQ_TEXT_DOMAIN),
                                 $pagination['total_items']
                             );
                         } else {
                             echo sprintf(
-                                esc_html__('Showing %d-%d of %d participants', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+                                esc_html__('Showing %d-%d of %d participants', FLOWQ_TEXT_DOMAIN),
                                 $start,
                                 $end,
                                 $pagination['total_items']
@@ -270,7 +270,7 @@ if (!defined('ABSPATH')) {
                             $prev_url = add_query_arg('paged', $pagination['current_page'] - 1, $base_url);
                         ?>
                             <a href="<?php echo esc_url($prev_url); ?>" class="pagination-link prev">
-                                ‹ <?php echo esc_html__('Previous', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                ‹ <?php echo esc_html__('Previous', FLOWQ_TEXT_DOMAIN); ?>
                             </a>
                         <?php endif; ?>
 
@@ -298,7 +298,7 @@ if (!defined('ABSPATH')) {
                             $next_url = add_query_arg('paged', $pagination['current_page'] + 1, $base_url);
                         ?>
                             <a href="<?php echo esc_url($next_url); ?>" class="pagination-link next">
-                                <?php echo esc_html__('Next', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?> ›
+                                <?php echo esc_html__('Next', FLOWQ_TEXT_DOMAIN); ?> ›
                             </a>
                         <?php endif; ?>
                     </div>
@@ -308,8 +308,8 @@ if (!defined('ABSPATH')) {
         <?php elseif ($selected_survey_id): ?>
             <!-- No Data Message -->
             <div class="no-data-message">
-                <p><?php echo esc_html__('No participants found for this survey yet.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></p>
-                <p><?php echo esc_html__('Participants will appear here once they start taking the survey.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></p>
+                <p><?php echo esc_html__('No participants found for this survey yet.', FLOWQ_TEXT_DOMAIN); ?></p>
+                <p><?php echo esc_html__('Participants will appear here once they start taking the survey.', FLOWQ_TEXT_DOMAIN); ?></p>
             </div>
 
         <?php else: ?>
@@ -317,8 +317,8 @@ if (!defined('ABSPATH')) {
             <div class="no-survey-selected">
                 <div class="placeholder-content">
                     <span class="dashicons dashicons-groups"></span>
-                    <h3><?php echo esc_html__('Select a Survey to View Participants', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h3>
-                    <p><?php echo esc_html__('Choose a survey from the dropdown above to see participant responses and details.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></p>
+                    <h3><?php echo esc_html__('Select a Survey to View Participants', FLOWQ_TEXT_DOMAIN); ?></h3>
+                    <p><?php echo esc_html__('Choose a survey from the dropdown above to see participant responses and details.', FLOWQ_TEXT_DOMAIN); ?></p>
                 </div>
             </div>
         <?php endif; ?>

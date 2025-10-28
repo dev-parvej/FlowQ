@@ -2,7 +2,7 @@
 /**
  * All Surveys Admin Template
  *
- * @package WP_Dynamic_Survey
+ * @package FlowQ
  */
 
 // Prevent direct access
@@ -16,18 +16,18 @@ if (!defined('ABSPATH')) {
         <div class="surveys-header">
             <div class="header-content">
                 <h1 class="page-title">
-                    <?php echo esc_html__('Surveys', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                    <?php echo esc_html__('Surveys', FLOWQ_TEXT_DOMAIN); ?>
                 </h1>
                 <p class="page-subtitle">
-                    <?php echo esc_html__('Manage and monitor your survey campaigns', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                    <?php echo esc_html__('Manage and monitor your survey campaigns', FLOWQ_TEXT_DOMAIN); ?>
                 </p>
             </div>
             <div class="header-actions">
-                <a href="<?php echo esc_url(admin_url('admin.php?page=wp-dynamic-surveys-add')); ?>" class="add-survey-button">
+                <a href="<?php echo esc_url(admin_url('admin.php?page=flowq-add')); ?>" class="add-survey-button">
                     <svg class="add-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
                     </svg>
-                    <span><?php echo esc_html__('Add New Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
+                    <span><?php echo esc_html__('Add New Survey', FLOWQ_TEXT_DOMAIN); ?></span>
                 </a>
             </div>
         </div>
@@ -41,31 +41,31 @@ if (!defined('ABSPATH')) {
                         </svg>
                     </div>
                     <h3 class="empty-state-title">
-                        <?php echo esc_html__('No surveys found', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        <?php echo esc_html__('No surveys found', FLOWQ_TEXT_DOMAIN); ?>
                     </h3>
                     <p class="empty-state-description">
-                        <?php echo esc_html__('Get started by creating your first survey to collect responses and insights from your audience.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        <?php echo esc_html__('Get started by creating your first survey to collect responses and insights from your audience.', FLOWQ_TEXT_DOMAIN); ?>
                     </p>
-                    <a href="<?php echo esc_url(admin_url('admin.php?page=wp-dynamic-surveys-add')); ?>" class="empty-state-button">
+                    <a href="<?php echo esc_url(admin_url('admin.php?page=flowq-add')); ?>" class="empty-state-button">
                         <svg class="button-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
                         </svg>
-                        <?php echo esc_html__('Create your first survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        <?php echo esc_html__('Create your first survey', FLOWQ_TEXT_DOMAIN); ?>
                     </a>
                 </div>
             </div>
         <?php else: ?>
             <div class="surveys-content">
                 <div class="surveys-table-header">
-                    <h2 class="table-title"><?php echo esc_html__('All Surveys', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h2>
+                    <h2 class="table-title"><?php echo esc_html__('All Surveys', FLOWQ_TEXT_DOMAIN); ?></h2>
                     <div class="table-stats">
-                        <span class="survey-count"><?php echo count($surveys); ?> <?php echo esc_html__('surveys', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
+                        <span class="survey-count"><?php echo count($surveys); ?> <?php echo esc_html__('surveys', FLOWQ_TEXT_DOMAIN); ?></span>
                     </div>
                 </div>
 
                 <div class="surveys-grid">
                     <?php foreach ($surveys as $survey):
-                        $survey_manager = new WP_Dynamic_Survey_Manager();
+                        $survey_manager = new FlowQ_Survey_Manager();
                         $stats = $survey_manager->get_survey_statistics($survey['id']);
 
                         // Question count is already included from the JOIN query
@@ -75,7 +75,7 @@ if (!defined('ABSPATH')) {
                             <div class="survey-card-header">
                                 <div class="survey-info">
                                     <h3 class="survey-title">
-                                        <a href="<?php echo esc_url(admin_url('admin.php?page=wp-dynamic-surveys-add&survey_id=' . $survey['id'])); ?>">
+                                        <a href="<?php echo esc_url(admin_url('admin.php?page=flowq-add&survey_id=' . $survey['id'])); ?>">
                                             <?php echo esc_html($survey['title']); ?>
                                         </a>
                                     </h3>
@@ -93,7 +93,7 @@ if (!defined('ABSPATH')) {
                                             <?php echo esc_html(ucfirst($survey['status'])); ?>
                                         </span>
                                         <span class="survey-date">
-                                            <?php echo esc_html__('Created:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                            <?php echo esc_html__('Created:', FLOWQ_TEXT_DOMAIN); ?>
                                             <?php echo esc_html(mysql2date(get_option('date_format'), $survey['created_at'])); ?>
                                         </span>
                                     </div>
@@ -103,21 +103,21 @@ if (!defined('ABSPATH')) {
                             <div class="survey-card-details">
                                 <?php if (!empty($survey['form_header'])): ?>
                                     <div class="survey-detail-item">
-                                        <span class="detail-label"><?php echo esc_html__('Form Header:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
+                                        <span class="detail-label"><?php echo esc_html__('Form Header:', FLOWQ_TEXT_DOMAIN); ?></span>
                                         <span class="detail-value"><?php echo esc_html($survey['form_header']); ?></span>
                                     </div>
                                 <?php endif; ?>
 
                                 <?php if ($survey['status'] === 'published'): ?>
                                     <div class="survey-detail-item">
-                                        <span class="detail-label"><?php echo esc_html__('Shortcode:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
-                                        <code class="detail-shortcode">[wp_dynamic_survey id="<?php echo esc_attr($survey['id']); ?>"]</code>
+                                        <span class="detail-label"><?php echo esc_html__('Shortcode:', FLOWQ_TEXT_DOMAIN); ?></span>
+                                        <code class="detail-shortcode">[dynamic_survey id="<?php echo esc_attr($survey['id']); ?>"]</code>
                                     </div>
                                 <?php endif; ?>
 
                                 <?php if (!empty($survey['thank_you_page_slug'])): ?>
                                     <div class="survey-detail-item">
-                                        <span class="detail-label"><?php echo esc_html__('Thank You Page:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
+                                        <span class="detail-label"><?php echo esc_html__('Thank You Page:', FLOWQ_TEXT_DOMAIN); ?></span>
                                         <span class="detail-value"><?php echo esc_html($survey['thank_you_page_slug']); ?></span>
                                     </div>
                                 <?php endif; ?>
@@ -126,57 +126,57 @@ if (!defined('ABSPATH')) {
                             <div class="survey-card-stats">
                                 <div class="stat-item">
                                     <div class="stat-number"><?php echo esc_html($question_count); ?></div>
-                                    <div class="stat-label"><?php echo esc_html__('Questions', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></div>
+                                    <div class="stat-label"><?php echo esc_html__('Questions', FLOWQ_TEXT_DOMAIN); ?></div>
                                 </div>
                                 <div class="stat-item">
                                     <div class="stat-number"><?php echo esc_html($stats['total_participants']); ?></div>
-                                    <div class="stat-label"><?php echo esc_html__('Participants', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></div>
+                                    <div class="stat-label"><?php echo esc_html__('Participants', FLOWQ_TEXT_DOMAIN); ?></div>
                                 </div>
                                 <div class="stat-item">
                                     <div class="stat-number"><?php echo esc_html($stats['completed_participants']); ?></div>
-                                    <div class="stat-label"><?php echo esc_html__('Completed', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></div>
+                                    <div class="stat-label"><?php echo esc_html__('Completed', FLOWQ_TEXT_DOMAIN); ?></div>
                                 </div>
                                 <div class="stat-item">
                                     <div class="stat-number"><?php echo esc_html($stats['completion_rate']); ?>%</div>
-                                    <div class="stat-label"><?php echo esc_html__('Rate', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></div>
+                                    <div class="stat-label"><?php echo esc_html__('Rate', FLOWQ_TEXT_DOMAIN); ?></div>
                                 </div>
                             </div>
 
                             <div class="survey-card-actions">
-                                <a href="<?php echo esc_url(admin_url('admin.php?page=wp-dynamic-surveys-add&survey_id=' . $survey['id'])); ?>"
+                                <a href="<?php echo esc_url(admin_url('admin.php?page=flowq-add&survey_id=' . $survey['id'])); ?>"
                                    class="action-button action-edit">
                                     <svg class="action-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                                         <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
                                     </svg>
-                                    <?php echo esc_html__('Edit', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                    <?php echo esc_html__('Edit', FLOWQ_TEXT_DOMAIN); ?>
                                 </a>
 
-                                <a href="<?php echo esc_url(admin_url('admin.php?page=wp-dynamic-surveys-questions&survey_id=' . $survey['id'])); ?>"
+                                <a href="<?php echo esc_url(admin_url('admin.php?page=flowq-questions&survey_id=' . $survey['id'])); ?>"
                                    class="action-button action-questions">
                                     <svg class="action-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                                         <path d="M8 6h13v2H8zm0 4h13v2H8zm0 4h13v2H8zM4 6h2v2H4zm0 4h2v2H4zm0 4h2v2H4z"/>
                                     </svg>
-                                    <?php echo esc_html__('Questions', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                    <?php echo esc_html__('Questions', FLOWQ_TEXT_DOMAIN); ?>
                                 </a>
 
                                 <?php if ($survey['status'] === 'published'): ?>
-                                <a href="<?php echo esc_url(admin_url('admin.php?page=wp-dynamic-surveys-analytics&survey_id=' . $survey['id'])); ?>"
+                                <a href="<?php echo esc_url(admin_url('admin.php?page=flowq-analytics&survey_id=' . $survey['id'])); ?>"
                                    class="action-button action-analytics">
                                     <svg class="action-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                                         <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
                                     </svg>
-                                    <?php echo esc_html__('Analytics', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                    <?php echo esc_html__('Analytics', FLOWQ_TEXT_DOMAIN); ?>
                                 </a>
                                 <?php endif; ?>
 
                                 <?php if ($survey['status'] !== 'published'): ?>
-                                <a href="<?php echo esc_url(wp_nonce_url(admin_url('admin-post.php?action=wp_dynamic_survey_survey_action&survey_action=delete&survey_id=' . $survey['id']), 'survey_action')); ?>"
+                                <a href="<?php echo esc_url(wp_nonce_url(admin_url('admin-post.php?action=flowq_survey_action&survey_action=delete&survey_id=' . $survey['id']), 'survey_action')); ?>"
                                    class="action-button action-delete"
-                                   onclick="return confirm('<?php echo esc_html__('Are you sure you want to delete this survey? This action cannot be undone.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>')">
+                                   onclick="return confirm('<?php echo esc_html__('Are you sure you want to delete this survey? This action cannot be undone.', FLOWQ_TEXT_DOMAIN); ?>')">
                                     <svg class="action-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                                         <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
                                     </svg>
-                                    <?php echo esc_html__('Delete', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                    <?php echo esc_html__('Delete', FLOWQ_TEXT_DOMAIN); ?>
                                 </a>
                                 <?php endif; ?>
                             </div>

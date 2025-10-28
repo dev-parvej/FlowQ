@@ -2,7 +2,7 @@
 /**
  * Centralized AJAX Handler for WP Dynamic Survey Plugin
  *
- * @package WP_Dynamic_Survey
+ * @package FlowQ
  */
 
 // Prevent direct access
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 /**
  * Centralized AJAX Handler class
  */
-class WP_Dynamic_Survey_Ajax_Handler {
+class FlowQ_Ajax_Handler {
 
     /**
      * Rate limiting storage
@@ -32,22 +32,22 @@ class WP_Dynamic_Survey_Ajax_Handler {
      */
     private function init_hooks() {
         // Frontend AJAX handlers
-        add_action('wp_ajax_wp_dynamic_survey_validate_session', array($this, 'validate_session'));
-        add_action('wp_ajax_nopriv_wp_dynamic_survey_validate_session', array($this, 'validate_session'));
+        add_action('wp_ajax_flowq_validate_session', array($this, 'validate_session'));
+        add_action('wp_ajax_nopriv_flowq_validate_session', array($this, 'validate_session'));
 
-        add_action('wp_ajax_wp_dynamic_survey_get_survey_data', array($this, 'get_survey_data'));
-        add_action('wp_ajax_nopriv_wp_dynamic_survey_get_survey_data', array($this, 'get_survey_data'));
+        add_action('wp_ajax_flowq_get_survey_data', array($this, 'get_survey_data'));
+        add_action('wp_ajax_nopriv_flowq_get_survey_data', array($this, 'get_survey_data'));
 
-        add_action('wp_ajax_wp_dynamic_survey_heartbeat', array($this, 'heartbeat'));
-        add_action('wp_ajax_nopriv_wp_dynamic_survey_heartbeat', array($this, 'heartbeat'));
+        add_action('wp_ajax_flowq_heartbeat', array($this, 'heartbeat'));
+        add_action('wp_ajax_nopriv_flowq_heartbeat', array($this, 'heartbeat'));
 
         // Admin AJAX handlers
-        add_action('wp_ajax_wp_dynamic_survey_get_survey_statistics', array($this, 'get_survey_statistics'));
-        add_action('wp_ajax_wp_dynamic_survey_bulk_export_responses', array($this, 'bulk_export_responses'));
-        add_action('wp_ajax_wp_dynamic_survey_select_template', array($this, 'select_template'));
+        add_action('wp_ajax_flowq_get_survey_statistics', array($this, 'get_survey_statistics'));
+        add_action('wp_ajax_flowq_bulk_export_responses', array($this, 'bulk_export_responses'));
+        add_action('wp_ajax_flowq_select_template', array($this, 'select_template'));
 
         // Security and validation
-        add_action('wp_ajax_wp_dynamic_survey_check_permissions', array($this, 'check_permissions'));
+        add_action('wp_ajax_flowq_check_permissions', array($this, 'check_permissions'));
     }
 
     /**
@@ -70,7 +70,7 @@ class WP_Dynamic_Survey_Ajax_Handler {
         // Check limit
         if (count(self::$rate_limits[$key]) >= $limit) {
             wp_send_json_error(array(
-                'message' => __('Rate limit exceeded. Please try again later.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+                'message' => __('Rate limit exceeded. Please try again later.', FLOWQ_TEXT_DOMAIN),
                 'code' => 'rate_limit_exceeded'
             ), 429);
         }
@@ -106,15 +106,15 @@ class WP_Dynamic_Survey_Ajax_Handler {
      */
     public function validate_session() {
         $this->check_rate_limit('validate_session', 30, 60);
-        check_ajax_referer('wp_dynamic_survey_frontend_nonce', 'nonce');
+        check_ajax_referer('flowq_frontend_nonce', 'nonce');
 
         $session_id = sanitize_text_field($_POST['session_id'] ?? '');
 
         if (empty($session_id)) {
-            wp_send_json_error(__('Session ID is required.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_send_json_error(__('Session ID is required.', FLOWQ_TEXT_DOMAIN));
         }
 
-        $participant_manager = new WP_Dynamic_Survey_Participant_Manager();
+        $participant_manager = new FlowQ_Participant_Manager();
         $participant = $participant_manager->validate_session($session_id);
 
         if (is_wp_error($participant)) {
@@ -134,22 +134,22 @@ class WP_Dynamic_Survey_Ajax_Handler {
      */
     public function get_survey_data() {
         $this->check_rate_limit('get_survey_data', 20, 60);
-        check_ajax_referer('wp_dynamic_survey_frontend_nonce', 'nonce');
+        check_ajax_referer('flowq_frontend_nonce', 'nonce');
 
         $survey_id = intval($_POST['survey_id'] ?? 0);
 
         if (!$survey_id) {
-            wp_send_json_error(__('Survey ID is required.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_send_json_error(__('Survey ID is required.', FLOWQ_TEXT_DOMAIN));
         }
 
-        $survey_manager = new WP_Dynamic_Survey_Manager();
+        $survey_manager = new FlowQ_Survey_Manager();
         $survey = $survey_manager->get_survey($survey_id);
 
         if (!$survey || $survey['status'] !== 'published') {
-            wp_send_json_error(__('Survey not available.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_send_json_error(__('Survey not available.', FLOWQ_TEXT_DOMAIN));
         }
 
-        $question_manager = new WP_Dynamic_Survey_Question_Manager();
+        $question_manager = new FlowQ_Question_Manager();
         $questions = $question_manager->get_survey_questions($survey_id, true);
 
         wp_send_json_success(array(
@@ -164,12 +164,12 @@ class WP_Dynamic_Survey_Ajax_Handler {
      */
     public function heartbeat() {
         $this->check_rate_limit('heartbeat', 10, 60);
-        check_ajax_referer('wp_dynamic_survey_frontend_nonce', 'nonce');
+        check_ajax_referer('flowq_frontend_nonce', 'nonce');
 
         $session_id = sanitize_text_field($_POST['session_id'] ?? '');
 
         if (!empty($session_id)) {
-            $participant_manager = new WP_Dynamic_Survey_Participant_Manager();
+            $participant_manager = new FlowQ_Participant_Manager();
             $participant = $participant_manager->get_participant($session_id);
 
             if ($participant && !$participant['completed_at']) {
@@ -198,19 +198,19 @@ class WP_Dynamic_Survey_Ajax_Handler {
     public function get_survey_statistics() {
         $this->check_rate_limit('get_survey_statistics', 10, 60);
 
-        if (!current_user_can('manage_wp_dynamic_surveys')) {
-            wp_send_json_error(__('Insufficient permissions.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+        if (!current_user_can('manage_flowq_surveys')) {
+            wp_send_json_error(__('Insufficient permissions.', FLOWQ_TEXT_DOMAIN));
         }
 
-        check_ajax_referer('wp_dynamic_survey_admin_nonce', 'nonce');
+        check_ajax_referer('flowq_admin_nonce', 'nonce');
 
         $survey_id = intval($_POST['survey_id'] ?? 0);
 
         if (!$survey_id) {
-            wp_send_json_error(__('Survey ID is required.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_send_json_error(__('Survey ID is required.', FLOWQ_TEXT_DOMAIN));
         }
 
-        $survey_manager = new WP_Dynamic_Survey_Manager();
+        $survey_manager = new FlowQ_Survey_Manager();
         $stats = $survey_manager->get_survey_statistics($survey_id);
 
         if (is_wp_error($stats)) {
@@ -226,20 +226,20 @@ class WP_Dynamic_Survey_Ajax_Handler {
     public function bulk_export_responses() {
         $this->check_rate_limit('bulk_export_responses', 5, 300); // More restrictive for exports
 
-        if (!current_user_can('manage_wp_dynamic_surveys')) {
-            wp_send_json_error(__('Insufficient permissions.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+        if (!current_user_can('manage_flowq_surveys')) {
+            wp_send_json_error(__('Insufficient permissions.', FLOWQ_TEXT_DOMAIN));
         }
 
-        check_ajax_referer('wp_dynamic_survey_admin_nonce', 'nonce');
+        check_ajax_referer('flowq_admin_nonce', 'nonce');
 
         $survey_ids = array_map('intval', $_POST['survey_ids'] ?? array());
         $format = sanitize_text_field($_POST['format'] ?? 'csv');
 
         if (empty($survey_ids)) {
-            wp_send_json_error(__('At least one survey must be selected.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_send_json_error(__('At least one survey must be selected.', FLOWQ_TEXT_DOMAIN));
         }
 
-        $session_manager = new WP_Dynamic_Survey_Session_Manager();
+        $session_manager = new FlowQ_Session_Manager();
 
         try {
             $export_data = array();
@@ -260,7 +260,7 @@ class WP_Dynamic_Survey_Ajax_Handler {
             ));
 
         } catch (Exception $e) {
-            wp_send_json_error(__('Export failed: ', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) . $e->getMessage());
+            wp_send_json_error(__('Export failed: ', FLOWQ_TEXT_DOMAIN) . $e->getMessage());
         }
     }
     
@@ -271,34 +271,34 @@ class WP_Dynamic_Survey_Ajax_Handler {
         $this->check_rate_limit('select_template', 10, 60);
 
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(__('Insufficient permissions.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_send_json_error(__('Insufficient permissions.', FLOWQ_TEXT_DOMAIN));
         }
 
-        check_ajax_referer('wp_dynamic_survey_admin_nonce', 'nonce');
+        check_ajax_referer('flowq_admin_nonce', 'nonce');
 
         $template_id = intval($_POST['template_id'] ?? 0);
 
         if (!$template_id) {
-            wp_send_json_error(__('Template ID is required.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_send_json_error(__('Template ID is required.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Verify template exists
         global $wpdb;
-        $table_name = $wpdb->prefix . 'wp_dynamic_survey_templates';
+        $table_name = $wpdb->prefix . 'flowq_templates';
         $template = $wpdb->get_row($wpdb->prepare(
             "SELECT * FROM {$table_name} WHERE id = %d",
             $template_id
         ), ARRAY_A);
 
         if (!$template) {
-            wp_send_json_error(__('Template not found.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_send_json_error(__('Template not found.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Update active template option
-        update_option('wp_dynamic_survey_active_template', $template_id);
+        update_option('flowq_active_template', $template_id);
 
         wp_send_json_success(array(
-            'message' => __('Template activated successfully.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+            'message' => __('Template activated successfully.', FLOWQ_TEXT_DOMAIN),
             'template_id' => $template_id,
             'template_name' => $template['name']
         ));
@@ -311,9 +311,9 @@ class WP_Dynamic_Survey_Ajax_Handler {
         $action = sanitize_text_field($_POST['action_check'] ?? '');
 
         $permissions = array(
-            'manage_surveys' => current_user_can('manage_wp_dynamic_surveys'),
-            'view_responses' => current_user_can('view_wp_dynamic_survey_responses'),
-            'export_data' => current_user_can('export_wp_dynamic_survey_data'),
+            'manage_surveys' => current_user_can('manage_flowq_surveys'),
+            'view_responses' => current_user_can('view_flowq_responses'),
+            'export_data' => current_user_can('export_flowq_data'),
             'is_admin' => current_user_can('administrator')
         );
 

@@ -2,7 +2,7 @@
 /**
  * Question Manager for WP Dynamic Survey Plugin
  *
- * @package WP_Dynamic_Survey
+ * @package FlowQ
  */
 
 // Prevent direct access
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 /**
  * Survey Question Manager class
  */
-class WP_Dynamic_Survey_Question_Manager {
+class FlowQ_Question_Manager {
 
     /**
      * WordPress database object
@@ -31,7 +31,7 @@ class WP_Dynamic_Survey_Question_Manager {
     public function __construct() {
         global $wpdb;
         $this->wpdb = $wpdb;
-        $this->table_prefix = $this->wpdb->prefix . 'wp_dynamic_survey_';
+        $this->table_prefix = $this->wpdb->prefix . 'flowq_';
     }
 
     /**
@@ -44,13 +44,13 @@ class WP_Dynamic_Survey_Question_Manager {
     public function create_question($survey_id, $question_data) {
         // Validate required fields
         if (empty($question_data['title'])) {
-            return new WP_Error('missing_title', __('Question title is required.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('missing_title', __('Question title is required.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Check if survey exists
-        $survey_manager = new WP_Dynamic_Survey_Manager();
+        $survey_manager = new FlowQ_Survey_Manager();
         if (!$survey_manager->get_survey($survey_id)) {
-            return new WP_Error('survey_not_found', __('Survey not found.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('survey_not_found', __('Survey not found.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Prepare question data
@@ -72,13 +72,13 @@ class WP_Dynamic_Survey_Question_Manager {
         $result = $this->wpdb->insert($table_name, $question_record);
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to create question.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to create question.', FLOWQ_TEXT_DOMAIN));
         }
 
         $question_id = $this->wpdb->insert_id;
 
         // Trigger action hook
-        do_action('wp_dynamic_survey_question_created', $question_id, $question_data, $survey_id);
+        do_action('flowq_question_created', $question_id, $question_data, $survey_id);
 
         return $question_id;
     }
@@ -120,12 +120,12 @@ class WP_Dynamic_Survey_Question_Manager {
     public function update_question($question_id, $data) {
         // Check if question exists
         if (!$this->get_question($question_id)) {
-            return new WP_Error('question_not_found', __('Question not found.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('question_not_found', __('Question not found.', FLOWQ_TEXT_DOMAIN));
         }
 
         if (isset($data['title'])) {
             if (empty($data['title'])) {
-                return new WP_Error('missing_title', __('Question title is required.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+                return new WP_Error('missing_title', __('Question title is required.', FLOWQ_TEXT_DOMAIN));
             }
             $update_data['title'] = sanitize_textarea_field($data['title']);
         }
@@ -160,11 +160,11 @@ class WP_Dynamic_Survey_Question_Manager {
         );
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to update question.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to update question.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Trigger action hook
-        do_action('wp_dynamic_survey_question_updated', $question_id, $update_data);
+        do_action('flowq_question_updated', $question_id, $update_data);
 
         return true;
     }
@@ -178,7 +178,7 @@ class WP_Dynamic_Survey_Question_Manager {
     public function delete_question($question_id) {
         // Check if question exists
         if (!$this->get_question($question_id)) {
-            return new WP_Error('question_not_found', __('Question not found.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('question_not_found', __('Question not found.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Delete related answers first
@@ -196,11 +196,11 @@ class WP_Dynamic_Survey_Question_Manager {
         );
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to delete question.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to delete question.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Trigger action hook
-        do_action('wp_dynamic_survey_question_deleted', $question_id);
+        do_action('flowq_question_deleted', $question_id);
 
         return true;
     }
@@ -242,12 +242,12 @@ class WP_Dynamic_Survey_Question_Manager {
     public function create_answer($question_id, $answer_data) {
         // Validate required fields
         if (empty($answer_data['answer_text'])) {
-            return new WP_Error('missing_text', __('Answer text is required.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('missing_text', __('Answer text is required.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Check if question exists
         if (!$this->get_question($question_id)) {
-            return new WP_Error('question_not_found', __('Question not found.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('question_not_found', __('Question not found.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Get next answer order
@@ -267,7 +267,7 @@ class WP_Dynamic_Survey_Question_Manager {
 
         // Validate redirect URL if provided
         if ($answer_record['redirect_url'] && !filter_var($answer_record['redirect_url'], FILTER_VALIDATE_URL)) {
-            return new WP_Error('invalid_url', __('Invalid redirect URL.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('invalid_url', __('Invalid redirect URL.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Insert answer
@@ -275,13 +275,13 @@ class WP_Dynamic_Survey_Question_Manager {
         $result = $this->wpdb->insert($table_name, $answer_record);
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to create answer.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to create answer.', FLOWQ_TEXT_DOMAIN));
         }
 
         $answer_id = $this->wpdb->insert_id;
 
         // Trigger action hook
-        do_action('wp_dynamic_survey_answer_created', $answer_id, $answer_data, $question_id);
+        do_action('flowq_answer_created', $answer_id, $answer_data, $question_id);
 
         return $answer_id;
     }
@@ -375,7 +375,7 @@ class WP_Dynamic_Survey_Question_Manager {
     public function update_answer($answer_id, $data) {
         // Check if answer exists
         if (!$this->get_answer($answer_id)) {
-            return new WP_Error('answer_not_found', __('Answer not found.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('answer_not_found', __('Answer not found.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Prepare update data
@@ -383,7 +383,7 @@ class WP_Dynamic_Survey_Question_Manager {
 
         if (isset($data['answer_text'])) {
             if (empty($data['answer_text'])) {
-                return new WP_Error('missing_text', __('Answer text is required.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+                return new WP_Error('missing_text', __('Answer text is required.', FLOWQ_TEXT_DOMAIN));
             }
             $update_data['answer_text'] = sanitize_textarea_field($data['answer_text']);
         }
@@ -398,7 +398,7 @@ class WP_Dynamic_Survey_Question_Manager {
 
         if (isset($data['redirect_url'])) {
             if ($data['redirect_url'] && !filter_var($data['redirect_url'], FILTER_VALIDATE_URL)) {
-                return new WP_Error('invalid_url', __('Invalid redirect URL.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+                return new WP_Error('invalid_url', __('Invalid redirect URL.', FLOWQ_TEXT_DOMAIN));
             }
             $update_data['redirect_url'] = $data['redirect_url'] ? esc_url_raw($data['redirect_url']) : null;
         }
@@ -416,11 +416,11 @@ class WP_Dynamic_Survey_Question_Manager {
         );
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to update answer.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to update answer.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Trigger action hook
-        do_action('wp_dynamic_survey_answer_updated', $answer_id, $update_data);
+        do_action('flowq_answer_updated', $answer_id, $update_data);
 
         return true;
     }
@@ -434,7 +434,7 @@ class WP_Dynamic_Survey_Question_Manager {
     public function delete_answer($answer_id) {
         // Check if answer exists
         if (!$this->get_answer($answer_id)) {
-            return new WP_Error('answer_not_found', __('Answer not found.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('answer_not_found', __('Answer not found.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Delete related responses
@@ -449,11 +449,11 @@ class WP_Dynamic_Survey_Question_Manager {
         );
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to delete answer.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to delete answer.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Trigger action hook
-        do_action('wp_dynamic_survey_answer_deleted', $answer_id);
+        do_action('flowq_answer_deleted', $answer_id);
 
         return true;
     }
@@ -478,7 +478,7 @@ class WP_Dynamic_Survey_Question_Manager {
             );
 
             if ($result === false) {
-                return new WP_Error('db_error', __('Failed to reorder answers.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+                return new WP_Error('db_error', __('Failed to reorder answers.', FLOWQ_TEXT_DOMAIN));
             }
         }
 

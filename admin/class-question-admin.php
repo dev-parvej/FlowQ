@@ -2,7 +2,7 @@
 /**
  * Question Management Admin for WP Dynamic Survey Plugin
  *
- * @package WP_Dynamic_Survey
+ * @package FlowQ
  */
 
 // Prevent direct access
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 /**
  * Question Admin class for handling question management operations
  */
-class WP_Dynamic_Survey_Question_Admin {
+class FlowQ_Question_Admin {
 
     /**
      * Constructor
@@ -27,32 +27,32 @@ class WP_Dynamic_Survey_Question_Admin {
      */
     private function init_hooks() {
         // Question management AJAX handlers
-        add_action('wp_ajax_wp_dynamic_survey_get_question', array($this, 'ajax_get_question'));
-        add_action('wp_ajax_wp_dynamic_survey_create_question', array($this, 'ajax_create_question'));
-        add_action('wp_ajax_wp_dynamic_survey_update_question', array($this, 'ajax_update_question'));
-        add_action('wp_ajax_wp_dynamic_survey_delete_question', array($this, 'ajax_delete_question'));
-        add_action('wp_ajax_wp_dynamic_survey_duplicate_question', array($this, 'ajax_duplicate_question'));
-        add_action('wp_ajax_wp_dynamic_survey_reorder_questions', array($this, 'ajax_reorder_questions'));
-        add_action('wp_ajax_wp_dynamic_survey_update_answer_next_question', array($this, 'ajax_update_answer_next_question'));
-        add_action('wp_ajax_wp_dynamic_survey_update_question_skip_destination', array($this, 'ajax_update_question_skip_destination'));
+        add_action('wp_ajax_flowq_get_question', array($this, 'ajax_get_question'));
+        add_action('wp_ajax_flowq_create_question', array($this, 'ajax_create_question'));
+        add_action('wp_ajax_flowq_update_question', array($this, 'ajax_update_question'));
+        add_action('wp_ajax_flowq_delete_question', array($this, 'ajax_delete_question'));
+        add_action('wp_ajax_flowq_duplicate_question', array($this, 'ajax_duplicate_question'));
+        add_action('wp_ajax_flowq_reorder_questions', array($this, 'ajax_reorder_questions'));
+        add_action('wp_ajax_flowq_update_answer_next_question', array($this, 'ajax_update_answer_next_question'));
+        add_action('wp_ajax_flowq_update_question_skip_destination', array($this, 'ajax_update_question_skip_destination'));
     }
 
     /**
      * AJAX: Get question data
      */
     public function ajax_get_question() {
-        check_ajax_referer('wp_dynamic_survey_admin_nonce', 'nonce');
+        check_ajax_referer('flowq_admin_nonce', 'nonce');
 
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(__('Insufficient permissions.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_send_json_error(__('Insufficient permissions.', FLOWQ_TEXT_DOMAIN));
         }
 
         $question_id = intval($_POST['question_id']);
         if (!$question_id) {
-            wp_send_json_error(__('Invalid question ID.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_send_json_error(__('Invalid question ID.', FLOWQ_TEXT_DOMAIN));
         }
 
-        $question_manager = new WP_Dynamic_Survey_Question_Manager();
+        $question_manager = new FlowQ_Question_Manager();
         $question = $question_manager->get_question($question_id);
 
         if (is_wp_error($question)) {
@@ -70,15 +70,15 @@ class WP_Dynamic_Survey_Question_Admin {
      * AJAX: Create new question
      */
     public function ajax_create_question() {
-        check_ajax_referer('wp_dynamic_survey_admin_nonce', 'nonce');
+        check_ajax_referer('flowq_admin_nonce', 'nonce');
 
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(__('Insufficient permissions.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_send_json_error(__('Insufficient permissions.', FLOWQ_TEXT_DOMAIN));
         }
 
         $survey_id = intval($_POST['survey_id']);
         if (!$survey_id) {
-            wp_send_json_error(__('Invalid survey ID.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_send_json_error(__('Invalid survey ID.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Prepare question data
@@ -90,7 +90,7 @@ class WP_Dynamic_Survey_Question_Admin {
             'skip_next_question_id' => !empty($_POST['question_skip_next_question_id']) ? intval($_POST['question_skip_next_question_id']) : null
         );
 
-        $question_manager = new WP_Dynamic_Survey_Question_Manager();
+        $question_manager = new FlowQ_Question_Manager();
         $question_id = $question_manager->create_question($survey_id, $question_data);
 
         if (is_wp_error($question_id)) {
@@ -102,7 +102,7 @@ class WP_Dynamic_Survey_Question_Admin {
 
         wp_send_json_success(array(
             'question_id' => $question_id,
-            'message' => __('Question created successfully.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)
+            'message' => __('Question created successfully.', FLOWQ_TEXT_DOMAIN)
         ));
     }
 
@@ -110,15 +110,15 @@ class WP_Dynamic_Survey_Question_Admin {
      * AJAX: Update existing question
      */
     public function ajax_update_question() {
-        check_ajax_referer('wp_dynamic_survey_admin_nonce', 'nonce');
+        check_ajax_referer('flowq_admin_nonce', 'nonce');
 
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(__('Insufficient permissions.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_send_json_error(__('Insufficient permissions.', FLOWQ_TEXT_DOMAIN));
         }
 
         $question_id = intval($_POST['question_id']);
         if (!$question_id) {
-            wp_send_json_error(__('Invalid question ID.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_send_json_error(__('Invalid question ID.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Prepare question data
@@ -130,7 +130,7 @@ class WP_Dynamic_Survey_Question_Admin {
             'skip_next_question_id' => !empty($_POST['question_skip_next_question_id']) ? intval($_POST['question_skip_next_question_id']) : null
         );
 
-        $question_manager = new WP_Dynamic_Survey_Question_Manager();
+        $question_manager = new FlowQ_Question_Manager();
         $result = $question_manager->update_question($question_id, $question_data);
 
         if (is_wp_error($result)) {
@@ -141,7 +141,7 @@ class WP_Dynamic_Survey_Question_Admin {
         $this->save_answer_options($question_id, $_POST);
 
         wp_send_json_success(array(
-            'message' => __('Question updated successfully.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)
+            'message' => __('Question updated successfully.', FLOWQ_TEXT_DOMAIN)
         ));
     }
 
@@ -149,21 +149,21 @@ class WP_Dynamic_Survey_Question_Admin {
      * AJAX: Delete question
      */
     public function ajax_delete_question() {
-        check_ajax_referer('wp_dynamic_survey_admin_nonce', 'nonce');
+        check_ajax_referer('flowq_admin_nonce', 'nonce');
 
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(__('Insufficient permissions.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_send_json_error(__('Insufficient permissions.', FLOWQ_TEXT_DOMAIN));
         }
 
         $question_id = intval($_POST['question_id']);
         if (!$question_id) {
-            wp_send_json_error(__('Invalid question ID.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_send_json_error(__('Invalid question ID.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Check for dependencies before deleting
         $this->check_question_dependencies($question_id);
 
-        $question_manager = new WP_Dynamic_Survey_Question_Manager();
+        $question_manager = new FlowQ_Question_Manager();
         $result = $question_manager->delete_question($question_id);
 
         if (is_wp_error($result)) {
@@ -171,7 +171,7 @@ class WP_Dynamic_Survey_Question_Admin {
         }
 
         wp_send_json_success(array(
-            'message' => __('Question deleted successfully.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)
+            'message' => __('Question deleted successfully.', FLOWQ_TEXT_DOMAIN)
         ));
     }
 
@@ -179,18 +179,18 @@ class WP_Dynamic_Survey_Question_Admin {
      * AJAX: Duplicate question
      */
     public function ajax_duplicate_question() {
-        check_ajax_referer('wp_dynamic_survey_admin_nonce', 'nonce');
+        check_ajax_referer('flowq_admin_nonce', 'nonce');
 
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(__('Insufficient permissions.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_send_json_error(__('Insufficient permissions.', FLOWQ_TEXT_DOMAIN));
         }
 
         $question_id = intval($_POST['question_id']);
         if (!$question_id) {
-            wp_send_json_error(__('Invalid question ID.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_send_json_error(__('Invalid question ID.', FLOWQ_TEXT_DOMAIN));
         }
 
-        $question_manager = new WP_Dynamic_Survey_Question_Manager();
+        $question_manager = new FlowQ_Question_Manager();
 
         // Get original question
         $original_question = $question_manager->get_question($question_id);
@@ -227,7 +227,7 @@ class WP_Dynamic_Survey_Question_Admin {
 
         wp_send_json_success(array(
             'question_id' => $new_question_id,
-            'message' => __('Question duplicated successfully.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)
+            'message' => __('Question duplicated successfully.', FLOWQ_TEXT_DOMAIN)
         ));
     }
 
@@ -235,26 +235,26 @@ class WP_Dynamic_Survey_Question_Admin {
      * AJAX: Reorder questions
      */
     public function ajax_reorder_questions() {
-        check_ajax_referer('wp_dynamic_survey_admin_nonce', 'nonce');
+        check_ajax_referer('flowq_admin_nonce', 'nonce');
 
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(__('Insufficient permissions.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_send_json_error(__('Insufficient permissions.', FLOWQ_TEXT_DOMAIN));
         }
 
         $survey_id = intval($_POST['survey_id']);
         $question_orders = json_decode(stripslashes($_POST['question_orders']), true);
 
         if (!$survey_id || !is_array($question_orders)) {
-            wp_send_json_error(__('Invalid data provided.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_send_json_error(__('Invalid data provided.', FLOWQ_TEXT_DOMAIN));
         }
 
-        $question_manager = new WP_Dynamic_Survey_Question_Manager();
+        $question_manager = new FlowQ_Question_Manager();
 
         // Note: question_order column was removed, questions are ordered by ID
         // This reordering functionality is no longer needed
 
         wp_send_json_success(array(
-            'message' => __('Questions reordered successfully.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)
+            'message' => __('Questions reordered successfully.', FLOWQ_TEXT_DOMAIN)
         ));
     }
 
@@ -266,7 +266,7 @@ class WP_Dynamic_Survey_Question_Admin {
             return;
         }
 
-        $question_manager = new WP_Dynamic_Survey_Question_Manager();
+        $question_manager = new FlowQ_Question_Manager();
 
         // Get existing answers
         $existing_answers = $question_manager->get_question_answers($question_id);
@@ -321,7 +321,7 @@ class WP_Dynamic_Survey_Question_Admin {
     private function check_question_dependencies($question_id) {
         global $wpdb;
 
-        $table_prefix = $wpdb->prefix . 'wp_dynamic_survey_';
+        $table_prefix = $wpdb->prefix . 'flowq_';
 
         // Check if any answers point to this question as next question
         $dependent_answers = $wpdb->get_var($wpdb->prepare(
@@ -330,7 +330,7 @@ class WP_Dynamic_Survey_Question_Admin {
         ));
 
         if ($dependent_answers > 0) {
-            wp_send_json_error(__('Cannot delete this question because other questions reference it in their flow logic. Please update the question flow first.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_send_json_error(__('Cannot delete this question because other questions reference it in their flow logic. Please update the question flow first.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Check if any questions point to this question as skip destination
@@ -340,7 +340,7 @@ class WP_Dynamic_Survey_Question_Admin {
         ));
 
         if ($dependent_questions > 0) {
-            wp_send_json_error(__('Cannot delete this question because other questions reference it as a skip destination. Please update the question skip settings first.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_send_json_error(__('Cannot delete this question because other questions reference it as a skip destination. Please update the question skip settings first.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Check if there are any responses for this question
@@ -351,7 +351,7 @@ class WP_Dynamic_Survey_Question_Admin {
 
         if ($responses_count > 0) {
             wp_send_json_error(sprintf(
-                __('Cannot delete this question because it has %d response(s). Deleting it would affect survey analytics.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+                __('Cannot delete this question because it has %d response(s). Deleting it would affect survey analytics.', FLOWQ_TEXT_DOMAIN),
                 $responses_count
             ));
         }
@@ -361,20 +361,20 @@ class WP_Dynamic_Survey_Question_Admin {
      * AJAX: Update answer next question
      */
     public function ajax_update_answer_next_question() {
-        check_ajax_referer('wp_dynamic_survey_admin_nonce', 'nonce');
+        check_ajax_referer('flowq_admin_nonce', 'nonce');
 
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(__('Insufficient permissions.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_send_json_error(__('Insufficient permissions.', FLOWQ_TEXT_DOMAIN));
         }
 
         $answer_id = intval($_POST['answer_id']);
         $next_question_id = !empty($_POST['next_question_id']) ? intval($_POST['next_question_id']) : null;
 
         if (!$answer_id) {
-            wp_send_json_error(__('Invalid answer ID.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_send_json_error(__('Invalid answer ID.', FLOWQ_TEXT_DOMAIN));
         }
 
-        $question_manager = new WP_Dynamic_Survey_Question_Manager();
+        $question_manager = new FlowQ_Question_Manager();
 
         // Update the answer
         $result = $question_manager->update_answer($answer_id, array(
@@ -386,7 +386,7 @@ class WP_Dynamic_Survey_Question_Admin {
         }
 
         wp_send_json_success(array(
-            'message' => __('Next question updated successfully.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+            'message' => __('Next question updated successfully.', FLOWQ_TEXT_DOMAIN),
             'next_question_id' => $next_question_id
         ));
     }
@@ -395,20 +395,20 @@ class WP_Dynamic_Survey_Question_Admin {
      * AJAX: Update question skip destination
      */
     public function ajax_update_question_skip_destination() {
-        check_ajax_referer('wp_dynamic_survey_admin_nonce', 'nonce');
+        check_ajax_referer('flowq_admin_nonce', 'nonce');
 
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(__('Insufficient permissions.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_send_json_error(__('Insufficient permissions.', FLOWQ_TEXT_DOMAIN));
         }
 
         $question_id = intval($_POST['question_id']);
         $skip_next_question_id = !empty($_POST['skip_next_question_id']) ? intval($_POST['skip_next_question_id']) : null;
 
         if (!$question_id) {
-            wp_send_json_error(__('Invalid question ID.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            wp_send_json_error(__('Invalid question ID.', FLOWQ_TEXT_DOMAIN));
         }
 
-        $question_manager = new WP_Dynamic_Survey_Question_Manager();
+        $question_manager = new FlowQ_Question_Manager();
 
         // Update the question skip destination
         $result = $question_manager->update_question($question_id, array(
@@ -420,11 +420,11 @@ class WP_Dynamic_Survey_Question_Admin {
         }
 
         wp_send_json_success(array(
-            'message' => __('Skip destination updated successfully.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+            'message' => __('Skip destination updated successfully.', FLOWQ_TEXT_DOMAIN),
             'skip_next_question_id' => $skip_next_question_id
         ));
     }
 }
 
 // Initialize the class
-new WP_Dynamic_Survey_Question_Admin();
+new FlowQ_Question_Admin();

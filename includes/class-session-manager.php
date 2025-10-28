@@ -2,7 +2,7 @@
 /**
  * Session Manager for WP Dynamic Survey Plugin
  *
- * @package WP_Dynamic_Survey
+ * @package FlowQ
  */
 
 // Prevent direct access
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 /**
  * Survey Session Manager class
  */
-class WP_Dynamic_Survey_Session_Manager {
+class FlowQ_Session_Manager {
 
     /**
      * WordPress database object
@@ -36,8 +36,8 @@ class WP_Dynamic_Survey_Session_Manager {
     public function __construct() {
         global $wpdb;
         $this->wpdb = $wpdb;
-        $this->table_prefix = $this->wpdb->prefix . 'wp_dynamic_survey_';
-        $this->participant_manager = new WP_Dynamic_Survey_Participant_Manager();
+        $this->table_prefix = $this->wpdb->prefix . 'flowq_';
+        $this->participant_manager = new FlowQ_Participant_Manager();
     }
 
     /**
@@ -53,19 +53,19 @@ class WP_Dynamic_Survey_Session_Manager {
         $session_id = $participant['session_id'];
 
         if ($question['survey_id'] != $participant['survey_id']) {
-            return new WP_Error('question_mismatch', __('Question does not belong to this survey.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('question_mismatch', __('Question does not belong to this survey.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Validate required fields - treat all questions as required since is_required column doesn't exist
         if (empty($answer_data['answer_text']) && empty($answer_data['answer_id']) && filter_var($question['is_required'], FILTER_VALIDATE_BOOLEAN)) {
-            return new WP_Error('required_answer', __('This question requires an answer.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('required_answer', __('This question requires an answer.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Validate answer ID if provided
         if (!empty($answer_data['answer_id'])) {
             $valid_answer = $this->validate_answer_for_question($answer_data['answer_id'], $question['id']);
             if (!$valid_answer) {
-                return new WP_Error('invalid_answer', __('Invalid answer for this question.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+                return new WP_Error('invalid_answer', __('Invalid answer for this question.', FLOWQ_TEXT_DOMAIN));
             }
         }
 
@@ -100,7 +100,7 @@ class WP_Dynamic_Survey_Session_Manager {
         }
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to record response.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to record response.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Update participant progress
@@ -108,7 +108,7 @@ class WP_Dynamic_Survey_Session_Manager {
         $this->participant_manager->add_to_question_chain($session_id, $question['id']);
 
         // Trigger action hook
-        do_action('wp_dynamic_survey_response_recorded', $session_id, $question['id'], $answer_data);
+        do_action('flowq_response_recorded', $session_id, $question['id'], $answer_data);
 
         return true;
     }
@@ -193,7 +193,7 @@ class WP_Dynamic_Survey_Session_Manager {
 
         // Check if already completed
         if (!empty($participant['completed_at'])) {
-            return new WP_Error('already_completed', __('Survey already completed.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN));
+            return new WP_Error('already_completed', __('Survey already completed.', FLOWQ_TEXT_DOMAIN));
         }
 
         // Validate all required questions are answered
@@ -209,7 +209,7 @@ class WP_Dynamic_Survey_Session_Manager {
         }
 
         // Trigger action hook
-        do_action('wp_dynamic_survey_completed', $participant['survey_id'], $session_id, $participant['id']);
+        do_action('flowq_survey_completed', $participant['survey_id'], $session_id, $participant['id']);
 
         return true;
     }
@@ -261,7 +261,7 @@ class WP_Dynamic_Survey_Session_Manager {
         }
 
         // Get total questions for survey
-        $question_manager = new WP_Dynamic_Survey_Question_Manager();
+        $question_manager = new FlowQ_Question_Manager();
         $all_questions = $question_manager->get_survey_questions($participant['survey_id'], false);
         $total_questions = count($all_questions);
 
@@ -419,7 +419,7 @@ class WP_Dynamic_Survey_Session_Manager {
             return new WP_Error(
                 'incomplete_survey',
                 sprintf(
-                    __('Required questions not answered: %s', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+                    __('Required questions not answered: %s', FLOWQ_TEXT_DOMAIN),
                     implode(', ', $unanswered_required)
                 )
             );
@@ -490,8 +490,8 @@ class WP_Dynamic_Survey_Session_Manager {
      * @return array CSV data
      */
     public function export_responses_csv($survey_id) {
-        $survey_manager = new WP_Dynamic_Survey_Manager();
-        $question_manager = new WP_Dynamic_Survey_Question_Manager();
+        $survey_manager = new FlowQ_Survey_Manager();
+        $question_manager = new FlowQ_Question_Manager();
 
         // Get survey and questions
         $survey = $survey_manager->get_survey($survey_id);
@@ -502,7 +502,7 @@ class WP_Dynamic_Survey_Session_Manager {
         $questions = $question_manager->get_survey_questions($survey_id, true);
 
         // Get all completed participants
-        $participant_manager = new WP_Dynamic_Survey_Participant_Manager();
+        $participant_manager = new FlowQ_Participant_Manager();
         $participants = $participant_manager->get_survey_participants($survey_id, array(
             'status' => 'completed',
             'limit' => 10000

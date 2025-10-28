@@ -6,7 +6,7 @@ Add a "required" option to questions that allows users to mark questions as opti
 ## Database Changes
 
 ### Questions Table Schema Modification
-Modify existing schema to include in `wp_dynamic_survey_questions` table:
+Modify existing schema to include in `flowq_questions` table:
 - `is_required` (BOOLEAN, DEFAULT TRUE)
 - `skip_next_question_id` (INT, NULLABLE) - Question ID to navigate to when skipped
 
@@ -43,7 +43,7 @@ Modify existing schema to include in `wp_dynamic_survey_questions` table:
    - Do not validate answer selection for skipped questions
 
 ### Data Storage
-- Track skipped questions in `wp_dynamic_survey_responses` table
+- Track skipped questions in `flowq_responses` table
 - Store skip status: `is_skipped` boolean field
 - Maintain navigation flow integrity
 

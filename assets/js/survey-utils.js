@@ -2,7 +2,7 @@
  * WP Dynamic Survey JavaScript Utilities
  * Supporting functions and classes for enhanced survey functionality
  *
- * @package WP_Dynamic_Survey
+ * @package FlowQ
  * @version 2.0.0
  */
 

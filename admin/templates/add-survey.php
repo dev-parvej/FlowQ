@@ -2,7 +2,7 @@
 /**
  * Add/Edit Survey Admin Template
  *
- * @package WP_Dynamic_Survey
+ * @package FlowQ
  */
 
 // Prevent direct access
@@ -11,20 +11,20 @@ if (!defined('ABSPATH')) {
 }
 
 $is_edit = !empty($survey);
-$page_title = $is_edit ? __('Edit Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('Add New Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN);
+$page_title = $is_edit ? __('Edit Survey', FLOWQ_TEXT_DOMAIN) : __('Add New Survey', FLOWQ_TEXT_DOMAIN);
 ?>
 
 <div class="wrap">
     <div class="page-header-with-back">
         <h1><?php echo esc_html($page_title); ?></h1>
-        <a href="<?php echo esc_url(admin_url('admin.php?page=wp-dynamic-surveys')); ?>" class="page-title-action back-button">
-            <?php echo esc_html__('← Back to Surveys', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+        <a href="<?php echo esc_url(admin_url('admin.php?page=flowq')); ?>" class="page-title-action back-button">
+            <?php echo esc_html__('← Back to Surveys', FLOWQ_TEXT_DOMAIN); ?>
         </a>
     </div>
 
     <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
-        <input type="hidden" name="action" value="wp_dynamic_survey_save_survey">
-        <?php wp_nonce_field('wp_dynamic_survey_save_survey'); ?>
+        <input type="hidden" name="action" value="flowq_save_survey">
+        <?php wp_nonce_field('flowq_save_survey'); ?>
 
         <?php if ($is_edit): ?>
             <input type="hidden" name="survey_id" value="<?php echo esc_attr($survey['id']); ?>">
@@ -32,12 +32,12 @@ $page_title = $is_edit ? __('Edit Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('
 
         <!-- Survey Details Card -->
         <div class="survey-card">
-            <h3 class="card-title"><?php echo esc_html__('Survey Details', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h3>
+            <h3 class="card-title"><?php echo esc_html__('Survey Details', FLOWQ_TEXT_DOMAIN); ?></h3>
             <div class="card-content">
                 <div class="form-field">
                     <label for="survey_title" class="field-label">
-                        <?php echo esc_html__('Survey Title', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
-                        <span class="help-tooltip" data-tooltip="<?php echo esc_attr__('Enter a descriptive title for your survey. This will be displayed to participants.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
+                        <?php echo esc_html__('Survey Title', FLOWQ_TEXT_DOMAIN); ?>
+                        <span class="help-tooltip" data-tooltip="<?php echo esc_attr__('Enter a descriptive title for your survey. This will be displayed to participants.', FLOWQ_TEXT_DOMAIN); ?>">
                             <span class="dashicons dashicons-editor-help"></span>
                         </span>
                     </label>
@@ -46,14 +46,14 @@ $page_title = $is_edit ? __('Edit Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('
                            name="survey_title"
                            class="full-width-input"
                            value="<?php echo esc_attr($survey['title'] ?? ''); ?>"
-                           placeholder="<?php echo esc_attr__('Enter your survey title...', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>"
+                           placeholder="<?php echo esc_attr__('Enter your survey title...', FLOWQ_TEXT_DOMAIN); ?>"
                            required>
                 </div>
 
                 <div class="form-field">
                     <label for="survey_description" class="field-label">
-                        <?php echo esc_html__('Description', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
-                        <span class="help-tooltip" data-tooltip="<?php echo esc_attr__('Optional description explaining what this survey is about. Participants will see this before starting.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
+                        <?php echo esc_html__('Description', FLOWQ_TEXT_DOMAIN); ?>
+                        <span class="help-tooltip" data-tooltip="<?php echo esc_attr__('Optional description explaining what this survey is about. Participants will see this before starting.', FLOWQ_TEXT_DOMAIN); ?>">
                             <span class="dashicons dashicons-editor-help"></span>
                         </span>
                     </label>
@@ -61,14 +61,14 @@ $page_title = $is_edit ? __('Edit Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('
                               name="survey_description"
                               class="full-width-textarea"
                               rows="4"
-                              placeholder="<?php echo esc_attr__('Describe what this survey is about...', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>"><?php echo esc_textarea($survey['description'] ?? ''); ?></textarea>
+                              placeholder="<?php echo esc_attr__('Describe what this survey is about...', FLOWQ_TEXT_DOMAIN); ?>"><?php echo esc_textarea($survey['description'] ?? ''); ?></textarea>
                 </div>
             </div>
         </div>
 
         <!-- Display Settings Card -->
         <div class="survey-card">
-            <h3 class="card-title"><?php echo esc_html__('Display Settings', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h3>
+            <h3 class="card-title"><?php echo esc_html__('Display Settings', FLOWQ_TEXT_DOMAIN); ?></h3>
             <div class="card-content">
                 <div>
                     <label class="checkbox-label">
@@ -77,19 +77,19 @@ $page_title = $is_edit ? __('Edit Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('
                                name="show_header"
                                value="1"
                                <?php checked(!empty($survey['show_header']), true); ?>>
-                        <?php echo esc_html__('Show Custom Header and Subtitle', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        <?php echo esc_html__('Show Custom Header and Subtitle', FLOWQ_TEXT_DOMAIN); ?>
                     </label>
                     <p class="field-description">
-                        <?php echo esc_html__('Display a custom header and subtitle at the top of the participant form instead of the survey title', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        <?php echo esc_html__('Display a custom header and subtitle at the top of the participant form instead of the survey title', FLOWQ_TEXT_DOMAIN); ?>
                     </p>
                 </div>
 
                 <div id="header-fields-container" style="display: none; margin-top: 30px;">
                     <div class="form-field">
                         <label for="form_header" class="field-label">
-                            <?php echo esc_html__('Survey Form Header', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                            <?php echo esc_html__('Survey Form Header', FLOWQ_TEXT_DOMAIN); ?>
                             <span style="color: #dc3232;">*</span>
-                            <span class="help-tooltip" data-tooltip="<?php echo esc_attr__('Main heading displayed at the top of the participant form (max 255 characters)', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
+                            <span class="help-tooltip" data-tooltip="<?php echo esc_attr__('Main heading displayed at the top of the participant form (max 255 characters)', FLOWQ_TEXT_DOMAIN); ?>">
                                 <span class="dashicons dashicons-editor-help"></span>
                             </span>
                         </label>
@@ -98,17 +98,17 @@ $page_title = $is_edit ? __('Edit Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('
                                name="form_header"
                                class="full-width-input"
                                value="<?php echo esc_attr($survey['form_header'] ?? ''); ?>"
-                               placeholder="<?php echo esc_attr__('e.g., Help Us Improve Your Experience', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>"
+                               placeholder="<?php echo esc_attr__('e.g., Help Us Improve Your Experience', FLOWQ_TEXT_DOMAIN); ?>"
                                maxlength="255">
                         <p class="field-description character-count">
-                            <span id="header-char-count">0</span> / 255 <?php echo esc_html__('characters', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                            <span id="header-char-count">0</span> / 255 <?php echo esc_html__('characters', FLOWQ_TEXT_DOMAIN); ?>
                         </p>
                     </div>
 
                     <div class="form-field">
                         <label for="form_subtitle" class="field-label">
-                            <?php echo esc_html__('Survey Form Subtitle', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
-                            <span class="help-tooltip" data-tooltip="<?php echo esc_attr__('Subtitle displayed below the header (optional)', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
+                            <?php echo esc_html__('Survey Form Subtitle', FLOWQ_TEXT_DOMAIN); ?>
+                            <span class="help-tooltip" data-tooltip="<?php echo esc_attr__('Subtitle displayed below the header (optional)', FLOWQ_TEXT_DOMAIN); ?>">
                                 <span class="dashicons dashicons-editor-help"></span>
                             </span>
                         </label>
@@ -127,7 +127,7 @@ $page_title = $is_edit ? __('Edit Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('
                         ));
                         ?>
                         <p class="field-description">
-                            <?php echo esc_html__('e.g., Your feedback matters! Take 2 minutes to share your thoughts.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                            <?php echo esc_html__('e.g., Your feedback matters! Take 2 minutes to share your thoughts.', FLOWQ_TEXT_DOMAIN); ?>
                         </p>
                     </div>
                 </div>
@@ -136,12 +136,12 @@ $page_title = $is_edit ? __('Edit Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('
 
         <!-- Page Settings Card -->
         <div class="survey-card">
-            <h3 class="card-title"><?php echo esc_html__('Page Settings', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h3>
+            <h3 class="card-title"><?php echo esc_html__('Page Settings', FLOWQ_TEXT_DOMAIN); ?></h3>
             <div class="card-content">
                 <div class="form-field">
                     <label for="thank_you_page_slug" class="field-label">
-                        <?php echo esc_html__('Thank You Page', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
-                        <span class="help-tooltip" data-tooltip="<?php echo esc_attr__('Optional: Select an existing published page. After completion, participants get a secure token to access this page (expires in 1 hour).', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
+                        <?php echo esc_html__('Thank You Page', FLOWQ_TEXT_DOMAIN); ?>
+                        <span class="help-tooltip" data-tooltip="<?php echo esc_attr__('Optional: Select an existing published page. After completion, participants get a secure token to access this page (expires in 1 hour).', FLOWQ_TEXT_DOMAIN); ?>">
                             <span class="dashicons dashicons-editor-help"></span>
                         </span>
                     </label>
@@ -159,7 +159,7 @@ $page_title = $is_edit ? __('Edit Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('
                         <select id="thank_you_page_slug"
                                 name="thank_you_page_slug"
                                 class="full-width-select">
-                            <option value=""><?php echo esc_html__('-- Select a page --', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></option>
+                            <option value=""><?php echo esc_html__('-- Select a page --', FLOWQ_TEXT_DOMAIN); ?></option>
                             <?php foreach ($pages as $page):
                                 $page_slug = $page->post_name;
                                 $page_title = $page->post_title;
@@ -187,7 +187,7 @@ $page_title = $is_edit ? __('Edit Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('
                                target="_blank"
                                style="<?php echo empty($current_slug) ? 'display:none;' : ''; ?>">
                                 <span class="dashicons dashicons-edit"></span>
-                                <?php echo esc_html__('Edit Page', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                <?php echo esc_html__('Edit Page', FLOWQ_TEXT_DOMAIN); ?>
                             </a>
                         <?php else: ?>
                             <a href="#"
@@ -196,31 +196,31 @@ $page_title = $is_edit ? __('Edit Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('
                                target="_blank"
                                style="display:none;">
                                 <span class="dashicons dashicons-edit"></span>
-                                <?php echo esc_html__('Edit Page', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                <?php echo esc_html__('Edit Page', FLOWQ_TEXT_DOMAIN); ?>
                             </a>
                         <?php endif; ?>
                     </div>
                     <p class="field-description">
-                        <?php echo esc_html__('⭐ Pages marked with a star contain "Thank You" in their title', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        <?php echo esc_html__('⭐ Pages marked with a star contain "Thank You" in their title', FLOWQ_TEXT_DOMAIN); ?>
                     </p>
                 </div>
 
                 <div class="form-field">
                     <label for="survey_status" class="field-label">
-                        <?php echo esc_html__('Status', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
-                        <span class="help-tooltip" data-tooltip="<?php echo esc_attr__('Draft: Hidden from participants. Published: Live and accessible. Archived: No longer accepting responses.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>">
+                        <?php echo esc_html__('Status', FLOWQ_TEXT_DOMAIN); ?>
+                        <span class="help-tooltip" data-tooltip="<?php echo esc_attr__('Draft: Hidden from participants. Published: Live and accessible. Archived: No longer accepting responses.', FLOWQ_TEXT_DOMAIN); ?>">
                             <span class="dashicons dashicons-editor-help"></span>
                         </span>
                     </label>
                     <select id="survey_status" name="survey_status" class="status-select">
                         <option value="draft" <?php selected($survey['status'] ?? 'draft', 'draft'); ?>>
-                            <?php echo esc_html__('Draft', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                            <?php echo esc_html__('Draft', FLOWQ_TEXT_DOMAIN); ?>
                         </option>
                         <option value="published" <?php selected($survey['status'] ?? '', 'published'); ?>>
-                            <?php echo esc_html__('Published', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                            <?php echo esc_html__('Published', FLOWQ_TEXT_DOMAIN); ?>
                         </option>
                         <option value="archived" <?php selected($survey['status'] ?? '', 'archived'); ?>>
-                            <?php echo esc_html__('Archived', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                            <?php echo esc_html__('Archived', FLOWQ_TEXT_DOMAIN); ?>
                         </option>
                     </select>
                 </div>
@@ -231,12 +231,12 @@ $page_title = $is_edit ? __('Edit Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('
         <div class="action-buttons">
             <div class="primary-actions">
                 <button type="submit" name="submit" class="button button-primary-custom">
-                    <?php echo $is_edit ? __('Update Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('Create Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                    <?php echo $is_edit ? __('Update Survey', FLOWQ_TEXT_DOMAIN) : __('Create Survey', FLOWQ_TEXT_DOMAIN); ?>
                 </button>
                 <?php if ($is_edit): ?>
-                    <a href="<?php echo esc_url(admin_url('admin.php?page=wp-dynamic-surveys-questions&survey_id=' . $survey['id'])); ?>" class="button button-secondary-custom">
+                    <a href="<?php echo esc_url(admin_url('admin.php?page=flowq-questions&survey_id=' . $survey['id'])); ?>" class="button button-secondary-custom">
                         <span class="dashicons dashicons-edit"></span>
-                        <?php echo esc_html__('Manage Questions', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                        <?php echo esc_html__('Manage Questions', FLOWQ_TEXT_DOMAIN); ?>
                     </a>
                 <?php endif; ?>
             </div>
@@ -246,36 +246,36 @@ $page_title = $is_edit ? __('Edit Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('
     <?php if ($is_edit): ?>
         <!-- Survey Actions Card -->
         <div class="survey-card actions-card">
-            <h3 class="card-title"><?php echo esc_html__('Survey Actions', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h3>
+            <h3 class="card-title"><?php echo esc_html__('Survey Actions', FLOWQ_TEXT_DOMAIN); ?></h3>
             <div class="card-content">
                 <?php if ($survey['status'] === 'published'): ?>
                     <!-- Analytics Section -->
                     <div class="action-section">
                         <div class="action-item">
-                            <a href="<?php echo esc_url(admin_url('admin.php?page=wp-dynamic-surveys-analytics&survey_id=' . $survey['id'])); ?>"
+                            <a href="<?php echo esc_url(admin_url('admin.php?page=flowq-analytics&survey_id=' . $survey['id'])); ?>"
                                class="button button-secondary-custom analytics-button">
                                 <span class="dashicons dashicons-chart-bar"></span>
-                                <?php echo esc_html__('View Analytics', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                <?php echo esc_html__('View Analytics', FLOWQ_TEXT_DOMAIN); ?>
                             </a>
                         </div>
                     </div>
 
                     <!-- Shortcode Section -->
                     <div class="action-section">
-                        <label class="field-label"><?php echo esc_html__('Shortcode', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></label>
+                        <label class="field-label"><?php echo esc_html__('Shortcode', FLOWQ_TEXT_DOMAIN); ?></label>
                         <div class="shortcode-container form-field">
                             <input type="text"
                                    id="shortcode-input"
                                    class="shortcode-input"
-                                   value="<?php echo esc_attr('[wp_dynamic_survey id="' . $survey['id'] . '"]'); ?>"
+                                   value="<?php echo esc_attr('[dynamic_survey id="' . $survey['id'] . '"]'); ?>"
                                    readonly>
                             <button type="button" class="button copy-button" onclick="copyShortcode()">
                                 <span class="dashicons dashicons-clipboard"></span>
-                                <?php echo esc_html__('Copy', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                <?php echo esc_html__('Copy', FLOWQ_TEXT_DOMAIN); ?>
                             </button>
                         </div>
                         <p class="field-description">
-                            <?php echo esc_html__('Use this shortcode to embed the survey in any post or page.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                            <?php echo esc_html__('Use this shortcode to embed the survey in any post or page.', FLOWQ_TEXT_DOMAIN); ?>
                         </p>
                     </div>
                 <?php endif; ?>
@@ -283,15 +283,15 @@ $page_title = $is_edit ? __('Edit Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN) : __('
                 <?php if ($survey['status'] !== 'published'): ?>
                 <!-- Danger Zone -->
                 <div class="action-section danger-zone">
-                    <label class="field-label danger-label"><?php echo esc_html__('Danger Zone', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></label>
+                    <label class="field-label danger-label"><?php echo esc_html__('Danger Zone', FLOWQ_TEXT_DOMAIN); ?></label>
                     <div class="danger-actions">
-                        <a href="<?php echo esc_url(wp_nonce_url(admin_url('admin.php?page=wp-dynamic-surveys&action=delete&survey_id=' . $survey['id']), 'survey_action')); ?>"
+                        <a href="<?php echo esc_url(wp_nonce_url(admin_url('admin.php?page=flowq&action=delete&survey_id=' . $survey['id']), 'survey_action')); ?>"
                            class="button button-danger"
-                           onclick="return confirm('<?php echo esc_html__('Are you sure you want to delete this survey? This action cannot be undone.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>')">
+                           onclick="return confirm('<?php echo esc_html__('Are you sure you want to delete this survey? This action cannot be undone.', FLOWQ_TEXT_DOMAIN); ?>')">
                             <span class="dashicons dashicons-trash"></span>
-                            <?php echo esc_html__('Delete Survey', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                            <?php echo esc_html__('Delete Survey', FLOWQ_TEXT_DOMAIN); ?>
                         </a>
-                        <span class="danger-description"><?php echo esc_html__('This action cannot be undone.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
+                        <span class="danger-description"><?php echo esc_html__('This action cannot be undone.', FLOWQ_TEXT_DOMAIN); ?></span>
                     </div>
                 </div>
                 <?php endif; ?>
@@ -748,7 +748,7 @@ function copyShortcode() {
         // Show success feedback
         button.classList.add('copy-success');
         const originalText = button.innerHTML;
-        button.innerHTML = '<span class="dashicons dashicons-yes"></span><?php echo esc_html__('Copied!', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>';
+        button.innerHTML = '<span class="dashicons dashicons-yes"></span><?php echo esc_html__('Copied!', FLOWQ_TEXT_DOMAIN); ?>';
 
         // Reset after 2 seconds
         setTimeout(function() {
@@ -759,14 +759,14 @@ function copyShortcode() {
         // Fallback for older browsers
         input.select();
         document.execCommand('copy');
-        alert('<?php echo esc_html__('Shortcode copied to clipboard!', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>');
+        alert('<?php echo esc_html__('Shortcode copied to clipboard!', FLOWQ_TEXT_DOMAIN); ?>');
     });
 }
 
 // Legacy function for compatibility
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(function() {
-        alert('<?php echo esc_html__('Shortcode copied to clipboard!', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>');
+        alert('<?php echo esc_html__('Shortcode copied to clipboard!', FLOWQ_TEXT_DOMAIN); ?>');
     });
 }
 
@@ -858,7 +858,7 @@ jQuery(document).ready(function($) {
 
             if (headerValue === '') {
                 e.preventDefault();
-                alert('<?php echo esc_js(__('Survey Form Header is required when Show Custom Header is enabled', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>');
+                alert('<?php echo esc_js(__('Survey Form Header is required when Show Custom Header is enabled', FLOWQ_TEXT_DOMAIN)); ?>');
                 $formHeaderInput.focus();
 
                 // Scroll to the field

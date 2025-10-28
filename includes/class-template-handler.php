@@ -2,7 +2,7 @@
 /**
  * Template Handler for WP Dynamic Survey Plugin
  *
- * @package WP_Dynamic_Survey
+ * @package FlowQ
  */
 
 // Prevent direct access
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 /**
  * Template Handler class
  */
-class WP_Dynamic_Survey_Template_Handler {
+class FlowQ_Template_Handler {
 
     /**
      * Get active template from database
@@ -22,10 +22,10 @@ class WP_Dynamic_Survey_Template_Handler {
      */
     public function get_active_template() {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'wp_dynamic_survey_templates';
+        $table_name = $wpdb->prefix . 'flowq_templates';
 
         // Get active template ID
-        $active_template_id = get_option('wp_dynamic_survey_active_template', 1);
+        $active_template_id = get_option('flowq_active_template', 1);
 
         // Fetch template from database
         $template = $wpdb->get_row(

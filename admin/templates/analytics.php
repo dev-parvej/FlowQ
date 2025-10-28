@@ -2,7 +2,7 @@
 /**
  * Analytics Dashboard Template
  *
- * @package WP_Dynamic_Survey
+ * @package FlowQ
  */
 
 // Prevent direct access
@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
 }
 ?>
 <div class="wrap">
-    <h1><?php echo esc_html__('Survey Analytics', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h1>
+    <h1><?php echo esc_html__('Survey Analytics', FLOWQ_TEXT_DOMAIN); ?></h1>
 
     <div class="analytics-wrapper">
         <!-- Survey Selection -->
@@ -19,9 +19,9 @@ if (!defined('ABSPATH')) {
             <form method="get" action="" class="survey-selector">
                 <input type="hidden" name="page" value="<?php echo esc_attr($_GET['page']); ?>">
 
-                <label for="survey_id"><?php echo esc_html__('Select Survey:', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></label>
+                <label for="survey_id"><?php echo esc_html__('Select Survey:', FLOWQ_TEXT_DOMAIN); ?></label>
                 <select name="survey_id" id="survey_id" onchange="this.form.submit()">
-                    <option value=""><?php echo esc_html__('-- Choose a Survey --', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></option>
+                    <option value=""><?php echo esc_html__('-- Choose a Survey --', FLOWQ_TEXT_DOMAIN); ?></option>
                     <?php foreach ($surveys as $survey): ?>
                         <option value="<?php echo esc_attr($survey['id']); ?>"
                                 <?php selected($selected_survey_id, $survey['id']); ?>>
@@ -40,7 +40,7 @@ if (!defined('ABSPATH')) {
                             <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
                             <path d="M12,19L8,15H10.5V12H13.5V15H16L12,19Z"/>
                         </svg>
-                        <span class="export-text"><?php echo esc_html__('Export CSV', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></span>
+                        <span class="export-text"><?php echo esc_html__('Export CSV', FLOWQ_TEXT_DOMAIN); ?></span>
                     </button>
                 </div>
             <?php endif; ?>
@@ -58,8 +58,8 @@ if (!defined('ABSPATH')) {
                         <div class="stat-number">
                             <?php echo esc_html(number_format($analytics_data['survey_stats']['total_participants'])); ?>
                         </div>
-                        <div class="stat-label"><?php echo esc_html__('Total Participants', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></div>
-                        <div class="click-hint"><?php echo esc_html__('Click to view details', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></div>
+                        <div class="stat-label"><?php echo esc_html__('Total Participants', FLOWQ_TEXT_DOMAIN); ?></div>
+                        <div class="click-hint"><?php echo esc_html__('Click to view details', FLOWQ_TEXT_DOMAIN); ?></div>
                     </div>
 
                     <div class="stat-card stat-card-completed">
@@ -71,7 +71,7 @@ if (!defined('ABSPATH')) {
                         <div class="stat-number">
                             <?php echo esc_html(number_format($analytics_data['survey_stats']['completed_participants'])); ?>
                         </div>
-                        <div class="stat-label"><?php echo esc_html__('Completed Responses', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></div>
+                        <div class="stat-label"><?php echo esc_html__('Completed Responses', FLOWQ_TEXT_DOMAIN); ?></div>
                     </div>
 
                     <div class="stat-card stat-card-rate">
@@ -83,7 +83,7 @@ if (!defined('ABSPATH')) {
                         <div class="stat-number">
                             <?php echo esc_html($analytics_data['survey_stats']['completion_rate'] . '%'); ?>
                         </div>
-                        <div class="stat-label"><?php echo esc_html__('Completion Rate', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></div>
+                        <div class="stat-label"><?php echo esc_html__('Completion Rate', FLOWQ_TEXT_DOMAIN); ?></div>
                     </div>
 
                     <div class="stat-card stat-card-time">
@@ -99,14 +99,14 @@ if (!defined('ABSPATH')) {
                             echo esc_html(round($avg_time, 1) . ' min');
                             ?>
                         </div>
-                        <div class="stat-label"><?php echo esc_html__('Avg. Completion Time', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></div>
+                        <div class="stat-label"><?php echo esc_html__('Avg. Completion Time', FLOWQ_TEXT_DOMAIN); ?></div>
                     </div>
                 </div>
             </div>
 
             <!-- Question Analytics -->
             <div class="question-analytics">
-                <h2><?php echo esc_html__('Question Analytics', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h2>
+                <h2><?php echo esc_html__('Question Analytics', FLOWQ_TEXT_DOMAIN); ?></h2>
 
                 <?php foreach ($analytics_data['question_stats'] as $index => $question_stat): ?>
                     <?php $question = $analytics_data['questions'][$index]; ?>
@@ -122,7 +122,7 @@ if (!defined('ABSPATH')) {
                             <div class="question-meta">
                                 <div class="response-count-badge">
                                     <?php echo esc_html(number_format($question_stat['total_responses'])); ?>
-                                    <?php echo esc_html__('responses', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?>
+                                    <?php echo esc_html__('responses', FLOWQ_TEXT_DOMAIN); ?>
                                 </div>
                             </div>
                         </div>
@@ -136,14 +136,14 @@ if (!defined('ABSPATH')) {
 
                             <!-- Answer Distribution Table -->
                             <div class="answer-distribution">
-                                <h4><?php echo esc_html__('Answer Distribution', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h4>
+                                <h4><?php echo esc_html__('Answer Distribution', FLOWQ_TEXT_DOMAIN); ?></h4>
                                 <div class="analytics-table-container">
                                     <table class="analytics-table">
                                         <thead>
                                             <tr>
-                                                <th class="answer-column"><?php echo esc_html__('Answer', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></th>
-                                                <th class="count-column"><?php echo esc_html__('Count', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></th>
-                                                <th class="percentage-column"><?php echo esc_html__('Percentage', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></th>
+                                                <th class="answer-column"><?php echo esc_html__('Answer', FLOWQ_TEXT_DOMAIN); ?></th>
+                                                <th class="count-column"><?php echo esc_html__('Count', FLOWQ_TEXT_DOMAIN); ?></th>
+                                                <th class="percentage-column"><?php echo esc_html__('Percentage', FLOWQ_TEXT_DOMAIN); ?></th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -172,7 +172,7 @@ if (!defined('ABSPATH')) {
                         <?php if (!empty($question_stat['text_responses'])): ?>
                             <!-- Text Responses -->
                             <div class="text-responses">
-                                <h4><?php echo esc_html__('Recent Text Responses', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h4>
+                                <h4><?php echo esc_html__('Recent Text Responses', FLOWQ_TEXT_DOMAIN); ?></h4>
                                 <div class="text-responses-list">
                                     <?php foreach (array_slice($question_stat['text_responses'], 0, 10) as $response): ?>
                                         <div class="text-response-item">
@@ -190,7 +190,7 @@ if (!defined('ABSPATH')) {
                                     <p class="more-responses">
                                         <?php
                                         echo esc_html(sprintf(
-                                            __('+ %d more responses (export CSV to see all)', WP_DYNAMIC_SURVEY_TEXT_DOMAIN),
+                                            __('+ %d more responses (export CSV to see all)', FLOWQ_TEXT_DOMAIN),
                                             count($question_stat['text_responses']) - 10
                                         ));
                                         ?>
@@ -205,8 +205,8 @@ if (!defined('ABSPATH')) {
         <?php elseif ($selected_survey_id): ?>
             <!-- No Data Message -->
             <div class="no-data-message">
-                <p><?php echo esc_html__('No analytics data available for this survey yet.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></p>
-                <p><?php echo esc_html__('Data will appear here once participants start completing the survey.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></p>
+                <p><?php echo esc_html__('No analytics data available for this survey yet.', FLOWQ_TEXT_DOMAIN); ?></p>
+                <p><?php echo esc_html__('Data will appear here once participants start completing the survey.', FLOWQ_TEXT_DOMAIN); ?></p>
             </div>
 
         <?php else: ?>
@@ -214,8 +214,8 @@ if (!defined('ABSPATH')) {
             <div class="no-survey-selected">
                 <div class="placeholder-content">
                     <span class="dashicons dashicons-chart-bar"></span>
-                    <h3><?php echo esc_html__('Select a Survey to View Analytics', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></h3>
-                    <p><?php echo esc_html__('Choose a published survey from the dropdown above to see detailed analytics and response data.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN); ?></p>
+                    <h3><?php echo esc_html__('Select a Survey to View Analytics', FLOWQ_TEXT_DOMAIN); ?></h3>
+                    <p><?php echo esc_html__('Choose a published survey from the dropdown above to see detailed analytics and response data.', FLOWQ_TEXT_DOMAIN); ?></p>
                 </div>
             </div>
         <?php endif; ?>
@@ -230,16 +230,16 @@ jQuery(document).ready(function($) {
         var button = $(this);
 
         button.prop('disabled', true);
-        button.find('.export-text').text('<?php echo esc_js(__('Exporting...', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>');
+        button.find('.export-text').text('<?php echo esc_js(__('Exporting...', FLOWQ_TEXT_DOMAIN)); ?>');
 
         $.ajax({
             url: ajaxurl,
             type: 'POST',
             data: {
-                action: 'wp_dynamic_survey_admin_action',
+                action: 'flowq_admin_action',
                 admin_action: 'export_responses',
                 survey_id: surveyId,
-                nonce: wpDynamicSurveyAdmin.nonce
+                nonce: flowqAdmin.nonce
             },
             success: function(response) {
                 if (response.success) {
@@ -263,15 +263,15 @@ jQuery(document).ready(function($) {
                         document.body.removeChild(link);
                     }
                 } else {
-                    alert('<?php echo esc_js(__('Export failed. Please try again.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>');
+                    alert('<?php echo esc_js(__('Export failed. Please try again.', FLOWQ_TEXT_DOMAIN)); ?>');
                 }
             },
             error: function() {
-                alert('<?php echo esc_js(__('Export failed. Please try again.', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>');
+                alert('<?php echo esc_js(__('Export failed. Please try again.', FLOWQ_TEXT_DOMAIN)); ?>');
             },
             complete: function() {
                 button.prop('disabled', false);
-                button.find('.export-text').text('<?php echo esc_js(__('Export CSV', WP_DYNAMIC_SURVEY_TEXT_DOMAIN)); ?>');
+                button.find('.export-text').text('<?php echo esc_js(__('Export CSV', FLOWQ_TEXT_DOMAIN)); ?>');
             }
         });
     });
