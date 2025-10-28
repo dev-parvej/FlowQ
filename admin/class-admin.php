@@ -34,7 +34,9 @@ class FlowQ_Admin {
         'add_survey' => 'flowq-add',
         'questions' => 'flowq-questions',
         'participants' => 'flowq-participants',
-        'analytics' => 'flowq-analytics'
+        'analytics' => 'flowq-analytics',
+        'contact' => 'flowq-contact',
+        'user_guide' => 'flowq-user-guide'
     );
 
     /**
@@ -140,6 +142,26 @@ class FlowQ_Admin {
             'manage_options',
             $this->menu_slugs['analytics'],
             array($this, 'display_analytics_page')
+        );
+
+        // Contact / Hire Developer submenu
+        add_submenu_page(
+            $this->menu_slugs['main'],
+            __('Contact Developer', FLOWQ_TEXT_DOMAIN),
+            __('Hire Developer', FLOWQ_TEXT_DOMAIN),
+            'manage_options',
+            $this->menu_slugs['contact'],
+            array($this, 'display_contact_page')
+        );
+
+        // User Guide submenu
+        add_submenu_page(
+            $this->menu_slugs['main'],
+            __('User Guide', FLOWQ_TEXT_DOMAIN),
+            __('User Guide', FLOWQ_TEXT_DOMAIN),
+            'manage_options',
+            $this->menu_slugs['user_guide'],
+            array($this, 'display_user_guide_page')
         );
 
     }
@@ -288,6 +310,22 @@ class FlowQ_Admin {
 
         // Include template
         include FLOWQ_PATH . 'admin/templates/analytics.php';
+    }
+
+    /**
+     * Display Contact/Hire Developer page
+     */
+    public function display_contact_page() {
+        // Include template
+        include FLOWQ_PATH . 'admin/templates/contact-page.php';
+    }
+
+    /**
+     * Display User Guide page
+     */
+    public function display_user_guide_page() {
+        // Include template
+        include FLOWQ_PATH . 'admin/templates/user-guide-page.php';
     }
 
     /**

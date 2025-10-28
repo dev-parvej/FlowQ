@@ -4,11 +4,11 @@
  * Plugin URI: https://github.com/dev-parvej/FlowQ
  * Description: Create intelligent, dynamic surveys that adapt in real-time to user responses. Engage your audience with interactive question flows built right inside WordPress.
  * Version: 1.0.0
- * Author: Your Name
- * Author URI: https://github.com/dev-parvej/FlowQ
+ * Author: Parvej Ahammad
+ * Author URI: https://www.linkedin.com/in/dev-parvej
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: https://github.com/dev-parvej/FlowQ
+ * Text Domain: wp-dynamic-survey
  * Domain Path: /languages
  * Requires at least: 5.0
  * Tested up to: 6.3
