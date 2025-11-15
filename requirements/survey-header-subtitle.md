@@ -155,7 +155,7 @@ $form_subtitle = sanitize_textarea_field($_POST['form_subtitle']);
 
 // Validation
 if ($show_header && empty($form_header)) {
-    return new WP_Error('required_field', __('Survey Form Header is required when Show Custom Header is enabled', 'wp-dynamic-survey'));
+    return new WP_Error('required_field', __('Survey Form Header is required when Show Custom Header is enabled', 'flowq'));
 }
 
 // Save to database

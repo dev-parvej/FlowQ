@@ -11,22 +11,22 @@ if (!defined('ABSPATH')) {
 }
 ?>
 
-<div class="wrap wp-dynamic-survey-settings">
+<div class="wrap flowq-settings">
     <div class="settings-wrapper">
         <div class="settings-header">
             <div class="header-content">
                 <h1 class="page-title">
-                    <?php echo esc_html__('Settings', FLOWQ_TEXT_DOMAIN); ?>
+                    <?php echo esc_html__('Settings', 'flowq'); ?>
                 </h1>
                 <p class="page-subtitle">
-                    <?php echo esc_html__('Configure your survey plugin settings', FLOWQ_TEXT_DOMAIN); ?>
+                    <?php echo esc_html__('Configure your survey plugin settings', 'flowq'); ?>
                 </p>
             </div>
         </div>
 
-        <?php if (isset($_GET['settings-updated']) && $_GET['settings-updated'] === 'true'): ?>
+        <?php if (isset($_GET['settings-updated']) && sanitize_text_field($_GET['settings-updated']) === 'true'): ?>
             <div class="notice notice-success is-dismissible">
-                <p><?php echo esc_html__('Settings saved successfully.', FLOWQ_TEXT_DOMAIN); ?></p>
+                <p><?php echo esc_html__('Settings saved successfully.', 'flowq'); ?></p>
             </div>
         <?php endif; ?>
 

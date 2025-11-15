@@ -12,7 +12,7 @@
     /**
      * Survey Utilities Namespace
      */
-    window.WPDynamicSurveyUtils = {
+    window.FlowQUtils = {
 
         /**
          * DOM Utilities

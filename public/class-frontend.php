@@ -72,15 +72,31 @@ class FlowQ_Frontend {
 
         // Frontend CSS
         wp_enqueue_style(
-            'wp-dynamic-survey-frontend',
+            'flowq-frontend',
             FLOWQ_URL . 'assets/css/frontend.css',
             array(),
             FLOWQ_VERSION
         );
 
+        // Participant form CSS
+        wp_enqueue_style(
+            'flowq-participant-form',
+            FLOWQ_URL . 'assets/css/participant-form.css',
+            array('flowq-frontend'),
+            FLOWQ_VERSION
+        );
+
+        // Survey container CSS
+        wp_enqueue_style(
+            'flowq-survey-container',
+            FLOWQ_URL . 'assets/css/survey-container.css',
+            array('flowq-frontend'),
+            FLOWQ_VERSION
+        );
+
         // Survey utilities (loaded first)
         wp_enqueue_script(
-            'wp-dynamic-survey-utils',
+            'flowq-utils',
             FLOWQ_URL . 'assets/js/survey-utils.js',
             array(),
             FLOWQ_VERSION,
@@ -89,24 +105,24 @@ class FlowQ_Frontend {
 
         // Enhanced frontend JavaScript
         wp_enqueue_script(
-            'wp-dynamic-survey-frontend-enhanced',
+            'flowq-frontend-enhanced',
             FLOWQ_URL . 'assets/js/frontend-enhanced.js',
-            array('jquery', 'wp-dynamic-survey-utils'),
+            array('jquery', 'flowq-utils'),
             FLOWQ_VERSION,
             true
         );
 
         // Original frontend JavaScript (for backward compatibility)
         wp_enqueue_script(
-            'wp-dynamic-survey-frontend',
+            'flowq-frontend',
             FLOWQ_URL . 'assets/js/frontend.js',
-            array('jquery', 'wp-dynamic-survey-frontend-enhanced'),
+            array('jquery', 'flowq-frontend-enhanced'),
             FLOWQ_VERSION,
             true
         );
 
         // Localize script for AJAX
-        wp_localize_script('wp-dynamic-survey-frontend', 'flowq', array(
+        wp_localize_script('flowq-frontend', 'flowq', array(
             'ajaxurl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('flowq_frontend_nonce'),
             'debug' => defined('WP_DEBUG') && WP_DEBUG,
@@ -123,19 +139,19 @@ class FlowQ_Frontend {
                 'cacheTimeout' => 300000
             ),
             'strings' => array(
-                'loading' => __('Loading...', FLOWQ_TEXT_DOMAIN),
-                'submitting' => __('Submitting...', FLOWQ_TEXT_DOMAIN),
-                'error' => __('An error occurred. Please try again.', FLOWQ_TEXT_DOMAIN),
-                'required_field' => __('This field is required.', FLOWQ_TEXT_DOMAIN),
-                'invalid_email' => __('Please enter a valid email address.', FLOWQ_TEXT_DOMAIN),
-                'invalid_phone' => __('Please enter a valid phone number.', FLOWQ_TEXT_DOMAIN),
-                'thank_you' => __('Thank you for participating!', FLOWQ_TEXT_DOMAIN),
-                'session_expired' => __('Your session has expired. Please start over.', FLOWQ_TEXT_DOMAIN),
-                'network_error' => __('Network error. Please check your connection.', FLOWQ_TEXT_DOMAIN),
-                'validation_error' => __('Please fix the errors below.', FLOWQ_TEXT_DOMAIN),
-                'save_progress' => __('Progress saved automatically.', FLOWQ_TEXT_DOMAIN),
-                'offline_mode' => __('You are offline. Responses will be saved locally.', FLOWQ_TEXT_DOMAIN),
-                'back_online' => __('Connection restored. Syncing responses...', FLOWQ_TEXT_DOMAIN)
+                'loading' => __('Loading...', 'flowq'),
+                'submitting' => __('Submitting...', 'flowq'),
+                'error' => __('An error occurred. Please try again.', 'flowq'),
+                'required_field' => __('This field is required.', 'flowq'),
+                'invalid_email' => __('Please enter a valid email address.', 'flowq'),
+                'invalid_phone' => __('Please enter a valid phone number.', 'flowq'),
+                'thank_you' => __('Thank you for participating!', 'flowq'),
+                'session_expired' => __('Your session has expired. Please start over.', 'flowq'),
+                'network_error' => __('Network error. Please check your connection.', 'flowq'),
+                'validation_error' => __('Please fix the errors below.', 'flowq'),
+                'save_progress' => __('Progress saved automatically.', 'flowq'),
+                'offline_mode' => __('You are offline. Responses will be saved locally.', 'flowq'),
+                'back_online' => __('Connection restored. Syncing responses...', 'flowq')
             )
         ));
     }
@@ -164,6 +180,9 @@ class FlowQ_Frontend {
      * Register shortcodes
      */
     public function register_shortcodes() {
+        // Primary shortcode with proper prefix
+        add_shortcode('flowq_survey', array($this, 'render_survey_shortcode'));
+        // Legacy shortcode support
         add_shortcode('dynamic_survey', array($this, 'render_survey_shortcode'));
     }
 
@@ -180,8 +199,8 @@ class FlowQ_Frontend {
         $theme = sanitize_text_field($atts['theme']);
 
         if (!$survey_id) {
-            return '<div class="wp-dynamic-survey-error">' .
-                   esc_html__('Survey ID is required.', FLOWQ_TEXT_DOMAIN) .
+            return '<div class="flowq-error">' .
+                   esc_html__('Survey ID is required.', 'flowq') .
                    '</div>';
         }
 
@@ -196,14 +215,14 @@ class FlowQ_Frontend {
         $survey = $survey_manager->get_survey($survey_id);
 
         if (!$survey) {
-            return '<div class="wp-dynamic-survey-error">' .
-                   esc_html__('Survey not found.', FLOWQ_TEXT_DOMAIN) .
+            return '<div class="flowq-error">' .
+                   esc_html__('Survey not found.', 'flowq') .
                    '</div>';
         }
 
         if ($survey['status'] !== 'published') {
-            return '<div class="wp-dynamic-survey-error">' .
-                   esc_html__('This survey is not currently available.', FLOWQ_TEXT_DOMAIN) .
+            return '<div class="flowq-error">' .
+                   esc_html__('This survey is not currently available.', 'flowq') .
                    '</div>';
         }
 
@@ -212,8 +231,8 @@ class FlowQ_Frontend {
         $questions = $question_manager->get_survey_questions($survey_id, true);
 
         if (empty($questions)) {
-            return '<div class="wp-dynamic-survey-error">' .
-                   esc_html__('This survey has no questions.', FLOWQ_TEXT_DOMAIN) .
+            return '<div class="flowq-error">' .
+                   esc_html__('This survey has no questions.', 'flowq') .
                    '</div>';
         }
 
@@ -235,7 +254,7 @@ class FlowQ_Frontend {
         $survey = $survey_manager->get_survey($survey_id);
 
         if (!$survey || $survey['status'] !== 'published') {
-            wp_send_json_error(__('Survey not available.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Survey not available.', 'flowq'));
         }
 
         // Collect and validate stage 1 data
@@ -250,13 +269,13 @@ class FlowQ_Frontend {
         $errors = array();
 
         if (empty($stage1_data['name'])) {
-            $errors[] = __('Name is required.', FLOWQ_TEXT_DOMAIN);
+            $errors[] = __('Name is required.', 'flowq');
         }
 
         if (empty($stage1_data['email'])) {
-            $errors[] = __('Email address is required.', FLOWQ_TEXT_DOMAIN);
+            $errors[] = __('Email address is required.', 'flowq');
         } elseif (!is_email($stage1_data['email'])) {
-            $errors[] = __('Please enter a valid email address.', FLOWQ_TEXT_DOMAIN);
+            $errors[] = __('Please enter a valid email address.', 'flowq');
         }
 
         if (!empty($errors)) {
@@ -310,30 +329,39 @@ class FlowQ_Frontend {
     public function handle_stage2_submission() {
         check_ajax_referer('flowq_frontend_nonce', 'nonce');
 
-        $survey_id = intval($_POST['survey_id']);
-        $stage1_data = json_decode(stripslashes($_POST['stage1_data'] ?? ''), true);
-        $participant_phone = sanitize_text_field($_POST['participant_phone'] ?? '');
+        $survey_id = isset($_POST['survey_id']) ? absint($_POST['survey_id']) : 0;
+
+        // Sanitize and validate stage1_data
+        $stage1_json = isset($_POST['stage1_data']) ? sanitize_text_field(wp_unslash($_POST['stage1_data'])) : '';
+        $stage1_data = json_decode($stage1_json, true);
+
+        // Validate decoded data
+        if (!is_array($stage1_data)) {
+            wp_send_json_error(__('Invalid session data. Please start over.', 'flowq'));
+        }
+
+        $participant_phone = isset($_POST['participant_phone']) ? sanitize_text_field($_POST['participant_phone']) : '';
 
         // Check if phone is optional
         $phone_optional = get_option('flowq_phone_optional', '0');
 
         // Validate phone number (only if not optional or if provided)
         if (empty($participant_phone) && $phone_optional != '1') {
-            wp_send_json_error(__('Phone number is required.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Phone number is required.', 'flowq'));
         }
 
         // Update participant with phone number
         $participant_manager = new FlowQ_Participant_Manager();
 
         // Get participant by session ID from stage 1
-        $session_id = $stage1_data['session_id'] ?? '';
+        $session_id = isset($stage1_data['session_id']) ? sanitize_text_field($stage1_data['session_id']) : '';
         if (empty($session_id)) {
-            wp_send_json_error(__('Invalid session. Please start over.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Invalid session. Please start over.', 'flowq'));
         }
 
         $participant = $participant_manager->get_participant($session_id);
         if (!$participant) {
-            wp_send_json_error(__('Session not found. Please start over.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Session not found. Please start over.', 'flowq'));
         }
 
          if (empty($participant_phone) && $phone_optional != '1') {
@@ -351,7 +379,7 @@ class FlowQ_Frontend {
         $questions = $question_manager->get_survey_questions($survey_id, true);
 
         if (empty($questions)) {
-            wp_send_json_error(__('No questions found for this survey.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('No questions found for this survey.', 'flowq'));
         }
 
         $first_question = $questions[0];
@@ -400,7 +428,7 @@ class FlowQ_Frontend {
         $question = $questionManger->get_question($question_id);
 
         if (!$question) {
-            wp_send_json_error(__('Question not found.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Question not found.', 'flowq'));
         }
 
         $result = $session_manager->record_response($participant, $question, $answer_data);
@@ -437,12 +465,12 @@ class FlowQ_Frontend {
         $question = $question_manager->get_question($question_id, true);
 
         if (!$question) {
-            wp_send_json_error(__('Question not found.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Question not found.', 'flowq'));
         }
 
         // Verify question is optional (not required)
         if (filter_var($question['is_required'], FILTER_VALIDATE_BOOLEAN)) {
-            wp_send_json_error(__('This question is required and cannot be skipped.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('This question is required and cannot be skipped.', 'flowq'));
         }
 
         // Record the skip as a response with null answer
@@ -593,7 +621,7 @@ class FlowQ_Frontend {
         $session_id = sanitize_text_field($_POST['session_id'] ?? '');
 
         if (empty($session_id)) {
-            wp_send_json_error(__('Session ID is required.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Session ID is required.', 'flowq'));
         }
 
         // Validate session
@@ -601,7 +629,7 @@ class FlowQ_Frontend {
         $participant = $participant_manager->get_participant($session_id);
 
         if (!$participant) {
-            wp_send_json_error(__('Session not found.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Session not found.', 'flowq'));
         }
 
         // Get survey data
@@ -609,7 +637,7 @@ class FlowQ_Frontend {
         $survey = $survey_manager->get_survey($participant['survey_id']);
 
         if (!$survey) {
-            wp_send_json_error(__('Survey not found.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Survey not found.', 'flowq'));
         }
 
         // Get session responses
@@ -656,7 +684,7 @@ class FlowQ_Frontend {
         $session_id = sanitize_text_field($_POST['session_id'] ?? '');
 
         if (empty($session_id)) {
-            wp_send_json_error(__('Session ID is required.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Session ID is required.', 'flowq'));
         }
 
         // Mark participant as completed using the participant manager
@@ -744,22 +772,22 @@ class FlowQ_Frontend {
      */
     private function format_completion_time($seconds) {
         if ($seconds < 60) {
-            return sprintf(_n('%d second', '%d seconds', $seconds, FLOWQ_TEXT_DOMAIN), $seconds);
+            return sprintf(_n('%d second', '%d seconds', $seconds, 'flowq'), $seconds);
         } elseif ($seconds < 3600) {
             $minutes = floor($seconds / 60);
             $remaining_seconds = $seconds % 60;
             if ($remaining_seconds > 0) {
-                return sprintf(__('%d minutes %d seconds', FLOWQ_TEXT_DOMAIN), $minutes, $remaining_seconds);
+                return sprintf(__('%d minutes %d seconds', 'flowq'), $minutes, $remaining_seconds);
             } else {
-                return sprintf(_n('%d minute', '%d minutes', $minutes, FLOWQ_TEXT_DOMAIN), $minutes);
+                return sprintf(_n('%d minute', '%d minutes', $minutes, 'flowq'), $minutes);
             }
         } else {
             $hours = floor($seconds / 3600);
             $remaining_minutes = floor(($seconds % 3600) / 60);
             if ($remaining_minutes > 0) {
-                return sprintf(__('%d hours %d minutes', FLOWQ_TEXT_DOMAIN), $hours, $remaining_minutes);
+                return sprintf(__('%d hours %d minutes', 'flowq'), $hours, $remaining_minutes);
             } else {
-                return sprintf(_n('%d hour', '%d hours', $hours, FLOWQ_TEXT_DOMAIN), $hours);
+                return sprintf(_n('%d hour', '%d hours', $hours, 'flowq'), $hours);
             }
         }
     }
@@ -774,8 +802,8 @@ class FlowQ_Frontend {
             'nonce' => wp_create_nonce('flowq_download_' . $session_id)
         ), admin_url('admin-ajax.php'));
 
-        return '<a href="' . esc_url($download_url) . '" class="wp-dynamic-survey-download-link button button-primary" target="_blank">' .
-               esc_html__('Download Your Responses', FLOWQ_TEXT_DOMAIN) . '</a>';
+        return '<a href="' . esc_url($download_url) . '" class="flowq-download-link button button-primary" target="_blank">' .
+               esc_html__('Download Your Responses', 'flowq') . '</a>';
     }
 
     /**
@@ -788,55 +816,32 @@ class FlowQ_Frontend {
             return;
         }
 
-        // Check if this page is a thank you page
-        $survey_manager = new FlowQ_Survey_Manager();
-        $surveys = $survey_manager->get_surveys(['status' => 'published']);
-
-        $matching_survey = null;
-        foreach ($surveys as $survey) {
-            if (!empty($survey['thank_you_page_slug']) && $post->post_name === $survey['thank_you_page_slug']) {
-                $matching_survey = $survey;
-                break;
-            }
-        }
-
-        // If this is not a thank you page, continue normally
-        if (!$matching_survey) {
-            return;
-        }
-
         // This is a thank you page - validate token
-        $token = $_GET['token'] ?? null;
-
+        $token = isset($_GET['token']) ? sanitize_text_field($_GET['token']) : null;
         if (!$token) {
             // No token - store error for content filter
             global $flowq_access_error;
-            $flowq_access_error = __('Access denied. This page requires a valid access token.', FLOWQ_TEXT_DOMAIN);
+            $flowq_access_error = __('Access denied. This page requires a valid access token.', 'flowq');
             return;
         }
 
         // Validate the token
         $participant_manager = new FlowQ_Participant_Manager();
-        $participant = $participant_manager->validate_completion_token($token);
+        $result = $participant_manager->validate_completion_token($token);
 
-        if (is_wp_error($participant)) {
+        if (is_wp_error($result)) {
             global $flowq_access_error;
-            $flowq_access_error = __('Invalid or expired access token.', FLOWQ_TEXT_DOMAIN);
+            $flowq_access_error = __('Invalid or expired access token.', 'flowq');
             return;
         }
 
-        // Check if token belongs to the correct survey
-        if ($participant['survey_id'] != $matching_survey['id']) {
-            global $flowq_access_error;
-            $flowq_access_error = __('Access token is not valid for this page.', FLOWQ_TEXT_DOMAIN);
-            return;
-        }
+        
 
         // Token is valid - store completion data
         global $flowq_completion_data;
         $flowq_completion_data = array(
-            'survey' => $matching_survey,
-            'participant' => $participant,
+            'survey' => $result['survey'],
+            'participant' => $result['participant'],
             'token' => $token
         );
     }
@@ -869,8 +874,8 @@ class FlowQ_Frontend {
 
         // If there's an access error, show it instead of content
         if ($flowq_access_error) {
-            return '<div class="wp-dynamic-survey-access-denied">' .
-                   '<h2>' . __('Access Denied', FLOWQ_TEXT_DOMAIN) . '</h2>' .
+            return '<div class="flowq-access-denied">' .
+                   '<h2>' . __('Access Denied', 'flowq') . '</h2>' .
                    '<p>' . esc_html($flowq_access_error) . '</p>' .
                    '</div>';
         }

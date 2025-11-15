@@ -70,7 +70,7 @@ class FlowQ_Ajax_Handler {
         // Check limit
         if (count(self::$rate_limits[$key]) >= $limit) {
             wp_send_json_error(array(
-                'message' => __('Rate limit exceeded. Please try again later.', FLOWQ_TEXT_DOMAIN),
+                'message' => __('Rate limit exceeded. Please try again later.', 'flowq'),
                 'code' => 'rate_limit_exceeded'
             ), 429);
         }
@@ -87,7 +87,8 @@ class FlowQ_Ajax_Handler {
 
         foreach ($ip_keys as $key) {
             if (array_key_exists($key, $_SERVER) === true) {
-                $ip = $_SERVER[$key];
+                // Sanitize $_SERVER value
+                $ip = sanitize_text_field($_SERVER[$key]);
                 if (strpos($ip, ',') !== false) {
                     $ip = explode(',', $ip)[0];
                 }
@@ -98,7 +99,8 @@ class FlowQ_Ajax_Handler {
             }
         }
 
-        return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+        // Sanitize fallback $_SERVER value
+        return isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field($_SERVER['REMOTE_ADDR']) : '0.0.0.0';
     }
 
     /**
@@ -111,7 +113,7 @@ class FlowQ_Ajax_Handler {
         $session_id = sanitize_text_field($_POST['session_id'] ?? '');
 
         if (empty($session_id)) {
-            wp_send_json_error(__('Session ID is required.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Session ID is required.', 'flowq'));
         }
 
         $participant_manager = new FlowQ_Participant_Manager();
@@ -139,14 +141,14 @@ class FlowQ_Ajax_Handler {
         $survey_id = intval($_POST['survey_id'] ?? 0);
 
         if (!$survey_id) {
-            wp_send_json_error(__('Survey ID is required.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Survey ID is required.', 'flowq'));
         }
 
         $survey_manager = new FlowQ_Survey_Manager();
         $survey = $survey_manager->get_survey($survey_id);
 
         if (!$survey || $survey['status'] !== 'published') {
-            wp_send_json_error(__('Survey not available.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Survey not available.', 'flowq'));
         }
 
         $question_manager = new FlowQ_Question_Manager();
@@ -199,7 +201,7 @@ class FlowQ_Ajax_Handler {
         $this->check_rate_limit('get_survey_statistics', 10, 60);
 
         if (!current_user_can('manage_flowq_surveys')) {
-            wp_send_json_error(__('Insufficient permissions.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Insufficient permissions.', 'flowq'));
         }
 
         check_ajax_referer('flowq_admin_nonce', 'nonce');
@@ -207,7 +209,7 @@ class FlowQ_Ajax_Handler {
         $survey_id = intval($_POST['survey_id'] ?? 0);
 
         if (!$survey_id) {
-            wp_send_json_error(__('Survey ID is required.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Survey ID is required.', 'flowq'));
         }
 
         $survey_manager = new FlowQ_Survey_Manager();
@@ -227,7 +229,7 @@ class FlowQ_Ajax_Handler {
         $this->check_rate_limit('bulk_export_responses', 5, 300); // More restrictive for exports
 
         if (!current_user_can('manage_flowq_surveys')) {
-            wp_send_json_error(__('Insufficient permissions.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Insufficient permissions.', 'flowq'));
         }
 
         check_ajax_referer('flowq_admin_nonce', 'nonce');
@@ -236,7 +238,7 @@ class FlowQ_Ajax_Handler {
         $format = sanitize_text_field($_POST['format'] ?? 'csv');
 
         if (empty($survey_ids)) {
-            wp_send_json_error(__('At least one survey must be selected.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('At least one survey must be selected.', 'flowq'));
         }
 
         $session_manager = new FlowQ_Session_Manager();
@@ -250,7 +252,7 @@ class FlowQ_Ajax_Handler {
                 }
             }
 
-            $filename = 'bulk-survey-export-' . date('Y-m-d-H-i-s') . '.' . $format;
+            $filename = 'bulk-survey-export-' . gmdate('Y-m-d-H-i-s') . '.' . $format;
 
             wp_send_json_success(array(
                 'data' => $export_data,
@@ -260,7 +262,7 @@ class FlowQ_Ajax_Handler {
             ));
 
         } catch (Exception $e) {
-            wp_send_json_error(__('Export failed: ', FLOWQ_TEXT_DOMAIN) . $e->getMessage());
+            wp_send_json_error(__('Export failed: ', 'flowq') . $e->getMessage());
         }
     }
     
@@ -271,7 +273,7 @@ class FlowQ_Ajax_Handler {
         $this->check_rate_limit('select_template', 10, 60);
 
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(__('Insufficient permissions.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Insufficient permissions.', 'flowq'));
         }
 
         check_ajax_referer('flowq_admin_nonce', 'nonce');
@@ -279,7 +281,7 @@ class FlowQ_Ajax_Handler {
         $template_id = intval($_POST['template_id'] ?? 0);
 
         if (!$template_id) {
-            wp_send_json_error(__('Template ID is required.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Template ID is required.', 'flowq'));
         }
 
         // Verify template exists
@@ -291,14 +293,14 @@ class FlowQ_Ajax_Handler {
         ), ARRAY_A);
 
         if (!$template) {
-            wp_send_json_error(__('Template not found.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Template not found.', 'flowq'));
         }
 
         // Update active template option
         update_option('flowq_active_template', $template_id);
 
         wp_send_json_success(array(
-            'message' => __('Template activated successfully.', FLOWQ_TEXT_DOMAIN),
+            'message' => __('Template activated successfully.', 'flowq'),
             'template_id' => $template_id,
             'template_name' => $template['name']
         ));

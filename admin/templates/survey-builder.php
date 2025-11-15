@@ -17,11 +17,11 @@ if (!defined('ABSPATH')) {
         <div class="builder-actions">
             <button type="button" class="button button-secondary" id="preview-survey" data-survey-id="<?php echo esc_attr($survey['id']); ?>">
                 <span class="dashicons dashicons-visibility"></span>
-                <?php echo esc_html__('Preview Survey', FLOWQ_TEXT_DOMAIN); ?>
+                <?php echo esc_html__('Preview Survey', 'flowq'); ?>
             </button>
             <button type="button" class="button button-primary" id="add-question">
                 <span class="dashicons dashicons-plus-alt2"></span>
-                <?php echo esc_html__('Add Question', FLOWQ_TEXT_DOMAIN); ?>
+                <?php echo esc_html__('Add Question', 'flowq'); ?>
             </button>
         </div>
     </div>
@@ -31,10 +31,10 @@ if (!defined('ABSPATH')) {
             <div class="no-questions-placeholder">
                 <div class="placeholder-content">
                     <span class="dashicons dashicons-clipboard"></span>
-                    <h3><?php echo esc_html__('No questions yet', FLOWQ_TEXT_DOMAIN); ?></h3>
-                    <p><?php echo esc_html__('Start building your survey by adding your first question.', FLOWQ_TEXT_DOMAIN); ?></p>
+                    <h3><?php echo esc_html__('No questions yet', 'flowq'); ?></h3>
+                    <p><?php echo esc_html__('Start building your survey by adding your first question.', 'flowq'); ?></p>
                     <button type="button" class="button button-primary" id="add-first-question">
-                        <?php echo esc_html__('Add First Question', FLOWQ_TEXT_DOMAIN); ?>
+                        <?php echo esc_html__('Add First Question', 'flowq'); ?>
                     </button>
                 </div>
             </div>
@@ -49,7 +49,7 @@ if (!defined('ABSPATH')) {
                             <div class="question-info">
                                 <div class="question-type">
                                     <span class="dashicons dashicons-list-view"></span>
-                                    <?php echo esc_html__('Question', FLOWQ_TEXT_DOMAIN); ?>
+                                    <?php echo esc_html__('Question', 'flowq'); ?>
                                 </div>
                                 <div class="question-order">
                                     #<?php echo esc_html($question['question_order']); ?>
@@ -58,11 +58,11 @@ if (!defined('ABSPATH')) {
                             <div class="question-actions">
                                 <button type="button" class="button button-small edit-question"
                                         data-question-id="<?php echo esc_attr($question['id']); ?>">
-                                    <?php echo esc_html__('Edit', FLOWQ_TEXT_DOMAIN); ?>
+                                    <?php echo esc_html__('Edit', 'flowq'); ?>
                                 </button>
                                 <button type="button" class="button button-small button-link-delete delete-question"
                                         data-question-id="<?php echo esc_attr($question['id']); ?>">
-                                    <?php echo esc_html__('Delete', FLOWQ_TEXT_DOMAIN); ?>
+                                    <?php echo esc_html__('Delete', 'flowq'); ?>
                                 </button>
                             </div>
                         </div>
@@ -105,11 +105,11 @@ if (!defined('ABSPATH')) {
                                                     <button type="button" class="button button-small edit-answer"
                                                             data-answer-id="<?php echo esc_attr($answer['id']); ?>"
                                                             data-question-id="<?php echo esc_attr($question['id']); ?>">
-                                                        <?php echo esc_html__('Edit', FLOWQ_TEXT_DOMAIN); ?>
+                                                        <?php echo esc_html__('Edit', 'flowq'); ?>
                                                     </button>
                                                     <button type="button" class="button button-small button-link-delete delete-answer"
                                                             data-answer-id="<?php echo esc_attr($answer['id']); ?>">
-                                                        <?php echo esc_html__('Delete', FLOWQ_TEXT_DOMAIN); ?>
+                                                        <?php echo esc_html__('Delete', 'flowq'); ?>
                                                     </button>
                                                 </div>
                                             </div>
@@ -119,7 +119,7 @@ if (!defined('ABSPATH')) {
                                     <button type="button" class="button button-secondary add-answer"
                                             data-question-id="<?php echo esc_attr($question['id']); ?>">
                                         <span class="dashicons dashicons-plus-alt2"></span>
-                                        <?php echo esc_html__('Add Answer', FLOWQ_TEXT_DOMAIN); ?>
+                                        <?php echo esc_html__('Add Answer', 'flowq'); ?>
                                     </button>
                                 </div>
                             <?php endif; ?>
@@ -132,7 +132,7 @@ if (!defined('ABSPATH')) {
             <div class="add-question-button-container">
                 <button type="button" class="button button-primary" id="add-question-bottom">
                     <span class="dashicons dashicons-plus-alt2"></span>
-                    <?php echo esc_html__('Add Another Question', FLOWQ_TEXT_DOMAIN); ?>
+                    <?php echo esc_html__('Add Another Question', 'flowq'); ?>
                 </button>
             </div>
         <?php endif; ?>
@@ -153,7 +153,7 @@ if (!defined('ABSPATH')) {
 <div id="preview-modal" style="display: none;">
     <div class="preview-modal-content">
         <div class="preview-header">
-            <h3><?php echo esc_html__('Survey Preview', FLOWQ_TEXT_DOMAIN); ?></h3>
+            <h3><?php echo esc_html__('Survey Preview', 'flowq'); ?></h3>
             <button type="button" class="preview-close">&times;</button>
         </div>
         <div class="preview-body">
@@ -162,235 +162,14 @@ if (!defined('ABSPATH')) {
     </div>
 </div>
 
-<script type="text/javascript">
-jQuery(document).ready(function($) {
-    // Initialize survey builder
-    if (typeof WPSurveyBuilder !== 'undefined') {
-        WPSurveyBuilder.init(<?php echo json_encode(array(
-            'survey_id' => $survey['id'],
-            'questions' => $questions
-        )); ?>);
-    }
-});
-</script>
-
-<style>
-.survey-builder-wrapper {
-    max-width: 100%;
-    margin: 20px 0;
-}
-
-.survey-builder-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #ddd;
-}
-
-.builder-actions {
-    display: flex;
-    gap: 10px;
-}
-
-.no-questions-placeholder {
-    text-align: center;
-    padding: 60px 20px;
-    border: 2px dashed #ddd;
-    border-radius: 8px;
-    background: #fafafa;
-}
-
-.placeholder-content .dashicons {
-    font-size: 48px;
-    color: #ccd0d4;
-    margin-bottom: 15px;
-}
-
-.questions-container {
-    margin-bottom: 30px;
-}
-
-.question-item {
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    margin-bottom: 20px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    transition: box-shadow 0.2s;
-}
-
-.question-item:hover {
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-}
-
-.question-header {
-    display: flex;
-    align-items: center;
-    padding: 15px 20px;
-    background: #f8f9fa;
-    border-bottom: 1px solid #eee;
-    border-radius: 6px 6px 0 0;
-}
-
-.question-drag-handle {
-    cursor: move;
-    margin-right: 15px;
-    color: #666;
-}
-
-.question-info {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.question-type {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-weight: 600;
-    color: #2271b1;
-}
-
-.question-order {
-    color: #666;
-    font-size: 14px;
-}
-
-.question-actions {
-    display: flex;
-    gap: 5px;
-}
-
-.question-title {
-    font-size: 16px;
-    margin-bottom: 10px;
-}
-
-.required-indicator {
-    color: #d63638;
-    font-weight: bold;
-}
-
-.question-description {
-    color: #666;
-    margin-bottom: 15px;
-    font-style: italic;
-}
-
-.answers-list {
-    margin-bottom: 15px;
-}
-
-.answer-item {
-    display: flex;
-    align-items: center;
-    padding: 10px 15px;
-    background: #f9f9f9;
-    border: 1px solid #eee;
-    border-radius: 4px;
-    margin-bottom: 8px;
-    gap: 10px;
-}
-
-.answer-drag-handle {
-    cursor: move;
-    color: #666;
-}
-
-.answer-text {
-    flex: 1;
-}
-
-.answer-routing {
-    font-size: 12px;
-    color: #666;
-    background: #e8f4fd;
-    padding: 2px 6px;
-    border-radius: 3px;
-}
-
-.answer-actions {
-    display: flex;
-    gap: 5px;
-}
-
-.text-question-info {
-    margin-top: 15px;
-    padding: 10px;
-    background: #f0f6fc;
-    border-radius: 4px;
-    border-left: 4px solid #2271b1;
-}
-
-.add-question-button-container {
-    text-align: center;
-    padding: 30px 0;
-}
-
-/* Modal Styles */
-#preview-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.8);
-    z-index: 100000;
-}
-
-.preview-modal-content {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    width: 90%;
-    max-width: 800px;
-    max-height: 90%;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-}
-
-.preview-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    background: #f8f9fa;
-    border-bottom: 1px solid #ddd;
-}
-
-.preview-close {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #666;
-}
-
-.preview-body {
-    padding: 20px;
-    max-height: 60vh;
-    overflow-y: auto;
-}
-
-/* Sortable helpers */
-.ui-sortable-helper {
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    transform: rotate(2deg);
-}
-
-.ui-sortable-placeholder {
-    border: 2px dashed #2271b1;
-    background: rgba(34, 113, 177, 0.1);
-    visibility: visible !important;
-    height: 100px;
-    margin-bottom: 20px;
-    border-radius: 6px;
-}
-</style>
+<?php
+// Add inline script for survey builder initialization using wp_add_inline_script
+$survey_init_script = sprintf(
+    'jQuery(document).ready(function($) { if (typeof flowqSurveyBuilder !== "undefined") { flowqSurveyBuilder.init(%s); } });',
+    wp_json_encode(array(
+        'survey_id' => $survey['id'],
+        'questions' => $questions
+    ))
+);
+wp_add_inline_script('flowq-admin', $survey_init_script);
+?>

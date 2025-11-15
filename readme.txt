@@ -1,8 +1,8 @@
-=== FlowQ - Dynamic Survey Builder ===
-Contributors: parvejahammad
+=== FlowQ ===
+Contributors: quickui
 Tags: survey, forms, quiz, poll, feedback
 Requires at least: 5.0
-Tested up to: 6.4
+Tested up to: 6.8
 Requires PHP: 7.4
 Stable tag: 1.0.0
 License: GPLv2 or later
@@ -58,7 +58,7 @@ Choose from 5 professionally designed templates:
 
 * Clean, well-documented code
 * WordPress coding standards compliant
-* Translation-ready (text domain: wp-dynamic-survey)
+* Translation-ready (text domain: flowq)
 * Hooks and filters for extensibility
 * REST API foundation
 
@@ -123,7 +123,7 @@ No. FlowQ is optimized for performance with efficient database queries and minim
 
 = Can I translate FlowQ? =
 
-Yes, FlowQ is translation-ready with text domain 'wp-dynamic-survey'.
+Yes, FlowQ is translation-ready with text domain 'flowq'.
 
 = Where can I get support? =
 

@@ -8,12 +8,11 @@
  * Author URI: https://www.linkedin.com/in/dev-parvej
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: wp-dynamic-survey
+ * Text Domain: flowq
  * Domain Path: /languages
  * Requires at least: 5.0
- * Tested up to: 6.3
+ * Tested up to: 6.8
  * Requires PHP: 7.4
- * Network: false
  */
 
 // Prevent direct access
@@ -27,7 +26,6 @@ define('FLOWQ_FILE', __FILE__);
 define('FLOWQ_PATH', plugin_dir_path(__FILE__));
 define('FLOWQ_URL', plugin_dir_url(__FILE__));
 define('FLOWQ_BASENAME', plugin_basename(__FILE__));
-define('FLOWQ_TEXT_DOMAIN', 'flowq');
 
 // Main plugin class with unique prefix
 class FlowQ_Plugin {
@@ -70,9 +68,6 @@ class FlowQ_Plugin {
 
         // Initialize plugin after WordPress loads
         add_action('plugins_loaded', array($this, 'init'), 10);
-
-        // Load text domain for translations
-        add_action('init', array($this, 'load_textdomain'));
     }
 
     /**
@@ -129,7 +124,7 @@ class FlowQ_Plugin {
         if (version_compare(PHP_VERSION, '7.4', '<')) {
             add_action('admin_notices', function() {
                 echo '<div class="notice notice-error"><p>';
-                echo __('FlowQ requires PHP 7.4 or higher.', FLOWQ_TEXT_DOMAIN);
+                echo esc_html__('FlowQ requires PHP 7.4 or higher.', 'flowq');
                 echo '</p></div>';
             });
             return false;
@@ -140,7 +135,7 @@ class FlowQ_Plugin {
         if (version_compare($wp_version, '5.0', '<')) {
             add_action('admin_notices', function() {
                 echo '<div class="notice notice-error"><p>';
-                echo __('FlowQ requires WordPress 5.0 or higher.', FLOWQ_TEXT_DOMAIN);
+                echo esc_html__('FlowQ requires WordPress 5.0 or higher.', 'flowq');
                 echo '</p></div>';
             });
             return false;
@@ -174,6 +169,10 @@ class FlowQ_Plugin {
         // Load frontend class
         require_once FLOWQ_PATH . 'public/class-frontend.php';
         new FlowQ_Frontend();
+
+        // Initialize template handler for proper CSS enqueuing
+        $template_handler = new FlowQ_Template_Handler();
+        $template_handler->init();
     }
 
     /**
@@ -284,17 +283,6 @@ class FlowQ_Plugin {
 
             file_put_contents($survey_dir . '/.htaccess', $htaccess_content);
         }
-    }
-
-    /**
-     * Load text domain for translations
-     */
-    public function load_textdomain() {
-        load_plugin_textdomain(
-            FLOWQ_TEXT_DOMAIN,
-            false,
-            dirname(FLOWQ_BASENAME) . '/languages'
-        );
     }
 
     /**

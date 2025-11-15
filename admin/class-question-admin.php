@@ -44,12 +44,12 @@ class FlowQ_Question_Admin {
         check_ajax_referer('flowq_admin_nonce', 'nonce');
 
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(__('Insufficient permissions.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Insufficient permissions.', 'flowq'));
         }
 
         $question_id = intval($_POST['question_id']);
         if (!$question_id) {
-            wp_send_json_error(__('Invalid question ID.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Invalid question ID.', 'flowq'));
         }
 
         $question_manager = new FlowQ_Question_Manager();
@@ -73,12 +73,12 @@ class FlowQ_Question_Admin {
         check_ajax_referer('flowq_admin_nonce', 'nonce');
 
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(__('Insufficient permissions.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Insufficient permissions.', 'flowq'));
         }
 
         $survey_id = intval($_POST['survey_id']);
         if (!$survey_id) {
-            wp_send_json_error(__('Invalid survey ID.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Invalid survey ID.', 'flowq'));
         }
 
         // Prepare question data
@@ -97,12 +97,13 @@ class FlowQ_Question_Admin {
             wp_send_json_error($question_id->get_error_message());
         }
 
-        // Create answer options if provided
+        // Create answer options if provided - sanitization happens in save_answer_options()
+        // Note: Individual fields are sanitized within save_answer_options() method
         $this->save_answer_options($question_id, $_POST);
 
         wp_send_json_success(array(
             'question_id' => $question_id,
-            'message' => __('Question created successfully.', FLOWQ_TEXT_DOMAIN)
+            'message' => __('Question created successfully.', 'flowq')
         ));
     }
 
@@ -113,12 +114,12 @@ class FlowQ_Question_Admin {
         check_ajax_referer('flowq_admin_nonce', 'nonce');
 
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(__('Insufficient permissions.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Insufficient permissions.', 'flowq'));
         }
 
         $question_id = intval($_POST['question_id']);
         if (!$question_id) {
-            wp_send_json_error(__('Invalid question ID.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Invalid question ID.', 'flowq'));
         }
 
         // Prepare question data
@@ -141,7 +142,7 @@ class FlowQ_Question_Admin {
         $this->save_answer_options($question_id, $_POST);
 
         wp_send_json_success(array(
-            'message' => __('Question updated successfully.', FLOWQ_TEXT_DOMAIN)
+            'message' => __('Question updated successfully.', 'flowq')
         ));
     }
 
@@ -152,12 +153,12 @@ class FlowQ_Question_Admin {
         check_ajax_referer('flowq_admin_nonce', 'nonce');
 
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(__('Insufficient permissions.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Insufficient permissions.', 'flowq'));
         }
 
         $question_id = intval($_POST['question_id']);
         if (!$question_id) {
-            wp_send_json_error(__('Invalid question ID.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Invalid question ID.', 'flowq'));
         }
 
         // Check for dependencies before deleting
@@ -171,7 +172,7 @@ class FlowQ_Question_Admin {
         }
 
         wp_send_json_success(array(
-            'message' => __('Question deleted successfully.', FLOWQ_TEXT_DOMAIN)
+            'message' => __('Question deleted successfully.', 'flowq')
         ));
     }
 
@@ -182,12 +183,12 @@ class FlowQ_Question_Admin {
         check_ajax_referer('flowq_admin_nonce', 'nonce');
 
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(__('Insufficient permissions.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Insufficient permissions.', 'flowq'));
         }
 
         $question_id = intval($_POST['question_id']);
         if (!$question_id) {
-            wp_send_json_error(__('Invalid question ID.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Invalid question ID.', 'flowq'));
         }
 
         $question_manager = new FlowQ_Question_Manager();
@@ -227,7 +228,7 @@ class FlowQ_Question_Admin {
 
         wp_send_json_success(array(
             'question_id' => $new_question_id,
-            'message' => __('Question duplicated successfully.', FLOWQ_TEXT_DOMAIN)
+            'message' => __('Question duplicated successfully.', 'flowq')
         ));
     }
 
@@ -238,14 +239,14 @@ class FlowQ_Question_Admin {
         check_ajax_referer('flowq_admin_nonce', 'nonce');
 
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(__('Insufficient permissions.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Insufficient permissions.', 'flowq'));
         }
 
         $survey_id = intval($_POST['survey_id']);
         $question_orders = json_decode(stripslashes($_POST['question_orders']), true);
 
         if (!$survey_id || !is_array($question_orders)) {
-            wp_send_json_error(__('Invalid data provided.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Invalid data provided.', 'flowq'));
         }
 
         $question_manager = new FlowQ_Question_Manager();
@@ -254,7 +255,7 @@ class FlowQ_Question_Admin {
         // This reordering functionality is no longer needed
 
         wp_send_json_success(array(
-            'message' => __('Questions reordered successfully.', FLOWQ_TEXT_DOMAIN)
+            'message' => __('Questions reordered successfully.', 'flowq')
         ));
     }
 
@@ -330,7 +331,7 @@ class FlowQ_Question_Admin {
         ));
 
         if ($dependent_answers > 0) {
-            wp_send_json_error(__('Cannot delete this question because other questions reference it in their flow logic. Please update the question flow first.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Cannot delete this question because other questions reference it in their flow logic. Please update the question flow first.', 'flowq'));
         }
 
         // Check if any questions point to this question as skip destination
@@ -340,7 +341,7 @@ class FlowQ_Question_Admin {
         ));
 
         if ($dependent_questions > 0) {
-            wp_send_json_error(__('Cannot delete this question because other questions reference it as a skip destination. Please update the question skip settings first.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Cannot delete this question because other questions reference it as a skip destination. Please update the question skip settings first.', 'flowq'));
         }
 
         // Check if there are any responses for this question
@@ -351,7 +352,7 @@ class FlowQ_Question_Admin {
 
         if ($responses_count > 0) {
             wp_send_json_error(sprintf(
-                __('Cannot delete this question because it has %d response(s). Deleting it would affect survey analytics.', FLOWQ_TEXT_DOMAIN),
+                __('Cannot delete this question because it has %d response(s). Deleting it would affect survey analytics.', 'flowq'),
                 $responses_count
             ));
         }
@@ -364,14 +365,14 @@ class FlowQ_Question_Admin {
         check_ajax_referer('flowq_admin_nonce', 'nonce');
 
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(__('Insufficient permissions.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Insufficient permissions.', 'flowq'));
         }
 
         $answer_id = intval($_POST['answer_id']);
         $next_question_id = !empty($_POST['next_question_id']) ? intval($_POST['next_question_id']) : null;
 
         if (!$answer_id) {
-            wp_send_json_error(__('Invalid answer ID.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Invalid answer ID.', 'flowq'));
         }
 
         $question_manager = new FlowQ_Question_Manager();
@@ -386,7 +387,7 @@ class FlowQ_Question_Admin {
         }
 
         wp_send_json_success(array(
-            'message' => __('Next question updated successfully.', FLOWQ_TEXT_DOMAIN),
+            'message' => __('Next question updated successfully.', 'flowq'),
             'next_question_id' => $next_question_id
         ));
     }
@@ -398,14 +399,14 @@ class FlowQ_Question_Admin {
         check_ajax_referer('flowq_admin_nonce', 'nonce');
 
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(__('Insufficient permissions.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Insufficient permissions.', 'flowq'));
         }
 
         $question_id = intval($_POST['question_id']);
         $skip_next_question_id = !empty($_POST['skip_next_question_id']) ? intval($_POST['skip_next_question_id']) : null;
 
         if (!$question_id) {
-            wp_send_json_error(__('Invalid question ID.', FLOWQ_TEXT_DOMAIN));
+            wp_send_json_error(__('Invalid question ID.', 'flowq'));
         }
 
         $question_manager = new FlowQ_Question_Manager();
@@ -420,7 +421,7 @@ class FlowQ_Question_Admin {
         }
 
         wp_send_json_success(array(
-            'message' => __('Skip destination updated successfully.', FLOWQ_TEXT_DOMAIN),
+            'message' => __('Skip destination updated successfully.', 'flowq'),
             'skip_next_question_id' => $skip_next_question_id
         ));
     }

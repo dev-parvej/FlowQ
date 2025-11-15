@@ -7,13 +7,13 @@
    Survey Container Enhancements
    ========================================================================== */
 
-.wp-dynamic-survey-container {
+.flowq-container {
     position: relative;
     margin: 20px 0;
     clear: both;
 }
 
-.wp-dynamic-survey-container.disable-scroll {
+.flowq-container.disable-scroll {
     overflow: hidden;
 }
 
@@ -66,7 +66,7 @@
         display: none;
     }
 
-    .wp-dynamic-survey-container.print-enabled {
+    .flowq-container.print-enabled {
         background: white !important;
         box-shadow: none !important;
         border: none !important;
@@ -446,7 +446,7 @@
    Error Styles
    ========================================================================== */
 
-.wp-dynamic-survey-error {
+.flowq-error {
     background: #fdf2f2;
     border: 1px solid #f5c6cb;
     color: #721c24;
@@ -456,7 +456,7 @@
     border-left: 4px solid #dc3545;
 }
 
-.wp-dynamic-survey-error strong {
+.flowq-error strong {
     font-weight: 600;
 }
 

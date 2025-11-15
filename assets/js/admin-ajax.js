@@ -5,7 +5,7 @@
     'use strict';
 
     // Admin AJAX handler object
-    const WPDynamicSurveyAdminAjax = {
+    const FlowQAdminAjax = {
 
         /**
          * Configuration
@@ -330,10 +330,10 @@
 
     // Initialize when document is ready
     $(document).ready(function() {
-        WPDynamicSurveyAdminAjax.init();
+        FlowQAdminAjax.init();
     });
 
     // Expose globally for debugging
-    window.WPDynamicSurveyAdminAjax = WPDynamicSurveyAdminAjax;
+    window.FlowQAdminAjax = FlowQAdminAjax;
 
 })(jQuery);

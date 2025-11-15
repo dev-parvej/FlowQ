@@ -59,7 +59,7 @@ class FlowQ_Builder_Admin {
     public function render_survey_builder($survey_id) {
         $survey = $this->survey_manager->get_survey($survey_id);
         if (!$survey) {
-            echo '<div class="notice notice-error"><p>' . esc_html__('Survey not found.', FLOWQ_TEXT_DOMAIN) . '</p></div>';
+            echo '<div class="notice notice-error"><p>' . esc_html__('Survey not found.', 'flowq') . '</p></div>';
             return;
         }
 
@@ -83,7 +83,7 @@ class FlowQ_Builder_Admin {
 
         // Builder JavaScript
         wp_enqueue_script(
-            'wp-dynamic-survey-builder',
+            'flowq-builder',
             FLOWQ_URL . 'assets/js/survey-builder.js',
             array('jquery', 'jquery-ui-sortable', 'wp-util'),
             FLOWQ_VERSION,
@@ -92,30 +92,30 @@ class FlowQ_Builder_Admin {
 
         // Builder CSS
         wp_enqueue_style(
-            'wp-dynamic-survey-builder',
+            'flowq-builder',
             FLOWQ_URL . 'assets/css/survey-builder.css',
             array(),
             FLOWQ_VERSION
         );
 
         // Localize builder script
-        wp_localize_script('wp-dynamic-survey-builder', 'wpSurveyBuilder', array(
+        wp_localize_script('flowq-builder', 'flowqSurveyBuilder', array(
             'ajaxurl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('flowq_builder_nonce'),
             'strings' => array(
-                'add_question' => __('Add Question', FLOWQ_TEXT_DOMAIN),
-                'edit_question' => __('Edit Question', FLOWQ_TEXT_DOMAIN),
-                'delete_question' => __('Delete Question', FLOWQ_TEXT_DOMAIN),
-                'add_answer' => __('Add Answer', FLOWQ_TEXT_DOMAIN),
-                'edit_answer' => __('Edit Answer', FLOWQ_TEXT_DOMAIN),
-                'delete_answer' => __('Delete Answer', FLOWQ_TEXT_DOMAIN),
-                'confirm_delete_question' => __('Are you sure you want to delete this question?', FLOWQ_TEXT_DOMAIN),
-                'confirm_delete_answer' => __('Are you sure you want to delete this answer?', FLOWQ_TEXT_DOMAIN),
-                'saving' => __('Saving...', FLOWQ_TEXT_DOMAIN),
-                'saved' => __('Saved!', FLOWQ_TEXT_DOMAIN),
-                'error' => __('Error occurred. Please try again.', FLOWQ_TEXT_DOMAIN),
-                'required_field' => __('This field is required.', FLOWQ_TEXT_DOMAIN),
-                'invalid_url' => __('Please enter a valid URL.', FLOWQ_TEXT_DOMAIN)
+                'add_question' => __('Add Question', 'flowq'),
+                'edit_question' => __('Edit Question', 'flowq'),
+                'delete_question' => __('Delete Question', 'flowq'),
+                'add_answer' => __('Add Answer', 'flowq'),
+                'edit_answer' => __('Edit Answer', 'flowq'),
+                'delete_answer' => __('Delete Answer', 'flowq'),
+                'confirm_delete_question' => __('Are you sure you want to delete this question?', 'flowq'),
+                'confirm_delete_answer' => __('Are you sure you want to delete this answer?', 'flowq'),
+                'saving' => __('Saving...', 'flowq'),
+                'saved' => __('Saved!', 'flowq'),
+                'error' => __('Error occurred. Please try again.', 'flowq'),
+                'required_field' => __('This field is required.', 'flowq'),
+                'invalid_url' => __('Please enter a valid URL.', 'flowq')
             ),
             'question_types' => array()
         ));
@@ -161,7 +161,7 @@ class FlowQ_Builder_Admin {
 
         wp_send_json_success(array(
             'question' => $question,
-            'message' => __('Question saved successfully.', FLOWQ_TEXT_DOMAIN)
+            'message' => __('Question saved successfully.', 'flowq')
         ));
     }
 
@@ -183,7 +183,7 @@ class FlowQ_Builder_Admin {
         }
 
         wp_send_json_success(array(
-            'message' => __('Question deleted successfully.', FLOWQ_TEXT_DOMAIN)
+            'message' => __('Question deleted successfully.', 'flowq')
         ));
     }
 
@@ -229,7 +229,7 @@ class FlowQ_Builder_Admin {
         wp_send_json_success(array(
             'answer_id' => $answer_id,
             'answers' => $answers,
-            'message' => __('Answer saved successfully.', FLOWQ_TEXT_DOMAIN)
+            'message' => __('Answer saved successfully.', 'flowq')
         ));
     }
 
@@ -251,7 +251,7 @@ class FlowQ_Builder_Admin {
         }
 
         wp_send_json_success(array(
-            'message' => __('Answer deleted successfully.', FLOWQ_TEXT_DOMAIN)
+            'message' => __('Answer deleted successfully.', 'flowq')
         ));
     }
 
@@ -274,7 +274,7 @@ class FlowQ_Builder_Admin {
         }
 
         wp_send_json_success(array(
-            'message' => __('Questions reordered successfully.', FLOWQ_TEXT_DOMAIN)
+            'message' => __('Questions reordered successfully.', 'flowq')
         ));
     }
 
@@ -288,9 +288,16 @@ class FlowQ_Builder_Admin {
             wp_send_json_error('Permission denied');
         }
 
+        // Validate and sanitize input
+        if (!isset($_POST['answers']) || !is_array($_POST['answers'])) {
+            wp_send_json_error(__('Invalid answers data', 'flowq'));
+        }
+
         $answer_orders = array();
         foreach ($_POST['answers'] as $index => $answer_id) {
-            $answer_orders[intval($answer_id)] = $index + 1;
+            $index = absint($index);
+            $answer_id = absint($answer_id);
+            $answer_orders[$answer_id] = $index + 1;
         }
 
         $result = $this->question_manager->reorder_answers($answer_orders);
@@ -300,7 +307,7 @@ class FlowQ_Builder_Admin {
         }
 
         wp_send_json_success(array(
-            'message' => __('Answers reordered successfully.', FLOWQ_TEXT_DOMAIN)
+            'message' => __('Answers reordered successfully.', 'flowq')
         ));
     }
 
@@ -342,8 +349,8 @@ class FlowQ_Builder_Admin {
     private function get_question_types() {
         return array(
             'single_choice' => array(
-                'label' => __('Single Choice', FLOWQ_TEXT_DOMAIN),
-                'description' => __('Single selection from multiple options', FLOWQ_TEXT_DOMAIN),
+                'label' => __('Single Choice', 'flowq'),
+                'description' => __('Single selection from multiple options', 'flowq'),
                 'icon' => 'dashicons-list-view',
                 'has_answers' => true
             )
@@ -365,12 +372,12 @@ class FlowQ_Builder_Admin {
         $errors = array();
 
         if (empty($data['title'])) {
-            $errors[] = __('Question title is required.', FLOWQ_TEXT_DOMAIN);
+            $errors[] = __('Question title is required.', 'flowq');
         }
 
 
         if (!empty($data['redirect_url']) && !filter_var($data['redirect_url'], FILTER_VALIDATE_URL)) {
-            $errors[] = __('Invalid redirect URL.', FLOWQ_TEXT_DOMAIN);
+            $errors[] = __('Invalid redirect URL.', 'flowq');
         }
 
         return $errors;
@@ -383,11 +390,11 @@ class FlowQ_Builder_Admin {
         $errors = array();
 
         if (empty($data['answer_text'])) {
-            $errors[] = __('Answer text is required.', FLOWQ_TEXT_DOMAIN);
+            $errors[] = __('Answer text is required.', 'flowq');
         }
 
         if (!empty($data['redirect_url']) && !filter_var($data['redirect_url'], FILTER_VALIDATE_URL)) {
-            $errors[] = __('Invalid redirect URL.', FLOWQ_TEXT_DOMAIN);
+            $errors[] = __('Invalid redirect URL.', 'flowq');
         }
 
         return $errors;
@@ -398,8 +405,8 @@ class FlowQ_Builder_Admin {
      */
     public function get_default_answers($question_type = 'single_choice') {
         return array(
-            array('answer_text' => __('Option 1', FLOWQ_TEXT_DOMAIN), 'answer_value' => 'option1'),
-            array('answer_text' => __('Option 2', FLOWQ_TEXT_DOMAIN), 'answer_value' => 'option2')
+            array('answer_text' => __('Option 1', 'flowq'), 'answer_value' => 'option1'),
+            array('answer_text' => __('Option 2', 'flowq'), 'answer_value' => 'option2')
         );
     }
 

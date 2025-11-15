@@ -10,7 +10,7 @@
     /**
      * Main Frontend Survey Class
      */
-    window.WPDynamicSurveyFrontend = {
+    window.FlowQFrontend = {
 
         // Configuration
         config: {
@@ -56,8 +56,8 @@
          * Initialize DOM elements
          */
         initElements: function() {
-            this.elements.container = $('.wp-dynamic-survey-container');
-            this.elements.participantForm = $('#wp-dynamic-survey-participant-form');
+            this.elements.container = $('.flowq-container');
+            this.elements.participantForm = $('#flowq-participant-form');
             this.elements.questionStep = $('#question-step');
             this.elements.completionStep = $('#completion-step');
             this.elements.loadingOverlay = $('#survey-loading-overlay');
@@ -72,10 +72,10 @@
          */
         bindEvents: function() {
             // Stage 1 form submission
-            $(document).off('submit', '#wp-dynamic-survey-participant-form-stage1').on('submit', '#wp-dynamic-survey-participant-form-stage1', this.handleStage1FormSubmit.bind(this));
+            $(document).off('submit', '#flowq-participant-form-stage1').on('submit', '#flowq-participant-form-stage1', this.handleStage1FormSubmit.bind(this));
 
             // Stage 2 form submission
-            $(document).off('submit', '#wp-dynamic-survey-participant-form-stage2').on('submit', '#wp-dynamic-survey-participant-form-stage2', this.handleStage2FormSubmit.bind(this));
+            $(document).off('submit', '#flowq-participant-form-stage2').on('submit', '#flowq-participant-form-stage2', this.handleStage2FormSubmit.bind(this));
 
             // Back button click
             $(document).off('click', '.btn-back').on('click', '.btn-back', this.handleBackButton.bind(this));
@@ -196,7 +196,7 @@
 
                 // Prepare form data without phone number
                 const formData = new FormData();
-                formData.append('survey_id', this.stage1Data.survey_id || $('#wp-dynamic-survey-participant-form-stage2 input[name="survey_id"]').val());
+                formData.append('survey_id', this.stage1Data.survey_id || $('#flowq-participant-form-stage2 input[name="survey_id"]').val());
                 formData.append('session_id', this.stage1Data.session_id);
                 formData.append('participant_phone', ''); // Empty phone
                 formData.append('action', 'flowq_submit_stage2_info');
@@ -332,8 +332,8 @@
          * Show Stage 2 form and hide Stage 1
          */
         showStage2Form: function() {
-            $('#wp-dynamic-survey-participant-form-stage1').addClass('hidden');
-            $('#wp-dynamic-survey-participant-form-stage2').removeClass('hidden');
+            $('#flowq-participant-form-stage1').addClass('hidden');
+            $('#flowq-participant-form-stage2').removeClass('hidden');
 
             // Store stage 1 data in hidden field for stage 2 submission
             $('#stage1_data').val(JSON.stringify(this.stage1Data));
@@ -346,8 +346,8 @@
          * Show Stage 1 form and hide Stage 2
          */
         showStage1Form: function() {
-            $('#wp-dynamic-survey-participant-form-stage2').addClass('hidden');
-            $('#wp-dynamic-survey-participant-form-stage1').removeClass('hidden');
+            $('#flowq-participant-form-stage2').addClass('hidden');
+            $('#flowq-participant-form-stage1').removeClass('hidden');
 
             // Reset form title
             $('.form-title').text('Please provide your information to start the survey');
@@ -645,8 +645,8 @@
          */
         renderQuestionTemplate: function(questionData) {
             // Get template
-            const template = $('#wp-dynamic-survey-question-template-wrapper').html();
-            $('#wp-dynamic-survey-question-template').removeClass('hidden');
+            const template = $('#flowq-question-template-wrapper').html();
+            $('#flowq-question-template').removeClass('hidden');
 
             if (!template) {
                 console.error('Question template not found');
@@ -687,7 +687,7 @@
             // Handle answer loops
             html = this.processAnswerLoop(html, templateData.answers);
 
-            $('#wp-dynamic-survey-question-template').html(html);
+            $('#flowq-question-template').html(html);
 
             return html;
         },
@@ -835,7 +835,7 @@
          */
         showRedirectOverlay: function() {
             const overlayHtml = `
-                <div class="wp-dynamic-survey-redirect-overlay" style="
+                <div class="flowq-redirect-overlay" style="
                     position: fixed;
                     top: 0;
                     left: 0;
@@ -966,10 +966,10 @@
             // Check if we have a custom template from the server
             if (data.template && data.template.has_custom_template && data.template.html) {
                 // Use custom template rendered by the server
-                $('#wp-dynamic-survey-question-template').html(data.template.html);
+                $('#flowq-question-template').html(data.template.html);
             } else {
                 // Fall back to default completion template
-                const template = $('#wp-dynamic-survey-completion-template-wrapper').html();
+                const template = $('#flowq-completion-template-wrapper').html();
                 if (!template) {
                     console.error('Completion template not found');
                     this.showBasicCompletion();
@@ -978,7 +978,7 @@
 
                 // Render default completion template
                 let html = this.renderCompletionTemplate(template, data);
-                $('#wp-dynamic-survey-question-template').html(html);
+                $('#flowq-question-template').html(html);
             }
 
             // Show completion step
@@ -996,7 +996,7 @@
          */
         showBasicCompletion: function() {
             const basicHtml = `
-                <div class="wp-dynamic-survey-completion">
+                <div class="flowq-completion">
                     <div class="completion-content">
                         <div class="completion-icon">
                             <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1370,7 +1370,7 @@
          * Loading state management
          */
         showQuestionLoading: function(show) {
-            const questionContainer = $('#wp-dynamic-survey-question-template');
+            const questionContainer = $('#flowq-question-template');
 
             if (show) {
                 // Create overlay if it doesn't exist
@@ -1440,8 +1440,8 @@
     // Initialize when document is ready
     $(document).ready(function() {
         // Auto-initialize if survey container exists
-        if ($('.wp-dynamic-survey-container').length) {
-            WPDynamicSurveyFrontend.init();
+        if ($('.flowq-container').length) {
+            FlowQFrontend.init();
         }
     });
 

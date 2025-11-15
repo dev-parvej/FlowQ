@@ -44,13 +44,13 @@ class FlowQ_Question_Manager {
     public function create_question($survey_id, $question_data) {
         // Validate required fields
         if (empty($question_data['title'])) {
-            return new WP_Error('missing_title', __('Question title is required.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('missing_title', __('Question title is required.', 'flowq'));
         }
 
         // Check if survey exists
         $survey_manager = new FlowQ_Survey_Manager();
         if (!$survey_manager->get_survey($survey_id)) {
-            return new WP_Error('survey_not_found', __('Survey not found.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('survey_not_found', __('Survey not found.', 'flowq'));
         }
 
         // Prepare question data
@@ -72,7 +72,7 @@ class FlowQ_Question_Manager {
         $result = $this->wpdb->insert($table_name, $question_record);
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to create question.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to create question.', 'flowq'));
         }
 
         $question_id = $this->wpdb->insert_id;
@@ -120,12 +120,12 @@ class FlowQ_Question_Manager {
     public function update_question($question_id, $data) {
         // Check if question exists
         if (!$this->get_question($question_id)) {
-            return new WP_Error('question_not_found', __('Question not found.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('question_not_found', __('Question not found.', 'flowq'));
         }
 
         if (isset($data['title'])) {
             if (empty($data['title'])) {
-                return new WP_Error('missing_title', __('Question title is required.', FLOWQ_TEXT_DOMAIN));
+                return new WP_Error('missing_title', __('Question title is required.', 'flowq'));
             }
             $update_data['title'] = sanitize_textarea_field($data['title']);
         }
@@ -160,7 +160,7 @@ class FlowQ_Question_Manager {
         );
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to update question.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to update question.', 'flowq'));
         }
 
         // Trigger action hook
@@ -178,7 +178,7 @@ class FlowQ_Question_Manager {
     public function delete_question($question_id) {
         // Check if question exists
         if (!$this->get_question($question_id)) {
-            return new WP_Error('question_not_found', __('Question not found.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('question_not_found', __('Question not found.', 'flowq'));
         }
 
         // Delete related answers first
@@ -196,7 +196,7 @@ class FlowQ_Question_Manager {
         );
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to delete question.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to delete question.', 'flowq'));
         }
 
         // Trigger action hook
@@ -242,12 +242,12 @@ class FlowQ_Question_Manager {
     public function create_answer($question_id, $answer_data) {
         // Validate required fields
         if (empty($answer_data['answer_text'])) {
-            return new WP_Error('missing_text', __('Answer text is required.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('missing_text', __('Answer text is required.', 'flowq'));
         }
 
         // Check if question exists
         if (!$this->get_question($question_id)) {
-            return new WP_Error('question_not_found', __('Question not found.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('question_not_found', __('Question not found.', 'flowq'));
         }
 
         // Get next answer order
@@ -267,7 +267,7 @@ class FlowQ_Question_Manager {
 
         // Validate redirect URL if provided
         if ($answer_record['redirect_url'] && !filter_var($answer_record['redirect_url'], FILTER_VALIDATE_URL)) {
-            return new WP_Error('invalid_url', __('Invalid redirect URL.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('invalid_url', __('Invalid redirect URL.', 'flowq'));
         }
 
         // Insert answer
@@ -275,7 +275,7 @@ class FlowQ_Question_Manager {
         $result = $this->wpdb->insert($table_name, $answer_record);
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to create answer.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to create answer.', 'flowq'));
         }
 
         $answer_id = $this->wpdb->insert_id;
@@ -375,7 +375,7 @@ class FlowQ_Question_Manager {
     public function update_answer($answer_id, $data) {
         // Check if answer exists
         if (!$this->get_answer($answer_id)) {
-            return new WP_Error('answer_not_found', __('Answer not found.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('answer_not_found', __('Answer not found.', 'flowq'));
         }
 
         // Prepare update data
@@ -383,7 +383,7 @@ class FlowQ_Question_Manager {
 
         if (isset($data['answer_text'])) {
             if (empty($data['answer_text'])) {
-                return new WP_Error('missing_text', __('Answer text is required.', FLOWQ_TEXT_DOMAIN));
+                return new WP_Error('missing_text', __('Answer text is required.', 'flowq'));
             }
             $update_data['answer_text'] = sanitize_textarea_field($data['answer_text']);
         }
@@ -398,7 +398,7 @@ class FlowQ_Question_Manager {
 
         if (isset($data['redirect_url'])) {
             if ($data['redirect_url'] && !filter_var($data['redirect_url'], FILTER_VALIDATE_URL)) {
-                return new WP_Error('invalid_url', __('Invalid redirect URL.', FLOWQ_TEXT_DOMAIN));
+                return new WP_Error('invalid_url', __('Invalid redirect URL.', 'flowq'));
             }
             $update_data['redirect_url'] = $data['redirect_url'] ? esc_url_raw($data['redirect_url']) : null;
         }
@@ -416,7 +416,7 @@ class FlowQ_Question_Manager {
         );
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to update answer.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to update answer.', 'flowq'));
         }
 
         // Trigger action hook
@@ -434,7 +434,7 @@ class FlowQ_Question_Manager {
     public function delete_answer($answer_id) {
         // Check if answer exists
         if (!$this->get_answer($answer_id)) {
-            return new WP_Error('answer_not_found', __('Answer not found.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('answer_not_found', __('Answer not found.', 'flowq'));
         }
 
         // Delete related responses
@@ -449,7 +449,7 @@ class FlowQ_Question_Manager {
         );
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to delete answer.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to delete answer.', 'flowq'));
         }
 
         // Trigger action hook
@@ -478,7 +478,7 @@ class FlowQ_Question_Manager {
             );
 
             if ($result === false) {
-                return new WP_Error('db_error', __('Failed to reorder answers.', FLOWQ_TEXT_DOMAIN));
+                return new WP_Error('db_error', __('Failed to reorder answers.', 'flowq'));
             }
         }
 

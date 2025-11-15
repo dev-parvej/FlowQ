@@ -48,7 +48,7 @@ class FlowQ_REST_API {
                 'permission_callback' => array($this, 'check_survey_permissions'),
                 'args' => array(
                     'id' => array(
-                        'description' => __('Survey ID', FLOWQ_TEXT_DOMAIN),
+                        'description' => __('Survey ID', 'flowq'),
                         'type' => 'integer',
                         'required' => true
                     )
@@ -63,7 +63,7 @@ class FlowQ_REST_API {
             'permission_callback' => array($this, 'check_view_permissions'),
             'args' => array(
                 'id' => array(
-                    'description' => __('Survey ID', FLOWQ_TEXT_DOMAIN),
+                    'description' => __('Survey ID', 'flowq'),
                     'type' => 'integer',
                     'required' => true
                 )
@@ -78,7 +78,7 @@ class FlowQ_REST_API {
                 'permission_callback' => array($this, 'check_survey_permissions'),
                 'args' => array(
                     'survey_id' => array(
-                        'description' => __('Survey ID', FLOWQ_TEXT_DOMAIN),
+                        'description' => __('Survey ID', 'flowq'),
                         'type' => 'integer',
                         'required' => true
                     )
@@ -95,7 +95,7 @@ class FlowQ_REST_API {
             'permission_callback' => '__return_true', // Public endpoint
             'args' => array(
                 'session_id' => array(
-                    'description' => __('Session ID to validate', FLOWQ_TEXT_DOMAIN),
+                    'description' => __('Session ID to validate', 'flowq'),
                     'type' => 'string',
                     'required' => true
                 )
@@ -139,7 +139,7 @@ class FlowQ_REST_API {
         $survey = $survey_manager->get_survey($survey_id);
 
         if (!$survey) {
-            return new WP_Error('survey_not_found', __('Survey not found.', FLOWQ_TEXT_DOMAIN), array('status' => 404));
+            return new WP_Error('survey_not_found', __('Survey not found.', 'flowq'), array('status' => 404));
         }
 
         // Include questions if requested
@@ -263,18 +263,18 @@ class FlowQ_REST_API {
     private function get_survey_collection_params() {
         return array(
             'status' => array(
-                'description' => __('Filter by status', FLOWQ_TEXT_DOMAIN),
+                'description' => __('Filter by status', 'flowq'),
                 'type' => 'string',
                 'enum' => array('draft', 'published', 'archived')
             ),
             'page' => array(
-                'description' => __('Page number', FLOWQ_TEXT_DOMAIN),
+                'description' => __('Page number', 'flowq'),
                 'type' => 'integer',
                 'default' => 1,
                 'minimum' => 1
             ),
             'per_page' => array(
-                'description' => __('Items per page', FLOWQ_TEXT_DOMAIN),
+                'description' => __('Items per page', 'flowq'),
                 'type' => 'integer',
                 'default' => 10,
                 'minimum' => 1,

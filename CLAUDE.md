@@ -5,7 +5,7 @@
 ### Core Plugin Structure
 - WordPress plugin with proper activation/deactivation hooks
 - Database migration system with custom tables
-- Internationalization support (text domain: 'wp-dynamic-survey')
+- Internationalization support (text domain: 'flowq')
 - Security measures (nonce verification, capability checks)
 
 ### Question System
@@ -107,7 +107,7 @@ Tables created:
 
 ### File Structure
 ```
-wp-dynamic-survey/
+flowq/
 ├── admin/                    # Admin interface
 ├── includes/                 # Core classes
 ├── public/                   # Frontend

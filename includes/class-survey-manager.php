@@ -43,7 +43,7 @@ class FlowQ_Survey_Manager {
     public function create_survey($data) {
         // Validate required fields
         if (empty($data['title'])) {
-            return new WP_Error('missing_title', __('Survey title is required.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('missing_title', __('Survey title is required.', 'flowq'));
         }
 
         // Sanitize and prepare data
@@ -63,7 +63,7 @@ class FlowQ_Survey_Manager {
 
         // Validate status
         if (!in_array($survey_data['status'], ['draft', 'published', 'archived'])) {
-            return new WP_Error('invalid_status', __('Invalid survey status.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('invalid_status', __('Invalid survey status.', 'flowq'));
         }
 
 
@@ -72,7 +72,7 @@ class FlowQ_Survey_Manager {
         $result = $this->wpdb->insert($table_name, $survey_data);
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to create survey.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to create survey.', 'flowq'));
         }
 
         $survey_id = $this->wpdb->insert_id;
@@ -123,7 +123,7 @@ class FlowQ_Survey_Manager {
     public function update_survey($survey_id, $data) {
         // Check if survey exists
         if (!$this->get_survey($survey_id)) {
-            return new WP_Error('survey_not_found', __('Survey not found.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('survey_not_found', __('Survey not found.', 'flowq'));
         }
 
         // Prepare update data
@@ -131,7 +131,7 @@ class FlowQ_Survey_Manager {
 
         if (isset($data['title'])) {
             if (empty($data['title'])) {
-                return new WP_Error('missing_title', __('Survey title is required.', FLOWQ_TEXT_DOMAIN));
+                return new WP_Error('missing_title', __('Survey title is required.', 'flowq'));
             }
             $update_data['title'] = sanitize_text_field($data['title']);
         }
@@ -146,7 +146,7 @@ class FlowQ_Survey_Manager {
 
         if (isset($data['status'])) {
             if (!in_array($data['status'], ['draft', 'published', 'archived'])) {
-                return new WP_Error('invalid_status', __('Invalid survey status.', FLOWQ_TEXT_DOMAIN));
+                return new WP_Error('invalid_status', __('Invalid survey status.', 'flowq'));
             }
             $update_data['status'] = sanitize_text_field($data['status']);
         }
@@ -182,7 +182,7 @@ class FlowQ_Survey_Manager {
         );
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to update survey.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to update survey.', 'flowq'));
         }
 
         // Trigger action hook
@@ -200,7 +200,7 @@ class FlowQ_Survey_Manager {
     public function delete_survey($survey_id) {
         // Check if survey exists
         if (!$this->get_survey($survey_id)) {
-            return new WP_Error('survey_not_found', __('Survey not found.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('survey_not_found', __('Survey not found.', 'flowq'));
         }
 
         // Delete related data first
@@ -217,7 +217,7 @@ class FlowQ_Survey_Manager {
         );
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to delete survey.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to delete survey.', 'flowq'));
         }
 
         // Trigger action hook
@@ -239,7 +239,7 @@ class FlowQ_Survey_Manager {
         if (empty($questions)) {
             $issues[] = array(
                 'type' => 'error',
-                'message' => __('Survey has no questions.', FLOWQ_TEXT_DOMAIN)
+                'message' => __('Survey has no questions.', 'flowq')
             );
             return $issues;
         }
@@ -264,7 +264,7 @@ class FlowQ_Survey_Manager {
         foreach ($orphaned_refs as $orphaned_id) {
             $issues[] = array(
                 'type' => 'error',
-                'message' => sprintf(__('Reference to non-existent question ID: %d', FLOWQ_TEXT_DOMAIN), $orphaned_id)
+                'message' => sprintf(__('Reference to non-existent question ID: %d', 'flowq'), $orphaned_id)
             );
         }
 
@@ -381,6 +381,18 @@ class FlowQ_Survey_Manager {
         $args = wp_parse_args($args, $defaults);
         $table_name = $this->table_prefix . 'surveys';
         $questions_table = $this->table_prefix . 'questions';
+
+        // Whitelist allowed orderby columns to prevent SQL injection
+        $allowed_orderby = array('created_at', 'updated_at', 'title', 'status', 'id');
+        if (!in_array($args['orderby'], $allowed_orderby)) {
+            $args['orderby'] = 'created_at';
+        }
+
+        // Whitelist allowed order directions
+        $args['order'] = strtoupper($args['order']);
+        if (!in_array($args['order'], array('ASC', 'DESC'))) {
+            $args['order'] = 'DESC';
+        }
 
         $where_clauses = array();
         $where_values = array();
@@ -558,7 +570,7 @@ class FlowQ_Survey_Manager {
         if (in_array($question_id, $visited)) {
             $issues[] = array(
                 'type' => 'error',
-                'message' => sprintf(__('Circular reference detected involving question ID: %d', FLOWQ_TEXT_DOMAIN), $question_id)
+                'message' => sprintf(__('Circular reference detected involving question ID: %d', 'flowq'), $question_id)
             );
             return;
         }

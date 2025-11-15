@@ -85,8 +85,8 @@ class FlowQ_Admin {
 
         // Main menu item
         add_menu_page(
-            __('FlowQ', FLOWQ_TEXT_DOMAIN),           // Page title
-            __('FlowQ', FLOWQ_TEXT_DOMAIN),           // Menu title
+            __('FlowQ', 'flowq'),           // Page title
+            __('FlowQ', 'flowq'),           // Menu title
             'manage_options',                                        // Capability
             $this->menu_slugs['main'],                              // Menu slug
             array($this, 'display_all_surveys_page'),               // Callback
@@ -97,8 +97,8 @@ class FlowQ_Admin {
         // All Surveys submenu (same as main)
         add_submenu_page(
             $this->menu_slugs['main'],
-            __('All Surveys', FLOWQ_TEXT_DOMAIN),
-            __('All Surveys', FLOWQ_TEXT_DOMAIN),
+            __('All Surveys', 'flowq'),
+            __('All Surveys', 'flowq'),
             'manage_options',
             $this->menu_slugs['all_surveys'],
             array($this, 'display_all_surveys_page')
@@ -107,8 +107,8 @@ class FlowQ_Admin {
         // Add New Survey submenu
         add_submenu_page(
             $this->menu_slugs['main'],
-            __('Add New Survey', FLOWQ_TEXT_DOMAIN),
-            __('Add New Survey', FLOWQ_TEXT_DOMAIN),
+            __('Add New Survey', 'flowq'),
+            __('Add New Survey', 'flowq'),
             'manage_options',
             $this->menu_slugs['add_survey'],
             array($this, 'display_add_survey_page')
@@ -117,8 +117,8 @@ class FlowQ_Admin {
         // Questions Management submenu
         add_submenu_page(
             $this->menu_slugs['main'],
-            __('Manage Questions', FLOWQ_TEXT_DOMAIN),
-            __('Questions', FLOWQ_TEXT_DOMAIN),
+            __('Manage Questions', 'flowq'),
+            __('Questions', 'flowq'),
             'manage_options',
             $this->menu_slugs['questions'],
             array($this, 'display_questions_page')
@@ -127,8 +127,8 @@ class FlowQ_Admin {
         // Participants submenu
         add_submenu_page(
             $this->menu_slugs['main'],
-            __('Survey Participants', FLOWQ_TEXT_DOMAIN),
-            __('Participants', FLOWQ_TEXT_DOMAIN),
+            __('Survey Participants', 'flowq'),
+            __('Participants', 'flowq'),
             'manage_options',
             $this->menu_slugs['participants'],
             array($this, 'display_participants_page')
@@ -137,8 +137,8 @@ class FlowQ_Admin {
         // Analytics submenu
         add_submenu_page(
             $this->menu_slugs['main'],
-            __('Survey Analytics', FLOWQ_TEXT_DOMAIN),
-            __('Analytics', FLOWQ_TEXT_DOMAIN),
+            __('Survey Analytics', 'flowq'),
+            __('Analytics', 'flowq'),
             'manage_options',
             $this->menu_slugs['analytics'],
             array($this, 'display_analytics_page')
@@ -147,8 +147,8 @@ class FlowQ_Admin {
         // Contact / Hire Developer submenu
         add_submenu_page(
             $this->menu_slugs['main'],
-            __('Contact Developer', FLOWQ_TEXT_DOMAIN),
-            __('Hire Developer', FLOWQ_TEXT_DOMAIN),
+            __('Contact Developer', 'flowq'),
+            __('Hire Developer', 'flowq'),
             'manage_options',
             $this->menu_slugs['contact'],
             array($this, 'display_contact_page')
@@ -157,8 +157,8 @@ class FlowQ_Admin {
         // User Guide submenu
         add_submenu_page(
             $this->menu_slugs['main'],
-            __('User Guide', FLOWQ_TEXT_DOMAIN),
-            __('User Guide', FLOWQ_TEXT_DOMAIN),
+            __('User Guide', 'flowq'),
+            __('User Guide', 'flowq'),
             'manage_options',
             $this->menu_slugs['user_guide'],
             array($this, 'display_user_guide_page')
@@ -183,6 +183,16 @@ class FlowQ_Admin {
             $this->version
         );
 
+        // All Surveys page styles
+        if ($hook === 'toplevel_page_' . $this->menu_slugs['all_surveys']) {
+            wp_enqueue_style(
+                'flowq-all-surveys',
+                FLOWQ_URL . 'assets/css/admin-all-surveys.css',
+                array('flowq-admin'),
+                $this->version
+            );
+        }
+
         // Admin JavaScript
         wp_enqueue_script(
             'flowq-admin',
@@ -206,27 +216,35 @@ class FlowQ_Admin {
             'ajaxurl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('flowq_admin_nonce'),
             'strings' => array(
-                'confirm_delete' => __('Are you sure you want to delete this survey?', FLOWQ_TEXT_DOMAIN),
-                'saving' => __('Saving...', FLOWQ_TEXT_DOMAIN),
-                'saved' => __('Saved!', FLOWQ_TEXT_DOMAIN),
-                'error' => __('An error occurred. Please try again.', FLOWQ_TEXT_DOMAIN),
-                'loading' => __('Loading...', FLOWQ_TEXT_DOMAIN),
-                'refresh' => __('Refresh', FLOWQ_TEXT_DOMAIN),
-                'export' => __('Export Selected', FLOWQ_TEXT_DOMAIN),
-                'exporting' => __('Exporting...', FLOWQ_TEXT_DOMAIN),
-                'cleanup' => __('Cleanup Sessions', FLOWQ_TEXT_DOMAIN),
-                'cleaning' => __('Cleaning...', FLOWQ_TEXT_DOMAIN),
+                'confirm_delete' => __('Are you sure you want to delete this survey?', 'flowq'),
+                'saving' => __('Saving...', 'flowq'),
+                'saved' => __('Saved!', 'flowq'),
+                'error' => __('An error occurred. Please try again.', 'flowq'),
+                'loading' => __('Loading...', 'flowq'),
+                'refresh' => __('Refresh', 'flowq'),
+                'export' => __('Export Selected', 'flowq'),
+                'exporting' => __('Exporting...', 'flowq'),
+                'cleanup' => __('Cleanup Sessions', 'flowq'),
+                'cleaning' => __('Cleaning...', 'flowq'),
                 // Question management strings
-                'add_question' => __('Add New Question', FLOWQ_TEXT_DOMAIN),
-                'edit_question' => __('Edit Question', FLOWQ_TEXT_DOMAIN),
-                'save_question' => __('Save Question', FLOWQ_TEXT_DOMAIN),
-                'confirm_delete_question' => __('Are you sure you want to delete this question? This action cannot be undone.', FLOWQ_TEXT_DOMAIN)
+                'add_question' => __('Add New Question', 'flowq'),
+                'edit_question' => __('Edit Question', 'flowq'),
+                'save_question' => __('Save Question', 'flowq'),
+                'confirm_delete_question' => __('Are you sure you want to delete this question? This action cannot be undone.', 'flowq')
             )
         ));
 
         // WordPress media library for file uploads
-        if ($hook === 'surveys_page_' . $this->menu_slugs['add_survey']) {
+        if ($hook === 'flowq_page_' . $this->menu_slugs['add_survey']) {
             wp_enqueue_media();
+
+            // Add/Edit Survey page styles
+            wp_enqueue_style(
+                'flowq-add-survey',
+                FLOWQ_URL . 'assets/css/admin-add-survey.css',
+                array('flowq-admin'),
+                $this->version
+            );
 
             // jQuery UI Sortable for question reordering
             wp_enqueue_script('jquery-ui-sortable');
@@ -239,17 +257,165 @@ class FlowQ_Admin {
                 $this->version,
                 true
             );
+
+            // Add/Edit Survey page JavaScript
+            wp_enqueue_script(
+                'flowq-add-survey',
+                FLOWQ_URL . 'assets/js/admin-add-survey.js',
+                array('jquery', 'flowq-admin'),
+                $this->version,
+                true
+            );
         }
 
         // Additional libraries for specific pages
-        if ($hook === 'surveys_page_' . $this->menu_slugs['analytics']) {
-            // Chart.js for analytics - load in head to ensure it's available for inline scripts
+        if ($hook === 'flowq_page_' . $this->menu_slugs['analytics']) {
+            // Chart.js for analytics - loaded locally per WordPress.org requirements
             wp_enqueue_script(
                 'chart-js',
-                'https://cdn.jsdelivr.net/npm/chart.js',
+                FLOWQ_URL . 'assets/js/chart.min.js',
                 array(),
                 '3.9.1',
-                false  // Load in head, not footer
+                true  // Load in footer with other scripts
+            );
+
+            // Analytics page styles
+            wp_enqueue_style(
+                'flowq-analytics',
+                FLOWQ_URL . 'assets/css/admin-analytics.css',
+                array('flowq-admin'),
+                $this->version
+            );
+
+            // Analytics page scripts
+            wp_enqueue_script(
+                'flowq-analytics',
+                FLOWQ_URL . 'assets/js/admin-analytics.js',
+                array('jquery', 'flowq-admin', 'chart-js'),
+                $this->version,
+                true
+            );
+
+            // Localize script for analytics-specific strings
+            // Note: Chart data will be added via wp_add_inline_script in the template
+            wp_localize_script('flowq-analytics', 'flowqAnalytics', array(
+                'exportingText' => __('Exporting...', 'flowq'),
+                'exportText' => __('Export CSV', 'flowq'),
+                'failText' => __('Export failed. Please try again.', 'flowq')
+            ));
+        }
+
+        // Survey builder page assets
+        if (strpos($hook, 'flowq-survey-builder') !== false) {
+            wp_enqueue_style(
+                'flowq-survey-builder',
+                FLOWQ_URL . 'assets/css/admin-survey-builder.css',
+                array('flowq-admin'),
+                $this->version
+            );
+        }
+
+        // Contact page assets
+        if ($hook === 'flowq_page_' . $this->menu_slugs['contact']) {
+            wp_enqueue_style(
+                'flowq-contact',
+                FLOWQ_URL . 'assets/css/admin-contact.css',
+                array('flowq-admin'),
+                $this->version
+            );
+        }
+
+        // Participants page assets
+        if ($hook === 'flowq_page_' . $this->menu_slugs['participants']) {
+            wp_enqueue_style(
+                'flowq-participants',
+                FLOWQ_URL . 'assets/css/admin-participants.css',
+                array('flowq-admin'),
+                $this->version
+            );
+
+            wp_enqueue_script(
+                'flowq-participants',
+                FLOWQ_URL . 'assets/js/admin-participants.js',
+                array('jquery'),
+                $this->version,
+                true
+            );
+        }
+
+        // Questions page assets
+        if ($hook === 'flowq_page_' . $this->menu_slugs['questions']) {
+            wp_enqueue_style(
+                'flowq-questions-page',
+                FLOWQ_URL . 'assets/css/admin-questions-page.css',
+                array('flowq-admin'),
+                $this->version
+            );
+
+            wp_enqueue_script(
+                'flowq-questions-page',
+                FLOWQ_URL . 'assets/js/admin-questions-page.js',
+                array('jquery'),
+                $this->version,
+                true
+            );
+
+            wp_localize_script(
+                'flowq-questions-page',
+                'flowqQuestionsPage',
+                array(
+                    'nonce' => wp_create_nonce('flowq_admin_nonce'),
+                    'i18n'  => array(
+                        'endSurvey'   => __('End Survey', 'flowq'),
+                        'saving'      => __('Saving...', 'flowq'),
+                        'saved'       => __('Saved!', 'flowq'),
+                        'save'        => __('Save', 'flowq'),
+                        'errorSaving' => __('Error saving skip destination.', 'flowq'),
+                    ),
+                )
+            );
+
+            wp_enqueue_style(
+                'flowq-question-form',
+                FLOWQ_URL . 'assets/css/admin-question-form.css',
+                array('flowq-admin'),
+                $this->version
+            );
+
+            wp_enqueue_script(
+                'flowq-question-form',
+                FLOWQ_URL . 'assets/js/admin-question-form.js',
+                array('jquery'),
+                $this->version,
+                true
+            );
+
+            wp_localize_script(
+                'flowq-question-form',
+                'flowqQuestionForm',
+                array(
+                    'i18n' => array(
+                        'newAnswerOption' => __('New Answer Option', 'flowq'),
+                    ),
+                )
+            );
+        }
+
+        // User Guide page assets
+        if ($hook === 'flowq_page_' . $this->menu_slugs['user_guide']) {
+            wp_enqueue_style(
+                'flowq-user-guide',
+                FLOWQ_URL . 'assets/css/admin-user-guide.css',
+                array('flowq-admin'),
+                $this->version
+            );
+
+            wp_enqueue_script(
+                'flowq-user-guide',
+                FLOWQ_URL . 'assets/js/admin-user-guide.js',
+                array('jquery'),
+                $this->version,
+                true
             );
         }
     }
@@ -276,7 +442,8 @@ class FlowQ_Admin {
      * Display Add/Edit Survey page
      */
     public function display_add_survey_page() {
-        $survey_id = isset($_GET['survey_id']) ? intval($_GET['survey_id']) : 0;
+        // Sanitize GET parameter with absint()
+        $survey_id = isset($_GET['survey_id']) ? absint($_GET['survey_id']) : 0;
         $survey = null;
         $questions = array();
 
@@ -301,7 +468,8 @@ class FlowQ_Admin {
         $survey_manager = new FlowQ_Survey_Manager();
         $surveys = $survey_manager->get_surveys(array('status' => 'published'));
 
-        $selected_survey_id = isset($_GET['survey_id']) ? intval($_GET['survey_id']) : 0;
+        // Sanitize GET parameter with absint()
+        $selected_survey_id = isset($_GET['survey_id']) ? absint($_GET['survey_id']) : 0;
         $analytics_data = array();
 
         if ($selected_survey_id) {
@@ -339,12 +507,12 @@ class FlowQ_Admin {
 
         // Get all surveys for dropdown
         $surveys = $survey_manager->get_surveys();
-        $selected_survey_id = isset($_GET['survey_id']) ? intval($_GET['survey_id']) : 0;
+        $selected_survey_id = isset($_GET['survey_id']) ? absint($_GET['survey_id']) : 0;
         $status_filter = isset($_GET['status']) ? sanitize_text_field($_GET['status']) : 'all';
 
         // Pagination parameters
         $per_page = isset($_GET['per_page']) ? sanitize_text_field($_GET['per_page']) : '20';
-        $current_page = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
+        $current_page = isset($_GET['paged']) ? max(1, absint($_GET['paged'])) : 1;
 
         // Validate per_page value
         $allowed_per_page = array('10', '20', '30', '40', 'all');
@@ -430,11 +598,11 @@ class FlowQ_Admin {
      * Handle survey actions (delete, activate, etc.)
      */
     private function handle_survey_actions() {
-        if (!isset($_GET['survey_action']) || !isset($_GET['survey_id']) || !wp_verify_nonce($_GET['_wpnonce'], 'survey_action')) {
+        if (!isset($_GET['survey_action']) || !isset($_GET['survey_id']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'survey_action')) {
             return;
         }
 
-        $survey_id = intval($_GET['survey_id']);
+        $survey_id = absint($_GET['survey_id']);
         $action = sanitize_text_field($_GET['survey_action']);
         $survey_manager = new FlowQ_Survey_Manager();
 
@@ -443,13 +611,13 @@ class FlowQ_Admin {
                 // Get survey details to check status
                 $survey = $survey_manager->get_survey($survey_id);
                 if ($survey && $survey['status'] === 'published') {
-                    $this->add_admin_notice(__('Cannot delete published survey. Please change the survey status to draft or archived first.', FLOWQ_TEXT_DOMAIN), 'error');
+                    $this->add_admin_notice(__('Cannot delete published survey. Please change the survey status to draft or archived first.', 'flowq'), 'error');
                 } else {
                     $result = $survey_manager->delete_survey($survey_id);
                     if (is_wp_error($result)) {
                         $this->add_admin_notice($result->get_error_message(), 'error');
                     } else {
-                        $this->add_admin_notice(__('Survey deleted successfully.', FLOWQ_TEXT_DOMAIN), 'success');
+                        $this->add_admin_notice(__('Survey deleted successfully.', 'flowq'), 'success');
                     }
                 }
                 break;
@@ -460,7 +628,7 @@ class FlowQ_Admin {
                 if (is_wp_error($result)) {
                     $this->add_admin_notice($result->get_error_message(), 'error');
                 } else {
-                    $this->add_admin_notice(__('Survey published.', FLOWQ_TEXT_DOMAIN), 'success');
+                    $this->add_admin_notice(__('Survey published.', 'flowq'), 'success');
                 }
                 break;
 
@@ -469,7 +637,7 @@ class FlowQ_Admin {
                 if (is_wp_error($result)) {
                     $this->add_admin_notice($result->get_error_message(), 'error');
                 } else {
-                    $this->add_admin_notice(__('Survey moved to draft.', FLOWQ_TEXT_DOMAIN), 'success');
+                    $this->add_admin_notice(__('Survey moved to draft.', 'flowq'), 'success');
                 }
                 break;
         }
@@ -493,7 +661,7 @@ class FlowQ_Admin {
 
         // Validation: If show_header is enabled, form_header must not be empty
         if ($show_header && empty(trim($form_header))) {
-            $this->add_admin_notice(__('Survey Form Header is required when Show Custom Header is enabled', FLOWQ_TEXT_DOMAIN), 'error');
+            $this->add_admin_notice(__('Survey Form Header is required when Show Custom Header is enabled', 'flowq'), 'error');
 
             // Redirect back to form
             if ($survey_id) {
@@ -529,31 +697,12 @@ class FlowQ_Admin {
             $this->add_admin_notice($result->get_error_message(), 'error');
         } else {
 
-            $this->add_admin_notice(__('Survey saved successfully.', FLOWQ_TEXT_DOMAIN), 'success');
+            $this->add_admin_notice(__('Survey saved successfully.', 'flowq'), 'success');
 
             // Redirect to edit page
             wp_safe_redirect(admin_url('admin.php?page=' . $this->menu_slugs['all_surveys'] . '&survey_id=' . $survey_id));
             exit;
         }
-    }
-
-    
-
-
-    /**
-     * Handle save settings
-     */
-    private function handle_save_settings() {
-        $settings = array(
-            'session_timeout' => intval($_POST['session_timeout']),
-            'auto_save_interval' => intval($_POST['auto_save_interval']),
-            'enable_progress_bar' => isset($_POST['enable_progress_bar']) ? 1 : 0,
-            'allow_back_navigation' => isset($_POST['allow_back_navigation']) ? 1 : 0,
-            'require_all_fields' => isset($_POST['require_all_fields']) ? 1 : 0,
-        );
-
-        update_option('flowq_settings', $settings);
-        $this->add_admin_notice(__('Settings saved successfully.', FLOWQ_TEXT_DOMAIN), 'success');
     }
 
     /**
@@ -631,9 +780,9 @@ class FlowQ_Admin {
         // Get all surveys for dropdown
         $surveys = $survey_manager->get_surveys();
 
-        // Get selected survey ID from URL parameter
-        $selected_survey_id = isset($_GET['survey_id']) ? intval($_GET['survey_id']) : 0;
-        $selected_question_id = isset($_GET['question_id']) ? intval($_GET['question_id']) : 0;
+        // Get selected survey ID from URL parameter - sanitized with absint()
+        $selected_survey_id = isset($_GET['survey_id']) ? absint($_GET['survey_id']) : 0;
+        $selected_question_id = isset($_GET['question_id']) ? absint($_GET['question_id']) : 0;
 
         // Get survey and questions data if survey is selected
         $survey = null;
@@ -662,8 +811,8 @@ class FlowQ_Admin {
      */
     private function handle_question_form_submission() {
         // Verify nonce
-        if (!wp_verify_nonce($_POST['_wpnonce'], 'flowq_question_action')) {
-            wp_die(__('Security check failed.', FLOWQ_TEXT_DOMAIN));
+        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['_wpnonce'])), 'flowq_question_action')) {
+            wp_die(__('Security check failed.', 'flowq'));
         }
 
         $question_manager = new FlowQ_Question_Manager();
@@ -674,19 +823,19 @@ class FlowQ_Admin {
             switch ($action) {
                 case 'create_question':
                     $question_id = $this->create_question_from_form($question_manager, $survey_id);
-                    $this->add_admin_notice(__('Question created successfully!', FLOWQ_TEXT_DOMAIN), 'success');
+                    $this->add_admin_notice(__('Question created successfully!', 'flowq'), 'success');
                     break;
 
                 case 'update_question':
                     $question_id = intval($_POST['question_id']);
                     $this->update_question_from_form($question_manager, $question_id);
-                    $this->add_admin_notice(__('Question updated successfully!', FLOWQ_TEXT_DOMAIN), 'success');
+                    $this->add_admin_notice(__('Question updated successfully!', 'flowq'), 'success');
                     break;
 
                 case 'delete_question':
                     $question_id = intval($_POST['question_id']);
                     $question_manager->delete_question($question_id);
-                    $this->add_admin_notice(__('Question deleted successfully!', FLOWQ_TEXT_DOMAIN), 'success');
+                    $this->add_admin_notice(__('Question deleted successfully!', 'flowq'), 'success');
                     break;
             }
 
@@ -706,19 +855,19 @@ class FlowQ_Admin {
     private function handle_question_delete_action() {
         // Check user permissions
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have sufficient permissions to perform this action.', FLOWQ_TEXT_DOMAIN));
+            wp_die(__('You do not have sufficient permissions to perform this action.', 'flowq'));
         }
 
         // Verify nonce
-        if (!wp_verify_nonce($_GET['_wpnonce'], 'flowq_question_action')) {
-            wp_die(__('Security check failed.', FLOWQ_TEXT_DOMAIN));
+        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'flowq_question_action')) {
+            wp_die(__('Security check failed.', 'flowq'));
         }
 
-        $question_id = intval($_GET['question_id']);
-        $survey_id = intval($_GET['survey_id']);
+        $question_id = absint($_GET['question_id']);
+        $survey_id = absint($_GET['survey_id']);
 
         if (!$question_id || !$survey_id) {
-            wp_die(__('Invalid question or survey ID.', FLOWQ_TEXT_DOMAIN));
+            wp_die(__('Invalid question or survey ID.', 'flowq'));
         }
 
         $question_manager = new FlowQ_Question_Manager();
@@ -728,7 +877,7 @@ class FlowQ_Admin {
             // Get survey details to check status
             $survey = $survey_manager->get_survey($survey_id);
             if (!$survey) {
-                $this->add_admin_notice(__('Survey not found.', FLOWQ_TEXT_DOMAIN), 'error');
+                $this->add_admin_notice(__('Survey not found.', 'flowq'), 'error');
                 $redirect_url = admin_url('admin.php?page=flowq-questions&survey_id=' . $survey_id);
                 wp_redirect($redirect_url);
                 exit;
@@ -736,7 +885,7 @@ class FlowQ_Admin {
 
             // Check if survey is in draft status
             if ($survey['status'] !== 'draft') {
-                $this->add_admin_notice(__('Questions can only be deleted from draft surveys. Please set the survey to draft status first.', FLOWQ_TEXT_DOMAIN), 'error');
+                $this->add_admin_notice(__('Questions can only be deleted from draft surveys. Please set the survey to draft status first.', 'flowq'), 'error');
                 $redirect_url = admin_url('admin.php?page=flowq-questions&survey_id=' . $survey_id);
                 wp_redirect($redirect_url);
                 exit;
@@ -748,7 +897,7 @@ class FlowQ_Admin {
             if ($response_count > 0) {
                 $this->add_admin_notice(
                     sprintf(
-                        __('Cannot delete question: It has %d response(s). Questions with responses cannot be deleted to maintain data integrity.', FLOWQ_TEXT_DOMAIN),
+                        __('Cannot delete question: It has %d response(s). Questions with responses cannot be deleted to maintain data integrity.', 'flowq'),
                         $response_count
                     ),
                     'error'
@@ -764,7 +913,7 @@ class FlowQ_Admin {
             if (is_wp_error($result)) {
                 $this->add_admin_notice($result->get_error_message(), 'error');
             } else {
-                $this->add_admin_notice(__('Question deleted successfully!', FLOWQ_TEXT_DOMAIN), 'success');
+                $this->add_admin_notice(__('Question deleted successfully!', 'flowq'), 'success');
             }
 
         } catch (Exception $e) {
@@ -862,7 +1011,7 @@ class FlowQ_Admin {
 
         // Create Yes answer
         $question_manager->create_answer($question_id, array(
-            'answer_text' => __('Yes', FLOWQ_TEXT_DOMAIN),
+            'answer_text' => __('Yes', 'flowq'),
             'answer_order' => 1,
             'next_question_id' => null,
             'redirect_url' => null
@@ -870,7 +1019,7 @@ class FlowQ_Admin {
 
         // Create No answer
         $question_manager->create_answer($question_id, array(
-            'answer_text' => __('No', FLOWQ_TEXT_DOMAIN),
+            'answer_text' => __('No', 'flowq'),
             'answer_order' => 2,
             'next_question_id' => null,
             'redirect_url' => null
@@ -895,10 +1044,12 @@ class FlowQ_Admin {
     private function is_survey_admin_page($hook) {
         $survey_pages = array(
             'toplevel_page_' . $this->menu_slugs['main'],
-            'surveys_page_' . $this->menu_slugs['add_survey'],
-            'surveys_page_' . $this->menu_slugs['questions'],
-            'surveys_page_' . $this->menu_slugs['participants'],
-            'surveys_page_' . $this->menu_slugs['analytics']
+            'flowq_page_' . $this->menu_slugs['add_survey'],
+            'flowq_page_' . $this->menu_slugs['questions'],
+            'flowq_page_' . $this->menu_slugs['participants'],
+            'flowq_page_' . $this->menu_slugs['analytics'],
+            'flowq_page_' . $this->menu_slugs['contact'],
+            'flowq_page_' . $this->menu_slugs['user_guide'],
         );
 
         return in_array($hook, $survey_pages);
@@ -958,12 +1109,12 @@ class FlowQ_Admin {
     public function handle_save_survey_action() {
         // Check user permissions
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have sufficient permissions to perform this action.', FLOWQ_TEXT_DOMAIN));
+            wp_die(__('You do not have sufficient permissions to perform this action.', 'flowq'));
         }
 
         // Verify nonce
         if (!check_admin_referer('flowq_save_survey')) {
-            wp_die(__('Security check failed.', FLOWQ_TEXT_DOMAIN));
+            wp_die(__('Security check failed.', 'flowq'));
         }
 
         // Call the existing handler
@@ -976,12 +1127,12 @@ class FlowQ_Admin {
     public function handle_save_question_action() {
         // Check user permissions
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have sufficient permissions to perform this action.', FLOWQ_TEXT_DOMAIN));
+            wp_die(__('You do not have sufficient permissions to perform this action.', 'flowq'));
         }
 
         // Verify nonce - the form uses flowq_question_action
-        if (!wp_verify_nonce($_POST['_wpnonce'], 'flowq_question_action')) {
-            wp_die(__('Security check failed.', FLOWQ_TEXT_DOMAIN));
+        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['_wpnonce'])), 'flowq_question_action')) {
+            wp_die(__('Security check failed.', 'flowq'));
         }
 
         // Call the existing handler
@@ -994,12 +1145,12 @@ class FlowQ_Admin {
     public function handle_delete_question_action() {
         // Check user permissions
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have sufficient permissions to perform this action.', FLOWQ_TEXT_DOMAIN));
+            wp_die(__('You do not have sufficient permissions to perform this action.', 'flowq'));
         }
 
         // Verify nonce
-        if (!wp_verify_nonce($_GET['_wpnonce'], 'flowq_question_action')) {
-            wp_die(__('Security check failed.', FLOWQ_TEXT_DOMAIN));
+        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'flowq_question_action')) {
+            wp_die(__('Security check failed.', 'flowq'));
         }
 
         // Call the existing handler
@@ -1012,12 +1163,12 @@ class FlowQ_Admin {
     public function handle_survey_action() {
         // Check user permissions
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have sufficient permissions to perform this action.', FLOWQ_TEXT_DOMAIN));
+            wp_die(__('You do not have sufficient permissions to perform this action.', 'flowq'));
         }
 
         // Verify nonce
-        if (!wp_verify_nonce($_GET['_wpnonce'], 'survey_action')) {
-            wp_die(__('Security check failed.', FLOWQ_TEXT_DOMAIN));
+        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'survey_action')) {
+            wp_die(__('Security check failed.', 'flowq'));
         }
 
         // Call the existing handler

@@ -54,26 +54,26 @@ class FlowQ_Participant_Manager {
             if (empty($participant_data[$field])) {
                 return new WP_Error(
                     'missing_field',
-                    sprintf(__('Required field missing: %s', FLOWQ_TEXT_DOMAIN), $field)
+                    sprintf(__('Required field missing: %s', 'flowq'), $field)
                 );
             }
         }
 
         // Validate email format
         if (!is_email($participant_data['email'])) {
-            return new WP_Error('invalid_email', __('Invalid email address.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('invalid_email', __('Invalid email address.', 'flowq'));
         }
 
         // Check if survey exists
         $survey_manager = new FlowQ_Survey_Manager();
         $survey = $survey_manager->get_survey($survey_id);
         if (!$survey) {
-            return new WP_Error('survey_not_found', __('Survey not found.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('survey_not_found', __('Survey not found.', 'flowq'));
         }
 
         // Check if survey is accessible
         if ($survey['status'] !== 'published') {
-            return new WP_Error('survey_not_published', __('Survey is not published.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('survey_not_published', __('Survey is not published.', 'flowq'));
         }
 
         // Check for duplicate email if setting is disabled
@@ -83,7 +83,7 @@ class FlowQ_Participant_Manager {
             if ($email_exists) {
                 return new WP_Error(
                     'duplicate_email',
-                    __('You have already submitted this survey with this email address.', FLOWQ_TEXT_DOMAIN)
+                    __('You have already submitted this survey with this email address.', 'flowq')
                 );
             }
         }
@@ -115,7 +115,7 @@ class FlowQ_Participant_Manager {
         $result = $this->wpdb->insert($table_name, $participant_record);
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to create participant record.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to create participant record.', 'flowq'));
         }
 
         $participant_id = $this->wpdb->insert_id;
@@ -172,7 +172,7 @@ class FlowQ_Participant_Manager {
         // Validate session
         $participant = $this->get_participant($session_id);
         if (!$participant) {
-            return new WP_Error('invalid_session', __('Invalid or expired session.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('invalid_session', __('Invalid or expired session.', 'flowq'));
         }
 
         // Update current question
@@ -186,7 +186,7 @@ class FlowQ_Participant_Manager {
         );
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to update current question.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to update current question.', 'flowq'));
         }
 
         return true;
@@ -203,7 +203,7 @@ class FlowQ_Participant_Manager {
         // Get current participant
         $participant = $this->get_participant($session_id);
         if (!$participant) {
-            return new WP_Error('invalid_session', __('Invalid or expired session.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('invalid_session', __('Invalid or expired session.', 'flowq'));
         }
 
         // Add to question chain if not already present
@@ -223,7 +223,7 @@ class FlowQ_Participant_Manager {
         );
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to update question chain.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to update question chain.', 'flowq'));
         }
 
         return true;
@@ -257,11 +257,11 @@ class FlowQ_Participant_Manager {
             // Fallback to UUID-like generation
             $session_id = sprintf(
                 '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-                mt_rand(0, 0xffff), mt_rand(0, 0xffff),
-                mt_rand(0, 0xffff),
-                mt_rand(0, 0x0fff) | 0x4000,
-                mt_rand(0, 0x3fff) | 0x8000,
-                mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+                wp_rand(0, 0xffff), wp_rand(0, 0xffff),
+                wp_rand(0, 0xffff),
+                wp_rand(0, 0x0fff) | 0x4000,
+                wp_rand(0, 0x3fff) | 0x8000,
+                wp_rand(0, 0xffff), wp_rand(0, 0xffff), wp_rand(0, 0xffff)
             );
         }
 
@@ -311,7 +311,7 @@ class FlowQ_Participant_Manager {
         // Validate session
         $participant = $this->get_participant($session_id);
         if (!$participant) {
-            return new WP_Error('invalid_session', __('Invalid or expired session.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('invalid_session', __('Invalid or expired session.', 'flowq'));
         }
 
         // Update completion timestamp
@@ -325,7 +325,7 @@ class FlowQ_Participant_Manager {
         );
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to mark participant as completed.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to mark participant as completed.', 'flowq'));
         }
 
         return true;
@@ -342,12 +342,12 @@ class FlowQ_Participant_Manager {
         // Validate session exists
         $participant = $this->get_participant($session_id);
         if (!$participant) {
-            return new WP_Error('invalid_session', __('Invalid or expired session.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('invalid_session', __('Invalid or expired session.', 'flowq'));
         }
 
         // Validate phone number
         if (empty($phone_number)) {
-            return new WP_Error('missing_phone', __('Phone number is required.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('missing_phone', __('Phone number is required.', 'flowq'));
         }
 
         // Update phone number
@@ -361,7 +361,7 @@ class FlowQ_Participant_Manager {
         );
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to update phone number.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to update phone number.', 'flowq'));
         }
 
         return true;
@@ -392,12 +392,12 @@ class FlowQ_Participant_Manager {
      */
     public function validate_session($session_id) {
         if (empty($session_id)) {
-            return new WP_Error('missing_session', __('Session ID is required.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('missing_session', __('Session ID is required.', 'flowq'));
         }
 
         $participant = $this->get_participant($session_id);
         if (!$participant) {
-            return new WP_Error('invalid_session', __('Invalid or expired session.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('invalid_session', __('Invalid or expired session.', 'flowq'));
         }
 
         return $participant;
@@ -445,6 +445,18 @@ class FlowQ_Participant_Manager {
 
         $args = wp_parse_args($args, $defaults);
         $table_name = $this->table_prefix . 'participants';
+
+        // Whitelist allowed orderby columns to prevent SQL injection
+        $allowed_orderby = array('started_at', 'completed_at', 'updated_at', 'id');
+        if (!in_array($args['orderby'], $allowed_orderby)) {
+            $args['orderby'] = 'started_at';
+        }
+
+        // Whitelist allowed order directions
+        $args['order'] = strtoupper($args['order']);
+        if (!in_array($args['order'], array('ASC', 'DESC'))) {
+            $args['order'] = 'DESC';
+        }
 
         $where_clauses = array('survey_id = %d');
         $where_values = array($survey_id);
@@ -498,12 +510,12 @@ class FlowQ_Participant_Manager {
         // Validate session exists
         $participant = $this->get_participant($session_id);
         if (!$participant) {
-            return new WP_Error('invalid_session', __('Invalid session.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('invalid_session', __('Invalid session.', 'flowq'));
         }
 
         // Generate unique token
         $token = wp_generate_uuid4();
-        $expires_at = date('Y-m-d H:i:s', strtotime('+1 hour'));
+        $expires_at = gmdate('Y-m-d H:i:s', strtotime('+1 hour'));
 
         // Update participant with token
         $table_name = $this->table_prefix . 'participants';
@@ -519,7 +531,7 @@ class FlowQ_Participant_Manager {
         );
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to generate completion token.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to generate completion token.', 'flowq'));
         }
 
         return $token;
@@ -533,7 +545,7 @@ class FlowQ_Participant_Manager {
      */
     public function validate_completion_token($token) {
         if (empty($token)) {
-            return new WP_Error('missing_token', __('Token is required.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('missing_token', __('Token is required.', 'flowq'));
         }
 
         $table_name = $this->table_prefix . 'participants';
@@ -546,10 +558,13 @@ class FlowQ_Participant_Manager {
         );
 
         if (!$participant) {
-            return new WP_Error('invalid_token', __('Invalid or expired token.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('invalid_token', __('Invalid or expired token.', 'flowq'));
         }
 
-        return $participant;
+        return [
+            'survey' => (new FlowQ_Survey_Manager())->get_survey($participant['survey_id']), 
+            'participant' => $participant
+        ];
     }
 
     /**

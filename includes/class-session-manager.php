@@ -53,19 +53,19 @@ class FlowQ_Session_Manager {
         $session_id = $participant['session_id'];
 
         if ($question['survey_id'] != $participant['survey_id']) {
-            return new WP_Error('question_mismatch', __('Question does not belong to this survey.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('question_mismatch', __('Question does not belong to this survey.', 'flowq'));
         }
 
         // Validate required fields - treat all questions as required since is_required column doesn't exist
         if (empty($answer_data['answer_text']) && empty($answer_data['answer_id']) && filter_var($question['is_required'], FILTER_VALIDATE_BOOLEAN)) {
-            return new WP_Error('required_answer', __('This question requires an answer.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('required_answer', __('This question requires an answer.', 'flowq'));
         }
 
         // Validate answer ID if provided
         if (!empty($answer_data['answer_id'])) {
             $valid_answer = $this->validate_answer_for_question($answer_data['answer_id'], $question['id']);
             if (!$valid_answer) {
-                return new WP_Error('invalid_answer', __('Invalid answer for this question.', FLOWQ_TEXT_DOMAIN));
+                return new WP_Error('invalid_answer', __('Invalid answer for this question.', 'flowq'));
             }
         }
 
@@ -100,7 +100,7 @@ class FlowQ_Session_Manager {
         }
 
         if ($result === false) {
-            return new WP_Error('db_error', __('Failed to record response.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('db_error', __('Failed to record response.', 'flowq'));
         }
 
         // Update participant progress
@@ -193,7 +193,7 @@ class FlowQ_Session_Manager {
 
         // Check if already completed
         if (!empty($participant['completed_at'])) {
-            return new WP_Error('already_completed', __('Survey already completed.', FLOWQ_TEXT_DOMAIN));
+            return new WP_Error('already_completed', __('Survey already completed.', 'flowq'));
         }
 
         // Validate all required questions are answered
@@ -419,7 +419,7 @@ class FlowQ_Session_Manager {
             return new WP_Error(
                 'incomplete_survey',
                 sprintf(
-                    __('Required questions not answered: %s', FLOWQ_TEXT_DOMAIN),
+                    __('Required questions not answered: %s', 'flowq'),
                     implode(', ', $unanswered_required)
                 )
             );

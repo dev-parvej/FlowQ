@@ -7,7 +7,7 @@
 (function($) {
     'use strict';
 
-    const WPDynamicSurveyAdmin = {
+    const FlowQAdmin = {
         init: function() {
             this.bindEvents();
             this.initTooltips();
@@ -244,10 +244,10 @@
             type = type || 'info';
 
             // Remove existing notices
-            $('.wp-dynamic-survey-notice').remove();
+            $('.flowq-notice').remove();
 
             const $notice = $(`
-                <div class="notice notice-${type} is-dismissible wp-dynamic-survey-notice">
+                <div class="notice notice-${type} is-dismissible flowq-notice">
                     <p>${message}</p>
                     <button type="button" class="notice-dismiss">
                         <span class="screen-reader-text">Dismiss this notice.</span>
@@ -279,10 +279,10 @@
 
     // Initialize when document is ready
     $(document).ready(function() {
-        WPDynamicSurveyAdmin.init();
+        FlowQAdmin.init();
     });
 
     // Expose to global scope for debugging
-    window.WPDynamicSurveyAdmin = WPDynamicSurveyAdmin;
+    window.FlowQAdmin = FlowQAdmin;
 
 })(jQuery);

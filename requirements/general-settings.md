@@ -510,4 +510,4 @@ Add a General Settings tab to the Settings page where administrators can configu
 - Group related settings under section headings
 
 ## Internationalization
-- All text strings must be translatable using `__()` or `_e()` with text domain `'wp-dynamic-survey'`
+- All text strings must be translatable using `__()` or `_e()` with text domain `'flowq'`

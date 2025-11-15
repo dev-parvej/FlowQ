@@ -54,8 +54,8 @@ class FlowQ_Settings_Admin {
         // Add Settings submenu
         add_submenu_page(
             'flowq',                                                // Parent slug
-            __('Settings', FLOWQ_TEXT_DOMAIN),         // Page title
-            __('Settings', FLOWQ_TEXT_DOMAIN),         // Menu title
+            __('Settings', 'flowq'),         // Page title
+            __('Settings', 'flowq'),         // Menu title
             'manage_options',                                       // Capability
             $this->menu_slug,                                      // Menu slug
             array($this, 'display_settings_page')                  // Callback
@@ -72,6 +72,31 @@ class FlowQ_Settings_Admin {
         }
 
         wp_enqueue_script('jquery');
+
+        // General settings tab JavaScript
+        wp_enqueue_script(
+            'flowq-general-settings',
+            FLOWQ_URL . 'assets/js/admin-general-settings.js',
+            array('jquery'),
+            FLOWQ_VERSION,
+            true
+        );
+
+        // Templates tab assets
+        wp_enqueue_style(
+            'flowq-templates',
+            FLOWQ_URL . 'assets/css/admin-templates.css',
+            array(),
+            FLOWQ_VERSION
+        );
+
+        wp_enqueue_script(
+            'flowq-templates',
+            FLOWQ_URL . 'assets/js/admin-templates.js',
+            array('jquery'),
+            FLOWQ_VERSION,
+            true
+        );
     }
 
     /**
@@ -83,8 +108,8 @@ class FlowQ_Settings_Admin {
 
         // Define available tabs
         $tabs = array(
-            'general' => __('General', FLOWQ_TEXT_DOMAIN),
-            'templates' => __('Templates', FLOWQ_TEXT_DOMAIN),
+            'general' => __('General', 'flowq'),
+            'templates' => __('Templates', 'flowq'),
             // Additional tabs will be added in future updates
         );
 
@@ -140,12 +165,12 @@ class FlowQ_Settings_Admin {
     public function handle_save_settings() {
         // Check user permissions
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have sufficient permissions to perform this action.', FLOWQ_TEXT_DOMAIN));
+            wp_die(__('You do not have sufficient permissions to perform this action.', 'flowq'));
         }
 
         // Verify nonce
         if (!check_admin_referer('flowq_save_settings')) {
-            wp_die(__('Security check failed.', FLOWQ_TEXT_DOMAIN));
+            wp_die(__('Security check failed.', 'flowq'));
         }
 
         // Get current tab

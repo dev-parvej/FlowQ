@@ -86,12 +86,12 @@ Before installing FlowQ, ensure your system meets these requirements:
 
 1. **Extract the ZIP File**
    - Unzip the FlowQ plugin file on your computer
-   - You should see a folder named `wp-dynamic-survey`
+   - You should see a folder named `flowq`
 
 2. **Upload via FTP**
    - Connect to your server using an FTP client (FileZilla, Cyberduck, etc.)
    - Navigate to `/wp-content/plugins/`
-   - Upload the `wp-dynamic-survey` folder
+   - Upload the `flowq` folder
 
 3. **Activate**
    - Go to WordPress admin **Plugins** page
@@ -952,7 +952,7 @@ A: Unlimited! Create as many surveys as you need.
 A: Yes, FlowQ is designed to work with any properly coded WordPress theme.
 
 **Q: Can I translate FlowQ?**
-A: Yes, FlowQ is translation-ready with text domain `wp-dynamic-survey`.
+A: Yes, FlowQ is translation-ready with text domain `flowq`.
 
 **Q: Is coding required?**
 A: No! FlowQ is designed for non-technical users. Everything is visual and intuitive.

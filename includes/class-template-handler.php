@@ -81,7 +81,7 @@ class FlowQ_Template_Handler {
         $button_style = $styles['button_style'] ?? 'solid';
 
         // Base styles
-        $css .= ".wp-dynamic-survey-participant-form, .wp-dynamic-survey-container {";
+        $css .= ".flowq-participant-form, .flowq-container {";
         $css .= "font-family: {$font_family};";
         $css .= "}";
 
@@ -263,10 +263,44 @@ class FlowQ_Template_Handler {
     /**
      * Render template-specific CSS inline
      *
-     * @return string CSS wrapped in style tags
+     * @deprecated Use enqueue_template_styles() instead
+     * @return string Empty string (use enqueue_template_styles() for proper enqueueing)
      */
     public function render_template_css() {
+        // Deprecated method - use enqueue_template_styles() instead
+        _deprecated_function(__METHOD__, '1.0.0', 'FlowQ_Template_Handler::enqueue_template_styles()');
+
+        // Call the proper enqueue method instead of returning raw tags
+        $this->enqueue_template_styles();
+        return '';
+    }
+
+    /**
+     * Enqueue template-specific CSS properly using wp_add_inline_style
+     *
+     * @return void
+     */
+    public function enqueue_template_styles() {
+        // Only enqueue on frontend
+        if (is_admin()) {
+            return;
+        }
+
+        // Generate dynamic CSS
         $css = $this->generate_template_css();
-        return "<style type=\"text/css\">{$css}</style>";
+
+        // Add inline styles to the frontend stylesheet
+        // This ensures styles are properly enqueued rather than echoed as inline tags
+        wp_add_inline_style('flowq-frontend', $css);
+    }
+
+    /**
+     * Initialize template handler hooks
+     *
+     * @return void
+     */
+    public function init() {
+        // Hook into wp_enqueue_scripts to properly enqueue template styles
+        add_action('wp_enqueue_scripts', array($this, 'enqueue_template_styles'), 20);
     }
 }

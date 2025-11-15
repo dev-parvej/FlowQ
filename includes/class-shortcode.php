@@ -40,11 +40,15 @@ class FlowQ_Shortcode {
      * Register all shortcodes
      */
     public function register_shortcodes() {
+        // Primary shortcodes with proper prefix
+        add_shortcode('flowq_survey', array($this, 'render_survey'));
+        add_shortcode('flowq_survey_list', array($this, 'render_survey_list'));
+        add_shortcode('flowq_survey_stats', array($this, 'render_survey_stats'));
+        add_shortcode('flowq_survey_button', array($this, 'render_survey_button'));
+        add_shortcode('flowq_survey_embed', array($this, 'render_survey_embed'));
+
+        // Legacy shortcode support for backward compatibility
         add_shortcode('dynamic_survey', array($this, 'render_survey'));
-        add_shortcode('survey_list', array($this, 'render_survey_list'));
-        add_shortcode('survey_stats', array($this, 'render_survey_stats'));
-        add_shortcode('survey_button', array($this, 'render_survey_button'));
-        add_shortcode('survey_embed', array($this, 'render_survey_embed'));
     }
 
     /**
@@ -89,7 +93,7 @@ class FlowQ_Shortcode {
         $track_analytics = filter_var($atts['track_analytics'], FILTER_VALIDATE_BOOLEAN);
 
         if (!$survey_id) {
-            return $this->render_error(__('Survey ID is required.', FLOWQ_TEXT_DOMAIN));
+            return $this->render_error(__('Survey ID is required.', 'flowq'));
         }
 
         // Validate survey exists and is published
@@ -97,13 +101,13 @@ class FlowQ_Shortcode {
         $survey = $survey_manager->get_survey($survey_id, true);
 
         if (!$survey) {
-            return $this->render_error(__('Survey not found.', FLOWQ_TEXT_DOMAIN));
+            return $this->render_error(__('Survey not found.', 'flowq'));
         }
 
         if ($survey['status'] !== 'published') {
             // Show message for admins, nothing for regular users
             if (current_user_can('manage_flowq_surveys')) {
-                return $this->render_error(__('Survey is not published. Only administrators can see this message.', FLOWQ_TEXT_DOMAIN));
+                return $this->render_error(__('Survey is not published. Only administrators can see this message.', 'flowq'));
             }
             return '';
         }
@@ -115,12 +119,12 @@ class FlowQ_Shortcode {
 
         // Generate unique container ID if not provided
         if (empty($container_id)) {
-            $container_id = 'wp-dynamic-survey-' . $survey_id . '-' . uniqid();
+            $container_id = 'flowq-' . $survey_id . '-' . uniqid();
         }
 
         // Build container classes
         $container_classes = array(
-            'wp-dynamic-survey-container',
+            'flowq-container',
             'survey-theme-' . $theme,
             'survey-id-' . $survey_id
         );
@@ -186,31 +190,33 @@ class FlowQ_Shortcode {
             <?php if ($enable_print): ?>
             <div class="survey-print-options">
                 <button type="button" class="survey-print-btn" onclick="window.print()">
-                    <?php echo esc_html__('Print Survey', FLOWQ_TEXT_DOMAIN); ?>
+                    <?php echo esc_html__('Print Survey', 'flowq'); ?>
                 </button>
             </div>
             <?php endif; ?>
 
         </div>
 
-        <?php if (!empty($custom_css)): ?>
-        <style>
-            #<?php echo esc_attr($container_id); ?> {
-                <?php echo wp_strip_all_tags($custom_css); ?>
-            }
-        </style>
-        <?php endif; ?>
+        <?php
+        // Add inline custom CSS using WordPress function
+        if (!empty($custom_css)) {
+            $inline_css = '#' . $container_id . ' {' . wp_strip_all_tags($custom_css) . '}';
+            wp_add_inline_style('flowq-shortcode', $inline_css);
+        }
 
-        <script>
+        // Add inline initialization script using WordPress function
+        $inline_script = "
         document.addEventListener('DOMContentLoaded', function() {
-            const container = document.getElementById('<?php echo esc_js($container_id); ?>');
-            const config = JSON.parse(container.dataset.surveyConfig);
+            const container = document.getElementById('" . esc_js($container_id) . "');
+            const config = JSON.parse(container && container.dataset.surveyConfig || '{}');
 
-            if (typeof WPDynamicSurveyFrontend !== 'undefined') {
-                WPDynamicSurveyFrontend.init(config);
+            if (typeof FlowQFrontend !== 'undefined') {
+                FlowQFrontend.init(config);
             }
         });
-        </script>
+        ";
+        wp_add_inline_script('flowq-frontend-enhanced', $inline_script);
+        ?>
 
         <?php
         return ob_get_clean();
@@ -248,7 +254,7 @@ class FlowQ_Shortcode {
 
         if (empty($surveys)) {
             return '<div class="survey-list-empty">' .
-                   esc_html__('No surveys found.', FLOWQ_TEXT_DOMAIN) .
+                   esc_html__('No surveys found.', 'flowq') .
                    '</div>';
         }
 
@@ -306,7 +312,7 @@ class FlowQ_Shortcode {
         $format = sanitize_text_field($atts['format']);
 
         if (!$survey_id) {
-            return $this->render_error(__('Survey ID is required for statistics.', FLOWQ_TEXT_DOMAIN));
+            return $this->render_error(__('Survey ID is required for statistics.', 'flowq'));
         }
 
         $survey_manager = new FlowQ_Survey_Manager();
@@ -320,21 +326,21 @@ class FlowQ_Shortcode {
 
         if ($show === 'all' || $show === 'participants') {
             $display_stats['participants'] = array(
-                'label' => __('Total Participants', FLOWQ_TEXT_DOMAIN),
+                'label' => __('Total Participants', 'flowq'),
                 'value' => number_format($stats['total_participants'])
             );
         }
 
         if ($show === 'all' || $show === 'completion') {
             $display_stats['completion'] = array(
-                'label' => __('Completion Rate', FLOWQ_TEXT_DOMAIN),
+                'label' => __('Completion Rate', 'flowq'),
                 'value' => number_format($stats['completion_rate'], 1) . '%'
             );
         }
 
         if ($show === 'all' || $show === 'average_time') {
             $display_stats['average_time'] = array(
-                'label' => __('Average Completion Time', FLOWQ_TEXT_DOMAIN),
+                'label' => __('Average Completion Time', 'flowq'),
                 'value' => $this->format_duration($stats['average_completion_time'])
             );
         }
@@ -399,7 +405,7 @@ class FlowQ_Shortcode {
         $new_window = filter_var($atts['new_window'], FILTER_VALIDATE_BOOLEAN);
 
         if (!$survey_id) {
-            return $this->render_error(__('Survey ID is required for button.', FLOWQ_TEXT_DOMAIN));
+            return $this->render_error(__('Survey ID is required for button.', 'flowq'));
         }
 
         // Build URL
@@ -461,7 +467,7 @@ class FlowQ_Shortcode {
         $sandbox = sanitize_text_field($atts['sandbox']);
 
         if (!$survey_id) {
-            return $this->render_error(__('Survey ID is required for embed.', FLOWQ_TEXT_DOMAIN));
+            return $this->render_error(__('Survey ID is required for embed.', 'flowq'));
         }
 
         // Build iframe URL
@@ -476,7 +482,7 @@ class FlowQ_Shortcode {
             'height' => esc_attr($height),
             'frameborder' => esc_attr($frameborder),
             'scrolling' => esc_attr($scrolling),
-            'title' => esc_attr__('Survey', FLOWQ_TEXT_DOMAIN)
+            'title' => esc_attr__('Survey', 'flowq')
         );
 
         if (!empty($sandbox)) {
@@ -497,24 +503,24 @@ class FlowQ_Shortcode {
      */
     private function enqueue_survey_assets($theme) {
         // Enqueue base assets
-        wp_enqueue_style('wp-dynamic-survey-frontend');
-        wp_enqueue_script('wp-dynamic-survey-frontend-enhanced');
+        wp_enqueue_style('flowq-frontend');
+        wp_enqueue_script('flowq-frontend-enhanced');
 
         // Enqueue theme-specific assets
         if ($theme !== 'default') {
             wp_enqueue_style(
-                'wp-dynamic-survey-theme-' . $theme,
+                'flowq-theme-' . $theme,
                 FLOWQ_URL . 'assets/css/themes/' . $theme . '.css',
-                array('wp-dynamic-survey-frontend'),
+                array('flowq-frontend'),
                 FLOWQ_VERSION
             );
         }
 
         // Enqueue shortcode-specific styles
         wp_enqueue_style(
-            'wp-dynamic-survey-shortcode',
+            'flowq-shortcode',
             FLOWQ_URL . 'assets/css/shortcode.css',
-            array('wp-dynamic-survey-frontend'),
+            array('flowq-frontend'),
             FLOWQ_VERSION
         );
     }
@@ -550,8 +556,8 @@ class FlowQ_Shortcode {
      * Render error message
      */
     private function render_error($message) {
-        return '<div class="wp-dynamic-survey-error" role="alert">' .
-               '<strong>' . esc_html__('Survey Error:', FLOWQ_TEXT_DOMAIN) . '</strong> ' .
+        return '<div class="flowq-error" role="alert">' .
+               '<strong>' . esc_html__('Survey Error:', 'flowq') . '</strong> ' .
                esc_html($message) .
                '</div>';
     }
@@ -561,14 +567,14 @@ class FlowQ_Shortcode {
      */
     private function format_duration($seconds) {
         if ($seconds < 60) {
-            return sprintf(__('%d seconds', FLOWQ_TEXT_DOMAIN), $seconds);
+            return sprintf(__('%d seconds', 'flowq'), $seconds);
         } elseif ($seconds < 3600) {
             $minutes = floor($seconds / 60);
-            return sprintf(__('%d minutes', FLOWQ_TEXT_DOMAIN), $minutes);
+            return sprintf(__('%d minutes', 'flowq'), $minutes);
         } else {
             $hours = floor($seconds / 3600);
             $minutes = floor(($seconds % 3600) / 60);
-            return sprintf(__('%d hours %d minutes', FLOWQ_TEXT_DOMAIN), $hours, $minutes);
+            return sprintf(__('%d hours %d minutes', 'flowq'), $hours, $minutes);
         }
     }
 
@@ -585,56 +591,56 @@ class FlowQ_Shortcode {
     public static function get_shortcode_docs() {
         return array(
             'dynamic_survey' => array(
-                'description' => __('Display a survey form', FLOWQ_TEXT_DOMAIN),
+                'description' => __('Display a survey form', 'flowq'),
                 'attributes' => array(
-                    'id' => __('Survey ID (required)', FLOWQ_TEXT_DOMAIN),
-                    'theme' => __('Theme name (default, minimal, modern, card, full-width)', FLOWQ_TEXT_DOMAIN),
-                    'width' => __('Container width (100%, 500px, etc.)', FLOWQ_TEXT_DOMAIN),
-                    'height' => __('Container height (auto, 600px, etc.)', FLOWQ_TEXT_DOMAIN),
-                    'show_title' => __('Show survey title (true/false)', FLOWQ_TEXT_DOMAIN),
-                    'show_description' => __('Show survey description (true/false)', FLOWQ_TEXT_DOMAIN),
-                    'show_progress' => __('Show progress bar (true/false)', FLOWQ_TEXT_DOMAIN),
-                    'auto_start' => __('Auto-scroll to survey (true/false)', FLOWQ_TEXT_DOMAIN),
-                    'css_class' => __('Additional CSS class', FLOWQ_TEXT_DOMAIN)
+                    'id' => __('Survey ID (required)', 'flowq'),
+                    'theme' => __('Theme name (default, minimal, modern, card, full-width)', 'flowq'),
+                    'width' => __('Container width (100%, 500px, etc.)', 'flowq'),
+                    'height' => __('Container height (auto, 600px, etc.)', 'flowq'),
+                    'show_title' => __('Show survey title (true/false)', 'flowq'),
+                    'show_description' => __('Show survey description (true/false)', 'flowq'),
+                    'show_progress' => __('Show progress bar (true/false)', 'flowq'),
+                    'auto_start' => __('Auto-scroll to survey (true/false)', 'flowq'),
+                    'css_class' => __('Additional CSS class', 'flowq')
                 ),
                 'example' => '[dynamic_survey id="1" theme="modern" show_progress="true"]'
             ),
             'survey_list' => array(
-                'description' => __('Display a list of surveys', FLOWQ_TEXT_DOMAIN),
+                'description' => __('Display a list of surveys', 'flowq'),
                 'attributes' => array(
-                    'status' => __('Survey status filter (published, draft)', FLOWQ_TEXT_DOMAIN),
-                    'limit' => __('Number of surveys to show', FLOWQ_TEXT_DOMAIN),
-                    'show_description' => __('Show descriptions (true/false)', FLOWQ_TEXT_DOMAIN),
-                    'show_stats' => __('Show statistics (true/false)', FLOWQ_TEXT_DOMAIN)
+                    'status' => __('Survey status filter (published, draft)', 'flowq'),
+                    'limit' => __('Number of surveys to show', 'flowq'),
+                    'show_description' => __('Show descriptions (true/false)', 'flowq'),
+                    'show_stats' => __('Show statistics (true/false)', 'flowq')
                 ),
                 'example' => '[survey_list limit="5" show_stats="true"]'
             ),
             'survey_stats' => array(
-                'description' => __('Display survey statistics', FLOWQ_TEXT_DOMAIN),
+                'description' => __('Display survey statistics', 'flowq'),
                 'attributes' => array(
-                    'id' => __('Survey ID (required)', FLOWQ_TEXT_DOMAIN),
-                    'show' => __('What to show (all, participants, completion, average_time)', FLOWQ_TEXT_DOMAIN),
-                    'format' => __('Display format (inline, table, cards)', FLOWQ_TEXT_DOMAIN)
+                    'id' => __('Survey ID (required)', 'flowq'),
+                    'show' => __('What to show (all, participants, completion, average_time)', 'flowq'),
+                    'format' => __('Display format (inline, table, cards)', 'flowq')
                 ),
                 'example' => '[survey_stats id="1" format="cards"]'
             ),
             'survey_button' => array(
-                'description' => __('Display a survey button/link', FLOWQ_TEXT_DOMAIN),
+                'description' => __('Display a survey button/link', 'flowq'),
                 'attributes' => array(
-                    'id' => __('Survey ID (required)', FLOWQ_TEXT_DOMAIN),
-                    'text' => __('Button text', FLOWQ_TEXT_DOMAIN),
-                    'style' => __('Style (button, link)', FLOWQ_TEXT_DOMAIN),
-                    'size' => __('Size (small, medium, large)', FLOWQ_TEXT_DOMAIN),
-                    'color' => __('Color (primary, secondary, success, warning, danger)', FLOWQ_TEXT_DOMAIN)
+                    'id' => __('Survey ID (required)', 'flowq'),
+                    'text' => __('Button text', 'flowq'),
+                    'style' => __('Style (button, link)', 'flowq'),
+                    'size' => __('Size (small, medium, large)', 'flowq'),
+                    'color' => __('Color (primary, secondary, success, warning, danger)', 'flowq')
                 ),
                 'example' => '[survey_button id="1" text="Start Survey" style="button" size="large"]'
             ),
             'survey_embed' => array(
-                'description' => __('Embed survey in iframe', FLOWQ_TEXT_DOMAIN),
+                'description' => __('Embed survey in iframe', 'flowq'),
                 'attributes' => array(
-                    'id' => __('Survey ID (required)', FLOWQ_TEXT_DOMAIN),
-                    'width' => __('Iframe width', FLOWQ_TEXT_DOMAIN),
-                    'height' => __('Iframe height', FLOWQ_TEXT_DOMAIN)
+                    'id' => __('Survey ID (required)', 'flowq'),
+                    'width' => __('Iframe width', 'flowq'),
+                    'height' => __('Iframe height', 'flowq')
                 ),
                 'example' => '[survey_embed id="1" width="100%" height="600px"]'
             )

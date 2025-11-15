@@ -12,7 +12,7 @@
     /**
      * Enhanced Frontend Survey System
      */
-    class WPDynamicSurveyFrontendEnhanced {
+    class FlowQFrontendEnhanced {
     }
 
     /**

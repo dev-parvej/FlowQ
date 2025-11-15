@@ -110,14 +110,14 @@ Perfect for:
 ### Method 2: Manual Installation
 
 1. Download and unzip the FlowQ plugin
-2. Upload the `wp-dynamic-survey` folder to `/wp-content/plugins/`
+2. Upload the `flowq` folder to `/wp-content/plugins/`
 3. Activate the plugin through the **Plugins** menu in WordPress
 
 ### Method 3: FTP Upload
 
 1. Unzip the downloaded plugin file
 2. Connect to your server via FTP
-3. Upload the `wp-dynamic-survey` folder to `/wp-content/plugins/`
+3. Upload the `flowq` folder to `/wp-content/plugins/`
 4. Navigate to **Plugins** in WordPress admin and activate FlowQ
 
 ### Post-Installation
@@ -575,7 +575,7 @@ A: Unlimited! Create as many surveys as you need.
 A: Yes, FlowQ is designed to work with any properly coded WordPress theme.
 
 **Q: Can I translate FlowQ?**
-A: Yes, FlowQ is translation-ready with text domain `wp-dynamic-survey`.
+A: Yes, FlowQ is translation-ready with text domain `flowq`.
 
 ### Technical Questions
 
@@ -828,23 +828,23 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 ### 1. Survey List Dashboard
 View all your surveys in a clean 2-column grid with statistics and quick actions.
 
-![All Surveys](assets/images/features/All%20surveys.png)
+![All Surveys](assets/images/features/all-surveys.png)
 
 ### 2. Create Survey
 Comprehensive survey creation interface with custom headers, subtitles, and thank you page selection.
 
-![Create Survey](assets/images/features/Create%20survey.png)
+![Create Survey](assets/images/features/create-survey.png)
 
 ### 3. Question Builder
 Intuitive interface for creating questions with conditional branching and answer options.
 
-![Survey Question Builder](assets/images/features/Survey%20Question%20Builder.png)
+![Survey Question Builder](assets/images/features/survey-question-builder.png)
 
 ### 4. Question Management
 Create and edit questions with multiple answer options and conditional logic.
 
-![Create Questions](assets/images/features/Create%20questions.png)
-![Edit Questions](assets/images/features/Edit%20questions.png)
+![Create Questions](assets/images/features/create-questions.png)
+![Edit Questions](assets/images/features/edit-questions.png)
 
 ### 5. Shortcode Display
 Easy-to-copy shortcode for embedding surveys anywhere on your site.
@@ -855,19 +855,19 @@ Easy-to-copy shortcode for embedding surveys anywhere on your site.
 View detailed participant information and track survey submissions.
 
 ![Participants](assets/images/features/Participants.png)
-![Participant Details](assets/images/features/Participants%20details.png)
+![Participant Details](assets/images/features/participants-details.png)
 
 ### 7. Frontend Survey Display
 Responsive, beautiful surveys that adapt to any device and theme.
 
-![Survey Frontend 1](assets/images/features/Survey%201.png)
-![Survey Frontend 2](assets/images/features/Survey%202.png)
+![Survey Frontend 1](assets/images/features/survey-1.png)
+![Survey Frontend 2](assets/images/features/survey-2.png)
 
 ### 8. Mobile Responsive Design
 Fully responsive survey questions optimized for mobile devices.
 
-![Survey Question Mobile](assets/images/features/survey%20question%20mobile.png)
-![Survey Question Desktop](assets/images/features/Survey%20question.png)
+![Survey Question Mobile](assets/images/features/survey-question-mobile.png)
+![Survey Question Desktop](assets/images/features/survey-question.png)
 
 ---
 

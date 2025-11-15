@@ -23,8 +23,8 @@ The Settings page should have a horizontal tab navigation at the top:
 ## Technical Requirements
 
 ### URL Structure
-- Main settings page: `admin.php?page=wp-dynamic-survey-settings`
-- Tab switching via URL hash or query parameter: `admin.php?page=wp-dynamic-survey-settings&tab=templates`
+- Main settings page: `admin.php?page=flowq-settings`
+- Tab switching via URL hash or query parameter: `admin.php?page=flowq-settings&tab=templates`
 
 ### Permissions
 - Only users with `manage_options` capability can access settings
