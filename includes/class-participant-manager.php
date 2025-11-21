@@ -274,20 +274,22 @@ class FlowQ_Participant_Manager {
      * @return string IP address
      */
     public function get_user_ip() {
+        $ip = '';
+
         // Check for IP from shared internet
         if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-            $ip = $_SERVER['HTTP_CLIENT_IP'];
+            $ip = sanitize_text_field(wp_unslash($_SERVER['HTTP_CLIENT_IP']));
         }
         // Check for IP passed from proxy
         elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+            $ip = sanitize_text_field(wp_unslash($_SERVER['HTTP_X_FORWARDED_FOR']));
         }
         // Check for IP from remote address
-        else {
-            $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+        elseif (!empty($_SERVER['REMOTE_ADDR'])) {
+            $ip = sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR']));
         }
 
-        // Validate and sanitize IP
+        // Validate IP after sanitization
         $ip = filter_var($ip, FILTER_VALIDATE_IP);
         return $ip ? $ip : '0.0.0.0';
     }
@@ -298,7 +300,7 @@ class FlowQ_Participant_Manager {
      * @return string User agent
      */
     private function get_user_agent() {
-        return sanitize_text_field($_SERVER['HTTP_USER_AGENT'] ?? '');
+        return isset($_SERVER['HTTP_USER_AGENT']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_USER_AGENT'])) : '';
     }
 
     /**

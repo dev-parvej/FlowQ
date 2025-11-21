@@ -85,35 +85,35 @@ class FlowQ_Template_Handler {
         $css .= "font-family: {$font_family};";
         $css .= "}";
 
-        // Container background
-        $css .= ".participant-form-container, .question-container {";
+        // Container background - Increased specificity
+        $css .= ".flowq-participant-form .participant-form-container, .flowq-container .question-container {";
         $css .= "background: {$background_color};";
         $css .= "border-radius: {$border_radius};";
         $css .= "}";
 
-        // Text colors
-        $css .= ".form-title, .question-title, .form-label, .answer-text {";
+        // Text colors - Increased specificity
+        $css .= ".flowq-participant-form .form-title, .flowq-container .question-title, .flowq-participant-form .form-label, .flowq-container .answer-text, .flowq-participant-form .survey-form-header, .flowq-participant-form .survey-form-subtitle {";
         $css .= "color: {$text_color};";
         $css .= "}";
 
         // Secondary text colors (descriptions, notes, etc.)
-        $css .= ".survey-description, .question-description p, .form-notes, .privacy-note, .required-note, .skip-notice, .progress-text, .privacy-policy-text {";
+        $css .= ".flowq-container .survey-description, .flowq-container .question-description p, .flowq-participant-form .form-notes, .flowq-participant-form .privacy-note, .flowq-participant-form .required-note, .flowq-container .skip-notice, .flowq-container .progress-text, .flowq-participant-form .privacy-policy-text {";
         $css .= "color: {$text_color};";
         $css .= "opacity: 0.8;";
         $css .= "}";
 
         // Privacy policy links
-        $css .= ".privacy-policy-text a {";
+        $css .= ".flowq-participant-form .privacy-policy-text a {";
         $css .= "color: {$primary_color};";
         $css .= "}";
 
         // Privacy policy checkbox label
-        $css .= ".privacy-policy-checkbox label {";
+        $css .= ".flowq-participant-form .privacy-policy-checkbox label {";
         $css .= "color: {$text_color};";
         $css .= "}";
 
         // Primary buttons
-        $css .= ".btn-primary {";
+        $css .= ".flowq-participant-form .btn-primary, .flowq-container .btn-primary {";
         if ($button_style === 'gradient' && isset($styles['gradient_start']) && isset($styles['gradient_end'])) {
             $css .= "background: linear-gradient(135deg, {$styles['gradient_start']}, {$styles['gradient_end']});";
         } else {
@@ -123,7 +123,7 @@ class FlowQ_Template_Handler {
         $css .= "}";
 
         // Primary button hover
-        $css .= ".btn-primary:hover:not(:disabled) {";
+        $css .= ".flowq-participant-form .btn-primary:hover:not(:disabled), .flowq-container .btn-primary:hover:not(:disabled) {";
         if ($button_style === 'gradient' && isset($styles['gradient_start']) && isset($styles['gradient_end'])) {
             $css .= "background: linear-gradient(135deg, {$styles['gradient_start']}, {$styles['gradient_end']});";
             $css .= "opacity: 0.9;";
@@ -133,7 +133,7 @@ class FlowQ_Template_Handler {
         $css .= "}";
 
         // Form controls
-        $css .= ".form-control {";
+        $css .= ".flowq-participant-form .form-control {";
         $css .= "border-radius: {$border_radius};";
         // Apply dark theme input styles if available
         if (isset($styles['input_bg_color'])) {
@@ -149,37 +149,44 @@ class FlowQ_Template_Handler {
 
         // Form control placeholder
         if (isset($styles['input_text_color'])) {
-            $css .= ".form-control::placeholder {";
+            $css .= ".flowq-participant-form .form-control::placeholder {";
             $css .= "color: rgba(" . $this->hex_to_rgb($styles['input_text_color']) . ", 0.5);";
             $css .= "}";
         }
 
         // Form control focus state
-        $css .= ".form-control:focus {";
+        $css .= ".flowq-participant-form .form-control:focus {";
         $css .= "border-color: {$primary_color};";
         $css .= "box-shadow: 0 0 0 3px rgba(" . $this->hex_to_rgb($primary_color) . ", 0.1);";
         $css .= "}";
 
         // Answer options
-        $css .= ".single-choice .answer-label:hover, .single-choice .answer-input:checked + .answer-label {";
+        if (isset($styles['input_bg_color'])) {
+            $css .= ".flowq-container .single-choice .answer-label {";
+            $css .= "background-color: {$styles['input_bg_color']};";
+            $css .= "border-color: {$styles['input_border_color']};";
+            $css .= "}";
+        }
+
+        $css .= ".flowq-container .single-choice .answer-label:hover, .flowq-container .single-choice .answer-input:checked + .answer-label {";
         $css .= "border-color: {$primary_color};";
         $css .= "background: rgba(" . $this->hex_to_rgb($primary_color) . ", 0.05);";
         $css .= "}";
 
         // Answer text color on hover (white for dark themes)
         if (isset($styles['input_bg_color'])) {
-            $css .= ".single-choice .answer-label:hover .answer-text, .single-choice .answer-input:checked + .answer-label .answer-text {";
+            $css .= ".flowq-container .single-choice .answer-label:hover .answer-text, .flowq-container .single-choice .answer-input:checked + .answer-label .answer-text {";
             $css .= "color: #ffffff;";
             $css .= "}";
         }
 
-        $css .= ".single-choice .answer-input:checked + .answer-label .answer-indicator {";
+        $css .= ".flowq-container .single-choice .answer-input:checked + .answer-label .answer-indicator {";
         $css .= "border-color: {$primary_color};";
         $css .= "background: {$primary_color};";
         $css .= "}";
 
         // Progress bar
-        $css .= ".progress-fill {";
+        $css .= ".flowq-container .progress-fill {";
         if ($button_style === 'gradient' && isset($styles['gradient_start']) && isset($styles['gradient_end'])) {
             $css .= "background: linear-gradient(90deg, {$styles['gradient_start']}, {$styles['gradient_end']});";
         } else {
@@ -189,7 +196,7 @@ class FlowQ_Template_Handler {
 
         // Card shadow for elevated button style
         if ($button_style === 'elevated' && isset($styles['card_shadow'])) {
-            $css .= ".participant-form-container, .question-container {";
+            $css .= ".flowq-participant-form .participant-form-container, .flowq-container .question-container {";
             $css .= "box-shadow: {$styles['card_shadow']};";
             $css .= "}";
         }
@@ -197,14 +204,14 @@ class FlowQ_Template_Handler {
         // Skip button styling
         if (isset($styles['input_bg_color'])) {
             // Dark theme skip button
-            $css .= ".skip-question-btn {";
+            $css .= ".flowq-container .skip-question-btn {";
             $css .= "background: {$styles['input_bg_color']};";
             $css .= "border-color: {$styles['input_border_color']};";
             $css .= "color: {$text_color};";
             $css .= "}";
         }
 
-        $css .= ".skip-question-btn:hover {";
+        $css .= ".flowq-container .skip-question-btn:hover {";
         $css .= "border-color: {$primary_color};";
         $css .= "background: rgba(" . $this->hex_to_rgb($primary_color) . ", 0.05);";
         if (isset($styles['input_bg_color'])) {

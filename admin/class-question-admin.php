@@ -99,7 +99,13 @@ class FlowQ_Question_Admin {
 
         // Create answer options if provided - sanitization happens in save_answer_options()
         // Note: Individual fields are sanitized within save_answer_options() method
-        $this->save_answer_options($question_id, $_POST);
+        $answer_data = array(
+            'answer_text' => isset($_POST['answer_text']) ? $_POST['answer_text'] : array(),
+            'answer_id' => isset($_POST['answer_id']) ? $_POST['answer_id'] : array(),
+            'next_question_id' => isset($_POST['next_question_id']) ? $_POST['next_question_id'] : array(),
+            'answer_redirect_url' => isset($_POST['answer_redirect_url']) ? $_POST['answer_redirect_url'] : array()
+        );
+        $this->save_answer_options($question_id, $answer_data);
 
         wp_send_json_success(array(
             'question_id' => $question_id,
@@ -139,7 +145,13 @@ class FlowQ_Question_Admin {
         }
 
         // Update answer options
-        $this->save_answer_options($question_id, $_POST);
+        $answer_data = array(
+            'answer_text' => isset($_POST['answer_text']) ? $_POST['answer_text'] : array(),
+            'answer_id' => isset($_POST['answer_id']) ? $_POST['answer_id'] : array(),
+            'next_question_id' => isset($_POST['next_question_id']) ? $_POST['next_question_id'] : array(),
+            'answer_redirect_url' => isset($_POST['answer_redirect_url']) ? $_POST['answer_redirect_url'] : array()
+        );
+        $this->save_answer_options($question_id, $answer_data);
 
         wp_send_json_success(array(
             'message' => __('Question updated successfully.', 'flowq')

@@ -243,9 +243,9 @@ if ($selected_survey_id && !empty($analytics_data)) {
 
             $chart_init_script .= sprintf(
                 'FlowQAnalytics.initChart(%s, %s, %s);',
-                json_encode($question_id),
-                json_encode($labels),
-                json_encode($data)
+                wp_json_encode($question_id),
+                wp_json_encode($labels),
+                wp_json_encode($data)
             );
         }
     }

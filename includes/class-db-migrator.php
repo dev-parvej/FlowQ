@@ -49,6 +49,7 @@ class FlowQ_DB_Migrator {
         $this->create_answers_table();
         $this->create_responses_table();
         $this->create_templates_table();
+        $this->seed_default_templates();
 
         // Update database version
         update_option('flowq_db_version', self::DB_VERSION);
@@ -247,7 +248,7 @@ class FlowQ_DB_Migrator {
                 'description' => 'Traditional form-style survey with clean, professional design',
                 'is_default' => 1,
                 'preview_image' => FLOWQ_URL . 'assets/images/templates/classic.svg',
-                'styles' => json_encode(array(
+                'styles' => wp_json_encode(array(
                     'primary_color' => '#0073aa',
                     'background_color' => '#ffffff',
                     'text_color' => '#1d2327',
@@ -261,7 +262,7 @@ class FlowQ_DB_Migrator {
                 'description' => 'Clean, minimalist design with modern aesthetics',
                 'is_default' => 1,
                 'preview_image' => FLOWQ_URL . 'assets/images/templates/modern.svg',
-                'styles' => json_encode(array(
+                'styles' => wp_json_encode(array(
                     'primary_color' => '#6366f1',
                     'background_color' => '#f8f9fa',
                     'text_color' => '#1e293b',
@@ -275,7 +276,7 @@ class FlowQ_DB_Migrator {
                 'description' => 'Each question displayed as an elegant card',
                 'is_default' => 1,
                 'preview_image' => FLOWQ_URL . 'assets/images/templates/card.svg',
-                'styles' => json_encode(array(
+                'styles' => wp_json_encode(array(
                     'primary_color' => '#10b981',
                     'background_color' => '#f3f4f6',
                     'text_color' => '#111827',
@@ -290,7 +291,7 @@ class FlowQ_DB_Migrator {
                 'description' => 'Sleek dark theme for modern surveys',
                 'is_default' => 1,
                 'preview_image' => FLOWQ_URL . 'assets/images/templates/dark.svg',
-                'styles' => json_encode(array(
+                'styles' => wp_json_encode(array(
                     'primary_color' => '#818cf8',
                     'background_color' => '#2d3748',
                     'text_color' => '#f1f5f9',
@@ -307,7 +308,7 @@ class FlowQ_DB_Migrator {
                 'description' => 'Vibrant, engaging design with bold colors',
                 'is_default' => 1,
                 'preview_image' => FLOWQ_URL . 'assets/images/templates/colorful.svg',
-                'styles' => json_encode(array(
+                'styles' => wp_json_encode(array(
                     'primary_color' => '#ec4899',
                     'background_color' => '#fef3c7',
                     'text_color' => '#1f2937',

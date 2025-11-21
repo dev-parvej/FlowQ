@@ -941,7 +941,13 @@ class FlowQ_Admin {
 
         // Handle answer options (always single choice)
         if (isset($_POST['answer_text']) && is_array($_POST['answer_text'])) {
-            $this->save_answer_options($question_manager, $question_id, $_POST);
+            $answer_data = array(
+                'answer_text' => $_POST['answer_text'],
+                'answer_id' => isset($_POST['answer_id']) ? $_POST['answer_id'] : array(),
+                'next_question_id' => isset($_POST['next_question_id']) ? $_POST['next_question_id'] : array(),
+                'answer_redirect_url' => isset($_POST['answer_redirect_url']) ? $_POST['answer_redirect_url'] : array()
+            );
+            $this->save_answer_options($question_manager, $question_id, $answer_data);
         }
 
         return $question_id;
@@ -962,7 +968,13 @@ class FlowQ_Admin {
 
         // Handle answer options (always single choice)
         if (isset($_POST['answer_text']) && is_array($_POST['answer_text'])) {
-            $this->save_answer_options($question_manager, $question_id, $_POST);
+            $answer_data = array(
+                'answer_text' => $_POST['answer_text'],
+                'answer_id' => isset($_POST['answer_id']) ? $_POST['answer_id'] : array(),
+                'next_question_id' => isset($_POST['next_question_id']) ? $_POST['next_question_id'] : array(),
+                'answer_redirect_url' => isset($_POST['answer_redirect_url']) ? $_POST['answer_redirect_url'] : array()
+            );
+            $this->save_answer_options($question_manager, $question_id, $answer_data);
         }
     }
 

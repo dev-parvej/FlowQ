@@ -87,8 +87,8 @@ class FlowQ_Ajax_Handler {
 
         foreach ($ip_keys as $key) {
             if (array_key_exists($key, $_SERVER) === true) {
-                // Sanitize $_SERVER value
-                $ip = sanitize_text_field($_SERVER[$key]);
+                // Sanitize $_SERVER value with wp_unslash and sanitize_text_field
+                $ip = sanitize_text_field(wp_unslash($_SERVER[$key]));
                 if (strpos($ip, ',') !== false) {
                     $ip = explode(',', $ip)[0];
                 }
@@ -100,7 +100,7 @@ class FlowQ_Ajax_Handler {
         }
 
         // Sanitize fallback $_SERVER value
-        return isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field($_SERVER['REMOTE_ADDR']) : '0.0.0.0';
+        return isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : '0.0.0.0';
     }
 
     /**
@@ -331,7 +331,7 @@ class FlowQ_Ajax_Handler {
                 '[WP Dynamic Survey AJAX] Action: %s, Error: %s, Data: %s',
                 $action,
                 $error_message,
-                json_encode($data)
+                wp_json_encode($data)
             ));
         }
     }

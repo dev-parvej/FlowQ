@@ -178,7 +178,7 @@ class FlowQ_Shortcode {
              <?php if (!empty($container_styles)): ?>
              style="<?php echo esc_attr(implode('; ', $container_styles)); ?>"
              <?php endif; ?>
-             data-survey-config="<?php echo esc_attr(json_encode($config)); ?>">
+             data-survey-config="<?php echo esc_attr(wp_json_encode($config)); ?>">
             <div class="survey-content">
                 <?php
                 // Include the actual survey interface
