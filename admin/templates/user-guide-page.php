@@ -128,7 +128,7 @@ $toc_items = $toc_matches[1];
                             ?>
                             <li>
                                 <a href="#section-<?php echo esc_attr($anchor); ?>">
-                                    <span class="toc-number"><?php echo ($index + 1); ?>.</span>
+                                    <span class="toc-number"><?php echo absint($index + 1); ?>.</span>
                                     <?php echo esc_html($item); ?>
                                 </a>
                             </li>
@@ -140,19 +140,19 @@ $toc_items = $toc_matches[1];
                     <h4><?php esc_html_e('Quick Links', 'flowq'); ?></h4>
                     <ul>
                         <li>
-                            <a href="<?php echo admin_url('admin.php?page=flowq-add'); ?>">
+                            <a href="<?php echo esc_url(admin_url('admin.php?page=flowq-add')); ?>">
                                 <span class="dashicons dashicons-plus-alt"></span>
                                 <?php esc_html_e('Create New Survey', 'flowq'); ?>
                             </a>
                         </li>
                         <li>
-                            <a href="<?php echo admin_url('admin.php?page=flowq'); ?>">
+                            <a href="<?php echo esc_url(admin_url('admin.php?page=flowq')); ?>">
                                 <span class="dashicons dashicons-list-view"></span>
                                 <?php esc_html_e('View All Surveys', 'flowq'); ?>
                             </a>
                         </li>
                         <li>
-                            <a href="<?php echo admin_url('admin.php?page=flowq-settings'); ?>">
+                            <a href="<?php echo esc_url(admin_url('admin.php?page=flowq-settings')); ?>">
                                 <span class="dashicons dashicons-admin-settings"></span>
                                 <?php esc_html_e('Settings', 'flowq'); ?>
                             </a>

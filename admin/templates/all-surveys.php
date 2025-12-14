@@ -111,7 +111,7 @@ if (!defined('ABSPATH')) {
                                 <?php if ($survey['status'] === 'published'): ?>
                                     <div class="survey-detail-item">
                                         <span class="detail-label"><?php echo esc_html__('Shortcode:', 'flowq'); ?></span>
-                                        <code class="detail-shortcode">[dynamic_survey id="<?php echo esc_attr($survey['id']); ?>"]</code>
+                                        <code class="detail-shortcode">[flowq_survey id="<?php echo esc_attr($survey['id']); ?>"]</code>
                                     </div>
                                 <?php endif; ?>
 
@@ -151,7 +151,7 @@ if (!defined('ABSPATH')) {
                                     <?php echo esc_html__('Edit', 'flowq'); ?>
                                 </a>
 
-                                <a href="<?php echo esc_url(admin_url('admin.php?page=flowq-questions&survey_id=' . $survey['id'])); ?>"
+                                <a href="<?php echo esc_url($this->get_secure_admin_url('flowq-questions', array('survey_id' => $survey['id']))); ?>"
                                    class="action-button action-questions">
                                     <svg class="action-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                                         <path d="M8 6h13v2H8zm0 4h13v2H8zm0 4h13v2H8zM4 6h2v2H4zm0 4h2v2H4zm0 4h2v2H4z"/>
@@ -160,7 +160,7 @@ if (!defined('ABSPATH')) {
                                 </a>
 
                                 <?php if ($survey['status'] === 'published'): ?>
-                                <a href="<?php echo esc_url(admin_url('admin.php?page=flowq-analytics&survey_id=' . $survey['id'])); ?>"
+                                <a href="<?php echo esc_url($this->get_secure_admin_url('flowq-analytics', array('survey_id' => $survey['id']))); ?>"
                                    class="action-button action-analytics">
                                     <svg class="action-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                                         <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>

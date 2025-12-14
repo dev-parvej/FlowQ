@@ -293,8 +293,11 @@ class FlowQ_Builder_Admin {
             wp_send_json_error(__('Invalid answers data', 'flowq'));
         }
 
+        // Sanitize the array first before iterating
+        $answers_raw = array_map('absint', (array) $_POST['answers']);
+
         $answer_orders = array();
-        foreach ($_POST['answers'] as $index => $answer_id) {
+        foreach ($answers_raw as $index => $answer_id) {
             $index = absint($index);
             $answer_id = absint($answer_id);
             $answer_orders[$answer_id] = $index + 1;

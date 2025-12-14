@@ -18,7 +18,7 @@ $page_title = $is_editing ? __('Edit Question', 'flowq') : __('Manage Questions'
         <?php
         // Determine back button URL and text
         if ($selected_survey_id && !empty($survey)) {
-            $back_url = admin_url('admin.php?page=flowq-add&survey_id=' . $selected_survey_id);
+            $back_url = $this->get_secure_admin_url('flowq-add', array('survey_id' => $selected_survey_id));
             $back_text = sprintf(__('← Back to Edit "%s"', 'flowq'), esc_html($survey['title']));
         } else {
             $back_url = admin_url('admin.php?page=flowq');
@@ -61,7 +61,7 @@ $page_title = $is_editing ? __('Edit Question', 'flowq') : __('Manage Questions'
 
                 <?php if ($selected_survey_id && $survey): ?>
                 <div class="action-section">
-                    <a href="<?php echo esc_url(admin_url('admin.php?page=flowq-questions&survey_id=' . $selected_survey_id . '&action=add')); ?>"
+                    <a href="<?php echo esc_url($this->get_secure_admin_url('flowq-questions', array('survey_id' => $selected_survey_id, 'action' => 'add'))); ?>"
                        class="add-question-button">
                         <span class="dashicons dashicons-plus-alt2"></span>
                         <?php echo esc_html__('Add New Question', 'flowq'); ?>
@@ -175,7 +175,7 @@ $page_title = $is_editing ? __('Edit Question', 'flowq') : __('Manage Questions'
                                             <?php endif; ?>
                                         </div>
                                         <div class="question-actions">
-                                            <a href="<?php echo esc_url(admin_url('admin.php?page=flowq-questions&survey_id=' . $selected_survey_id . '&question_id=' . $question['id'])); ?>"
+                                            <a href="<?php echo esc_url($this->get_secure_admin_url('flowq-questions', array('survey_id' => $selected_survey_id, 'question_id' => $question['id']))); ?>"
                                                class="action-button edit-button"
                                                title="<?php echo esc_attr__('Edit Question', 'flowq'); ?>">
                                                 <span class="dashicons dashicons-edit"></span>
@@ -285,7 +285,7 @@ $page_title = $is_editing ? __('Edit Question', 'flowq') : __('Manage Questions'
                 </div>
             <?php endif; ?>
 
-            <?php if (!$is_editing && isset($_GET['action']) && $_GET['action'] === 'add'): ?>
+            <?php if (!$is_editing && isset($_GET['action']) && sanitize_text_field($_GET['action']) === 'add'): ?>
                 <!-- Add Question Form -->
                 <hr>
                 <div class="question-form-section">

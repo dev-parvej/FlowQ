@@ -450,15 +450,19 @@ class FlowQ_Participant_Manager {
 
         // Whitelist allowed orderby columns to prevent SQL injection
         $allowed_orderby = array('started_at', 'completed_at', 'updated_at', 'id');
-        if (!in_array($args['orderby'], $allowed_orderby)) {
+        if (!in_array($args['orderby'], $allowed_orderby, true)) {
             $args['orderby'] = 'started_at';
         }
 
         // Whitelist allowed order directions
         $args['order'] = strtoupper($args['order']);
-        if (!in_array($args['order'], array('ASC', 'DESC'))) {
+        if (!in_array($args['order'], array('ASC', 'DESC'), true)) {
             $args['order'] = 'DESC';
         }
+
+        // Escape validated values for extra security (already whitelisted above)
+        $orderby = esc_sql($args['orderby']);
+        $order = esc_sql($args['order']);
 
         $where_clauses = array('survey_id = %d');
         $where_values = array($survey_id);
@@ -472,7 +476,7 @@ class FlowQ_Participant_Manager {
         $where_sql = 'WHERE ' . implode(' AND ', $where_clauses);
 
         $sql = "SELECT * FROM {$table_name} {$where_sql}
-                ORDER BY {$args['orderby']} {$args['order']}
+                ORDER BY {$orderby} {$order}
                 LIMIT %d OFFSET %d";
 
         $where_values[] = $args['limit'];

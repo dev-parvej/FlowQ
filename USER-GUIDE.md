@@ -447,7 +447,7 @@ Once you've created questions, it's time to display your survey on your website.
 
 ![Shortcode](assets/images/features/ShortCode.png)
 
-Example: `[dynamic_survey id="4"]`
+Example: `[flowq_survey id="4"]`
 
 ### Embedding in Pages and Posts
 
@@ -457,13 +457,13 @@ Example: `[dynamic_survey id="4"]`
 2. Click the **(+)** button to add a block
 3. Search for **Shortcode**
 4. Select the **Shortcode** block
-5. Paste your shortcode: `[dynamic_survey id="4"]`
+5. Paste your shortcode: `[flowq_survey id="4"]`
 6. Click **Publish** or **Update**
 
 #### Using the Classic Editor
 
 1. Edit or create a new page/post
-2. Paste the shortcode directly in the editor: `[dynamic_survey id="4"]`
+2. Paste the shortcode directly in the editor: `[flowq_survey id="4"]`
 3. Click **Publish** or **Update**
 
 ### Embedding with Page Builders
@@ -508,7 +508,7 @@ Example: `[dynamic_survey id="4"]`
 For theme developers:
 
 ```php
-<?php echo do_shortcode('[dynamic_survey id="4"]'); ?>
+<?php echo do_shortcode('[flowq_survey id="4"]'); ?>
 ```
 
 ### Viewing Your Survey

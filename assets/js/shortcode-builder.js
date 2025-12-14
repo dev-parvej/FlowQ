@@ -181,7 +181,7 @@
                 attributes.push(`css_class="${cssClass}"`);
             }
 
-            return `[dynamic_survey ${attributes.join(' ')}]`;
+            return `[flowq_survey ${attributes.join(' ')}]`;
         }
 
         /**
@@ -391,7 +391,7 @@
                 attributes.push('show_progress="false"');
             }
 
-            const shortcode = `[dynamic_survey ${attributes.join(' ')}]`;
+            const shortcode = `[flowq_survey ${attributes.join(' ')}]`;
 
             // Insert into editor
             if (typeof tinymce !== 'undefined' && tinymce.activeEditor && !tinymce.activeEditor.isHidden()) {

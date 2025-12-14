@@ -40,7 +40,7 @@ wp_localize_script('flowq-templates', 'flowqTemplates', array(
     <?php else: ?>
         <div class="templates-grid">
             <?php foreach ($templates as $template): ?>
-                <div class="template-card <?php echo $template['id'] == $active_template_id ? 'active' : ''; ?>"
+                <div class="template-card <?php echo esc_attr($template['id'] == $active_template_id ? 'active' : ''); ?>"
                      data-template-id="<?php echo esc_attr($template['id']); ?>">
 
                     <!-- Preview Image -->

@@ -244,7 +244,7 @@ wp_localize_script('flowq-add-survey', 'flowqAddSurvey', array(
                     <?php echo $is_edit ? esc_html__('Update Survey', 'flowq') : esc_html__('Create Survey', 'flowq'); ?>
                 </button>
                 <?php if ($is_edit): ?>
-                    <a href="<?php echo esc_url(admin_url('admin.php?page=flowq-questions&survey_id=' . $survey['id'])); ?>" class="button button-secondary-custom">
+                    <a href="<?php echo esc_url($this->get_secure_admin_url('flowq-questions', array('survey_id' => $survey['id']))); ?>" class="button button-secondary-custom">
                         <span class="dashicons dashicons-edit"></span>
                         <?php echo esc_html__('Manage Questions', 'flowq'); ?>
                     </a>
@@ -262,7 +262,7 @@ wp_localize_script('flowq-add-survey', 'flowqAddSurvey', array(
                     <!-- Analytics Section -->
                     <div class="action-section">
                         <div class="action-item">
-                            <a href="<?php echo esc_url(admin_url('admin.php?page=flowq-analytics&survey_id=' . $survey['id'])); ?>"
+                            <a href="<?php echo esc_url($this->get_secure_admin_url('flowq-analytics', array('survey_id' => $survey['id']))); ?>"
                                class="button button-secondary-custom analytics-button">
                                 <span class="dashicons dashicons-chart-bar"></span>
                                 <?php echo esc_html__('View Analytics', 'flowq'); ?>
@@ -277,7 +277,7 @@ wp_localize_script('flowq-add-survey', 'flowqAddSurvey', array(
                             <input type="text"
                                    id="shortcode-input"
                                    class="shortcode-input"
-                                   value="<?php echo esc_attr('[dynamic_survey id="' . $survey['id'] . '"]'); ?>"
+                                   value="<?php echo esc_attr('[flowq_survey id="' . $survey['id'] . '"]'); ?>"
                                    readonly>
                             <button type="button" class="button copy-button" onclick="copyShortcode()">
                                 <span class="dashicons dashicons-clipboard"></span>

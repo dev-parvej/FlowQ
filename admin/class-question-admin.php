@@ -97,13 +97,12 @@ class FlowQ_Question_Admin {
             wp_send_json_error($question_id->get_error_message());
         }
 
-        // Create answer options if provided - sanitization happens in save_answer_options()
-        // Note: Individual fields are sanitized within save_answer_options() method
+        // Create answer options if provided - sanitize arrays from POST
         $answer_data = array(
-            'answer_text' => isset($_POST['answer_text']) ? $_POST['answer_text'] : array(),
-            'answer_id' => isset($_POST['answer_id']) ? $_POST['answer_id'] : array(),
-            'next_question_id' => isset($_POST['next_question_id']) ? $_POST['next_question_id'] : array(),
-            'answer_redirect_url' => isset($_POST['answer_redirect_url']) ? $_POST['answer_redirect_url'] : array()
+            'answer_text' => isset($_POST['answer_text']) ? array_map('sanitize_text_field', array_map('wp_unslash', (array) $_POST['answer_text'])) : array(),
+            'answer_id' => isset($_POST['answer_id']) ? array_map('absint', (array) $_POST['answer_id']) : array(),
+            'next_question_id' => isset($_POST['next_question_id']) ? array_map('absint', (array) $_POST['next_question_id']) : array(),
+            'answer_redirect_url' => isset($_POST['answer_redirect_url']) ? array_map('esc_url_raw', array_map('wp_unslash', (array) $_POST['answer_redirect_url'])) : array()
         );
         $this->save_answer_options($question_id, $answer_data);
 
@@ -144,12 +143,12 @@ class FlowQ_Question_Admin {
             wp_send_json_error($result->get_error_message());
         }
 
-        // Update answer options
+        // Update answer options - sanitize arrays from POST
         $answer_data = array(
-            'answer_text' => isset($_POST['answer_text']) ? $_POST['answer_text'] : array(),
-            'answer_id' => isset($_POST['answer_id']) ? $_POST['answer_id'] : array(),
-            'next_question_id' => isset($_POST['next_question_id']) ? $_POST['next_question_id'] : array(),
-            'answer_redirect_url' => isset($_POST['answer_redirect_url']) ? $_POST['answer_redirect_url'] : array()
+            'answer_text' => isset($_POST['answer_text']) ? array_map('sanitize_text_field', array_map('wp_unslash', (array) $_POST['answer_text'])) : array(),
+            'answer_id' => isset($_POST['answer_id']) ? array_map('absint', (array) $_POST['answer_id']) : array(),
+            'next_question_id' => isset($_POST['next_question_id']) ? array_map('absint', (array) $_POST['next_question_id']) : array(),
+            'answer_redirect_url' => isset($_POST['answer_redirect_url']) ? array_map('esc_url_raw', array_map('wp_unslash', (array) $_POST['answer_redirect_url'])) : array()
         );
         $this->save_answer_options($question_id, $answer_data);
 
@@ -255,11 +254,17 @@ class FlowQ_Question_Admin {
         }
 
         $survey_id = intval($_POST['survey_id']);
-        $question_orders = json_decode(stripslashes($_POST['question_orders']), true);
+
+        // Sanitize and decode JSON data
+        $question_orders_json = isset($_POST['question_orders']) ? sanitize_text_field(wp_unslash($_POST['question_orders'])) : '';
+        $question_orders = json_decode($question_orders_json, true);
 
         if (!$survey_id || !is_array($question_orders)) {
             wp_send_json_error(__('Invalid data provided.', 'flowq'));
         }
+
+        // Validate and sanitize the decoded array - ensure all values are integers
+        $question_orders = array_map('absint', $question_orders);
 
         $question_manager = new FlowQ_Question_Manager();
 

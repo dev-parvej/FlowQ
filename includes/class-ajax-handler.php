@@ -310,6 +310,7 @@ class FlowQ_Ajax_Handler {
      * Check permissions AJAX handler
      */
     public function check_permissions() {
+        check_ajax_referer('flowq_frontend_nonce', 'nonce');
         $action = sanitize_text_field($_POST['action_check'] ?? '');
 
         $permissions = array(

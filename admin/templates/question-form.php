@@ -200,7 +200,7 @@ $form_action = $is_editing ? 'update_question' : 'create_question';
             <input type="submit" class="button button-primary-custom" value="<?php echo esc_attr($is_editing ? __('Update Question', 'flowq') : __('Create Question', 'flowq')); ?>">
         </div>
         <div class="secondary-actions">
-            <a href="<?php echo esc_url(admin_url('admin.php?page=flowq-questions&survey_id=' . $selected_survey_id)); ?>" class="button-link-cancel">
+            <a href="<?php echo esc_url($this->get_secure_admin_url('flowq-questions', array('survey_id' => $selected_survey_id))); ?>" class="button-link-cancel">
                 <?php echo esc_html__('Cancel', 'flowq'); ?>
             </a>
         </div>

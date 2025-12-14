@@ -384,15 +384,19 @@ class FlowQ_Survey_Manager {
 
         // Whitelist allowed orderby columns to prevent SQL injection
         $allowed_orderby = array('created_at', 'updated_at', 'title', 'status', 'id');
-        if (!in_array($args['orderby'], $allowed_orderby)) {
+        if (!in_array($args['orderby'], $allowed_orderby, true)) {
             $args['orderby'] = 'created_at';
         }
 
         // Whitelist allowed order directions
         $args['order'] = strtoupper($args['order']);
-        if (!in_array($args['order'], array('ASC', 'DESC'))) {
+        if (!in_array($args['order'], array('ASC', 'DESC'), true)) {
             $args['order'] = 'DESC';
         }
+
+        // Escape validated values for extra security (already whitelisted above)
+        $orderby = esc_sql($args['orderby']);
+        $order = esc_sql($args['order']);
 
         $where_clauses = array();
         $where_values = array();
@@ -411,11 +415,11 @@ class FlowQ_Survey_Manager {
                     LEFT JOIN {$questions_table} q ON s.id = q.survey_id
                     {$where_sql}
                     GROUP BY s.id
-                    ORDER BY s.{$args['orderby']} {$args['order']}
+                    ORDER BY s.{$orderby} {$order}
                     LIMIT %d OFFSET %d";
         } else {
             $sql = "SELECT s.* FROM {$table_name} s {$where_sql}
-                    ORDER BY s.{$args['orderby']} {$args['order']}
+                    ORDER BY s.{$orderby} {$order}
                     LIMIT %d OFFSET %d";
         }
 

@@ -167,7 +167,7 @@ class FlowQ_Frontend {
         }
 
         // Check if current post has survey shortcode
-        if ($post && has_shortcode($post->post_content, 'dynamic_survey')) {
+        if ($post && has_shortcode($post->post_content, 'flowq_survey')) {
             return true;
         }
 
@@ -182,8 +182,6 @@ class FlowQ_Frontend {
     public function register_shortcodes() {
         // Primary shortcode with proper prefix
         add_shortcode('flowq_survey', array($this, 'render_survey_shortcode'));
-        // Legacy shortcode support
-        add_shortcode('dynamic_survey', array($this, 'render_survey_shortcode'));
     }
 
     /**
@@ -193,7 +191,7 @@ class FlowQ_Frontend {
         $atts = shortcode_atts(array(
             'id' => 0,
             'theme' => 'default'
-        ), $atts, 'dynamic_survey');
+        ), $atts, 'flowq_survey');
 
         $survey_id = intval($atts['id']);
         $theme = sanitize_text_field($atts['theme']);

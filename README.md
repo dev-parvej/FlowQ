@@ -80,7 +80,7 @@ Perfect for:
 - **Question Analytics**: See which questions get the most responses
 
 ### ⚡ Easy Integration
-- **Simple Shortcodes**: Embed surveys anywhere with `[dynamic_survey id="X"]`
+- **Simple Shortcodes**: Embed surveys anywhere with `[flowq_survey id="X"]`
 - **Page Builder Compatible**: Works with popular page builders
 - **Thank You Pages**: Redirect to custom thank you pages after completion
 - **REST API**: Extend functionality with custom integrations
@@ -155,7 +155,7 @@ You'll find a new **FlowQ** menu item in your WordPress admin sidebar.
 ### 3. Embed Your Survey (1 minute)
 
 1. Return to **All Surveys**
-2. Copy the shortcode from your survey card (e.g., `[dynamic_survey id="1"]`)
+2. Copy the shortcode from your survey card (e.g., `[flowq_survey id="1"]`)
 3. Paste it into any page, post, or widget
 4. Publish and test!
 
@@ -367,7 +367,7 @@ Templates are stored in the `flowq_templates` database table with JSON-formatted
 ### Basic Shortcode
 
 ```
-[dynamic_survey id="1"]
+[flowq_survey id="1"]
 ```
 
 Displays the survey with ID 1.
@@ -387,7 +387,7 @@ Currently supported:
 **Example Usage**:
 
 ```
-[dynamic_survey id="1"]
+[flowq_survey id="1"]
 ```
 
 ### Embedding in Templates
@@ -395,7 +395,7 @@ Currently supported:
 For theme developers, you can use the shortcode in PHP:
 
 ```php
-<?php echo do_shortcode('[dynamic_survey id="1"]'); ?>
+<?php echo do_shortcode('[flowq_survey id="1"]'); ?>
 ```
 
 ### Page Builder Compatibility

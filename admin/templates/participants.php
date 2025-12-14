@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
         <div class="participants-header">
             <div class="header-top-row">
                 <form method="get" action="" class="survey-selector">
-                    <input type="hidden" name="page" value="<?php echo esc_attr($_GET['page']); ?>">
+                    <input type="hidden" name="page" value="<?php echo esc_attr(sanitize_key($_GET['page'])); ?>">
 
                     <div class="filter-group">
                         <svg class="filter-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -40,17 +40,17 @@ if (!defined('ABSPATH')) {
 
                 <?php if ($selected_survey_id && isset($stats)): ?>
                     <div class="participants-stats">
-                        <a href="<?php echo esc_url(add_query_arg(array('page' => $_GET['page'], 'survey_id' => $selected_survey_id, 'status' => 'all'), admin_url('admin.php'))); ?>"
+                        <a href="<?php echo esc_url($this->get_secure_admin_url('flowq-participants', array('survey_id' => $selected_survey_id, 'status' => 'all'))); ?>"
                            class="stat-item <?php echo ($status_filter === 'all') ? 'active' : ''; ?>">
                             <strong><?php echo esc_html($stats['total']); ?></strong>
                             <?php echo esc_html__('Total Participants', 'flowq'); ?>
                         </a>
-                        <a href="<?php echo esc_url(add_query_arg(array('page' => $_GET['page'], 'survey_id' => $selected_survey_id, 'status' => 'completed'), admin_url('admin.php'))); ?>"
+                        <a href="<?php echo esc_url($this->get_secure_admin_url('flowq-participants', array('survey_id' => $selected_survey_id, 'status' => 'completed'))); ?>"
                            class="stat-item <?php echo ($status_filter === 'completed') ? 'active' : ''; ?>">
                             <strong><?php echo esc_html($stats['completed']); ?></strong>
                             <?php echo esc_html__('Completed', 'flowq'); ?>
                         </a>
-                        <a href="<?php echo esc_url(add_query_arg(array('page' => isset($_GET['page']) ? sanitize_key($_GET['page']) : '', 'survey_id' => $selected_survey_id, 'status' => 'in_progress'), admin_url('admin.php'))); ?>"
+                        <a href="<?php echo esc_url($this->get_secure_admin_url('flowq-participants', array('survey_id' => $selected_survey_id, 'status' => 'in_progress'))); ?>"
                            class="stat-item <?php echo ($status_filter === 'in_progress') ? 'active' : ''; ?>">
                             <strong><?php echo esc_html($stats['in_progress']); ?></strong>
                             <?php echo esc_html__('Incomplete', 'flowq'); ?>
@@ -147,7 +147,7 @@ if (!defined('ABSPATH')) {
                                         <h4><?php echo esc_html__('Survey Responses', 'flowq'); ?></h4>
                                         <?php if (!empty($responses)): ?>
                                             <div class="responses-meta">
-                                                <span class="response-count-badge"><?php echo count($responses); ?> <?php echo esc_html__('responses', 'flowq'); ?></span>
+                                                <span class="response-count-badge"><?php echo absint(count($responses)); ?> <?php echo esc_html__('responses', 'flowq'); ?></span>
                                             </div>
                                         <?php endif; ?>
                                     </div>
@@ -217,14 +217,14 @@ if (!defined('ABSPATH')) {
                         if ($pagination['per_page'] === 'all') {
                             echo sprintf(
                                 esc_html__('Showing all %d participants', 'flowq'),
-                                $pagination['total_items']
+                                absint($pagination['total_items'])
                             );
                         } else {
                             echo sprintf(
                                 esc_html__('Showing %d-%d of %d participants', 'flowq'),
-                                $start,
-                                $end,
-                                $pagination['total_items']
+                                absint($start),
+                                absint($end),
+                                absint($pagination['total_items'])
                             );
                         }
                         ?>
@@ -233,7 +233,7 @@ if (!defined('ABSPATH')) {
                     <div class="pagination-nav">
                         <?php
                         $base_url = add_query_arg(array(
-                            'page' => $_GET['page'],
+                            'page' => sanitize_key($_GET['page']),
                             'survey_id' => $selected_survey_id,
                             'status' => $status_filter,
                             'per_page' => $pagination['per_page']
@@ -256,12 +256,12 @@ if (!defined('ABSPATH')) {
                         for ($i = $start_page; $i <= $end_page; $i++):
                             if ($i == $pagination['current_page']):
                         ?>
-                                <span class="pagination-link current"><?php echo $i; ?></span>
+                                <span class="pagination-link current"><?php echo absint($i); ?></span>
                         <?php
                             else:
                                 $page_url = add_query_arg('paged', $i, $base_url);
                         ?>
-                                <a href="<?php echo esc_url($page_url); ?>" class="pagination-link"><?php echo $i; ?></a>
+                                <a href="<?php echo esc_url($page_url); ?>" class="pagination-link"><?php echo absint($i); ?></a>
                         <?php
                             endif;
                         endfor;

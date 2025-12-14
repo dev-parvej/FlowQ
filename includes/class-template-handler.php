@@ -297,8 +297,8 @@ class FlowQ_Template_Handler {
         $css = $this->generate_template_css();
 
         // Add inline styles to the frontend stylesheet
-        // This ensures styles are properly enqueued rather than echoed as inline tags
-        wp_add_inline_style('flowq-frontend', $css);
+        // CSS is generated from admin-controlled template data and stripped of HTML tags
+        wp_add_inline_style('flowq-frontend', wp_strip_all_tags($css));
     }
 
     /**

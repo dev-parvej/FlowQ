@@ -75,6 +75,45 @@ class FlowQ_Admin {
     }
 
     /**
+     * Generate a secure admin URL with nonce for survey operations
+     *
+     * @param string $page The admin page slug
+     * @param array $args Additional query arguments
+     * @return string The secured URL
+     */
+    public function get_secure_admin_url($page, $args = array()) {
+        $base_args = array('page' => $page);
+        $all_args = array_merge($base_args, $args);
+
+        $url = add_query_arg($all_args, admin_url('admin.php'));
+
+        // Add nonce for survey-specific operations
+        if (isset($args['survey_id']) || isset($args['question_id'])) {
+            $url = wp_nonce_url($url, 'flowq_admin_view');
+        }
+
+        return $url;
+    }
+
+    /**
+     * Verify admin page access with capability checks
+     *
+     * @return bool True if access is allowed, false otherwise
+     */
+    private function verify_admin_access() {
+        // Check user capability
+        if (!current_user_can('manage_options')) {
+            wp_die(
+                esc_html__('You do not have sufficient permissions to access this page.', 'flowq'),
+                esc_html__('Unauthorized Access', 'flowq'),
+                array('response' => 403)
+            );
+        }
+
+        return true;
+    }
+
+    /**
      * Add admin menu structure
      */
     public function add_admin_menu() {
@@ -275,7 +314,7 @@ class FlowQ_Admin {
                 'chart-js',
                 FLOWQ_URL . 'assets/js/chart.min.js',
                 array(),
-                '3.9.1',
+                '4.5.1',
                 true  // Load in footer with other scripts
             );
 
@@ -442,6 +481,9 @@ class FlowQ_Admin {
      * Display Add/Edit Survey page
      */
     public function display_add_survey_page() {
+        // Verify admin access with capability and nonce checks
+        $this->verify_admin_access();
+
         // Sanitize GET parameter with absint()
         $survey_id = isset($_GET['survey_id']) ? absint($_GET['survey_id']) : 0;
         $survey = null;
@@ -465,6 +507,9 @@ class FlowQ_Admin {
      * Display Analytics page
      */
     public function display_analytics_page() {
+        // Verify admin access with capability and nonce checks
+        $this->verify_admin_access();
+
         $survey_manager = new FlowQ_Survey_Manager();
         $surveys = $survey_manager->get_surveys(array('status' => 'published'));
 
@@ -500,6 +545,9 @@ class FlowQ_Admin {
      * Display Participants page
      */
     public function display_participants_page() {
+        // Verify admin access with capability and nonce checks
+        $this->verify_admin_access();
+
         $survey_manager = new FlowQ_Survey_Manager();
         $participant_manager = new FlowQ_Participant_Manager();
         $question_manager = new FlowQ_Question_Manager();
@@ -509,6 +557,12 @@ class FlowQ_Admin {
         $surveys = $survey_manager->get_surveys();
         $selected_survey_id = isset($_GET['survey_id']) ? absint($_GET['survey_id']) : 0;
         $status_filter = isset($_GET['status']) ? sanitize_text_field($_GET['status']) : 'all';
+
+        // Validate status_filter value
+        $allowed_statuses = array('all', 'completed', 'in_progress');
+        if (!in_array($status_filter, $allowed_statuses)) {
+            $status_filter = 'all';
+        }
 
         // Pagination parameters
         $per_page = isset($_GET['per_page']) ? sanitize_text_field($_GET['per_page']) : '20';
@@ -651,6 +705,8 @@ class FlowQ_Admin {
      * Handle save survey
      */
     private function handle_save_survey() {
+        check_admin_referer('flowq_save_survey');
+
         $survey_id = isset($_POST['survey_id']) ? intval($_POST['survey_id']) : 0;
         $survey_manager = new FlowQ_Survey_Manager();
 
@@ -710,6 +766,11 @@ class FlowQ_Admin {
      */
     public function handle_admin_ajax() {
         check_ajax_referer('flowq_admin_nonce', 'nonce');
+
+        // Verify user has permission to manage surveys
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(__('Insufficient permissions.', 'flowq'));
+        }
 
         $action = sanitize_text_field($_POST['admin_action']);
 
@@ -774,6 +835,9 @@ class FlowQ_Admin {
      * Display questions management page
      */
     public function display_questions_page() {
+        // Verify admin access with capability and nonce checks
+        $this->verify_admin_access();
+
         $survey_manager = new FlowQ_Survey_Manager();
         $question_manager = new FlowQ_Question_Manager();
 
@@ -840,7 +904,7 @@ class FlowQ_Admin {
             }
 
             // Redirect to prevent form resubmission
-            $redirect_url = admin_url('admin.php?page=flowq-questions&survey_id=' . $survey_id);
+            $redirect_url = $this->get_secure_admin_url('flowq-questions', array('survey_id' => $survey_id));
             wp_redirect($redirect_url);
             exit;
 
@@ -878,7 +942,7 @@ class FlowQ_Admin {
             $survey = $survey_manager->get_survey($survey_id);
             if (!$survey) {
                 $this->add_admin_notice(__('Survey not found.', 'flowq'), 'error');
-                $redirect_url = admin_url('admin.php?page=flowq-questions&survey_id=' . $survey_id);
+                $redirect_url = $this->get_secure_admin_url('flowq-questions', array('survey_id' => $survey_id));
                 wp_redirect($redirect_url);
                 exit;
             }
@@ -886,7 +950,7 @@ class FlowQ_Admin {
             // Check if survey is in draft status
             if ($survey['status'] !== 'draft') {
                 $this->add_admin_notice(__('Questions can only be deleted from draft surveys. Please set the survey to draft status first.', 'flowq'), 'error');
-                $redirect_url = admin_url('admin.php?page=flowq-questions&survey_id=' . $survey_id);
+                $redirect_url = $this->get_secure_admin_url('flowq-questions', array('survey_id' => $survey_id));
                 wp_redirect($redirect_url);
                 exit;
             }
@@ -902,7 +966,7 @@ class FlowQ_Admin {
                     ),
                     'error'
                 );
-                $redirect_url = admin_url('admin.php?page=flowq-questions&survey_id=' . $survey_id);
+                $redirect_url = $this->get_secure_admin_url('flowq-questions', array('survey_id' => $survey_id));
                 wp_redirect($redirect_url);
                 exit;
             }
@@ -921,7 +985,7 @@ class FlowQ_Admin {
         }
 
         // Redirect to prevent re-execution
-        $redirect_url = admin_url('admin.php?page=flowq-questions&survey_id=' . $survey_id);
+        $redirect_url = $this->get_secure_admin_url('flowq-questions', array('survey_id' => $survey_id));
         wp_redirect($redirect_url);
         exit;
     }
@@ -942,10 +1006,10 @@ class FlowQ_Admin {
         // Handle answer options (always single choice)
         if (isset($_POST['answer_text']) && is_array($_POST['answer_text'])) {
             $answer_data = array(
-                'answer_text' => $_POST['answer_text'],
-                'answer_id' => isset($_POST['answer_id']) ? $_POST['answer_id'] : array(),
-                'next_question_id' => isset($_POST['next_question_id']) ? $_POST['next_question_id'] : array(),
-                'answer_redirect_url' => isset($_POST['answer_redirect_url']) ? $_POST['answer_redirect_url'] : array()
+                'answer_text' => array_map('sanitize_text_field', array_map('wp_unslash', (array) $_POST['answer_text'])),
+                'answer_id' => isset($_POST['answer_id']) ? array_map('absint', (array) $_POST['answer_id']) : array(),
+                'next_question_id' => isset($_POST['next_question_id']) ? array_map('absint', (array) $_POST['next_question_id']) : array(),
+                'answer_redirect_url' => isset($_POST['answer_redirect_url']) ? array_map('esc_url_raw', array_map('wp_unslash', (array) $_POST['answer_redirect_url'])) : array()
             );
             $this->save_answer_options($question_manager, $question_id, $answer_data);
         }
@@ -969,10 +1033,10 @@ class FlowQ_Admin {
         // Handle answer options (always single choice)
         if (isset($_POST['answer_text']) && is_array($_POST['answer_text'])) {
             $answer_data = array(
-                'answer_text' => $_POST['answer_text'],
-                'answer_id' => isset($_POST['answer_id']) ? $_POST['answer_id'] : array(),
-                'next_question_id' => isset($_POST['next_question_id']) ? $_POST['next_question_id'] : array(),
-                'answer_redirect_url' => isset($_POST['answer_redirect_url']) ? $_POST['answer_redirect_url'] : array()
+                'answer_text' => array_map('sanitize_text_field', array_map('wp_unslash', (array) $_POST['answer_text'])),
+                'answer_id' => isset($_POST['answer_id']) ? array_map('absint', (array) $_POST['answer_id']) : array(),
+                'next_question_id' => isset($_POST['next_question_id']) ? array_map('absint', (array) $_POST['next_question_id']) : array(),
+                'answer_redirect_url' => isset($_POST['answer_redirect_url']) ? array_map('esc_url_raw', array_map('wp_unslash', (array) $_POST['answer_redirect_url'])) : array()
             );
             $this->save_answer_options($question_manager, $question_id, $answer_data);
         }

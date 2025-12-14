@@ -103,15 +103,20 @@ class FlowQ_Settings_Admin {
      * Display Settings page with tab navigation
      */
     public function display_settings_page() {
-        // Get current tab from URL parameter, default to 'general'
-        $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'general';
-
         // Define available tabs
         $tabs = array(
             'general' => __('General', 'flowq'),
             'templates' => __('Templates', 'flowq'),
             // Additional tabs will be added in future updates
         );
+
+        // Get current tab from URL parameter, default to 'general'
+        $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'general';
+
+        // Validate tab exists in allowed tabs
+        if (!array_key_exists($current_tab, $tabs)) {
+            $current_tab = 'general';
+        }
 
         // Include the settings page template
         include FLOWQ_PATH . 'admin/templates/settings-page.php';

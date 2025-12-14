@@ -46,9 +46,6 @@ class FlowQ_Shortcode {
         add_shortcode('flowq_survey_stats', array($this, 'render_survey_stats'));
         add_shortcode('flowq_survey_button', array($this, 'render_survey_button'));
         add_shortcode('flowq_survey_embed', array($this, 'render_survey_embed'));
-
-        // Legacy shortcode support for backward compatibility
-        add_shortcode('dynamic_survey', array($this, 'render_survey'));
     }
 
     /**
@@ -72,7 +69,7 @@ class FlowQ_Shortcode {
             'custom_css' => '',
             'lang' => '',
             'track_analytics' => 'true'
-        ), $atts, 'dynamic_survey');
+        ), $atts, 'flowq_survey');
 
         // Validate and sanitize attributes
         $survey_id = intval($atts['id']);
@@ -200,7 +197,9 @@ class FlowQ_Shortcode {
         <?php
         // Add inline custom CSS using WordPress function
         if (!empty($custom_css)) {
-            $inline_css = '#' . $container_id . ' {' . wp_strip_all_tags($custom_css) . '}';
+            // Sanitize container ID for use in CSS selector (alphanumeric and hyphens only)
+            $safe_container_id = preg_replace('/[^a-zA-Z0-9\-_]/', '', $container_id);
+            $inline_css = '#' . esc_attr($safe_container_id) . ' {' . wp_strip_all_tags($custom_css) . '}';
             wp_add_inline_style('flowq-shortcode', $inline_css);
         }
 
@@ -537,11 +536,11 @@ class FlowQ_Shortcode {
 
         // Check for any survey shortcodes
         $shortcodes = array(
-            'dynamic_survey',
-            'survey_list',
-            'survey_stats',
-            'survey_button',
-            'survey_embed'
+            'flowq_survey',
+            'flowq_survey_list',
+            'flowq_survey_stats',
+            'flowq_survey_button',
+            'flowq_survey_embed'
         );
 
         foreach ($shortcodes as $shortcode) {
@@ -590,7 +589,7 @@ class FlowQ_Shortcode {
      */
     public static function get_shortcode_docs() {
         return array(
-            'dynamic_survey' => array(
+            'flowq_survey' => array(
                 'description' => __('Display a survey form', 'flowq'),
                 'attributes' => array(
                     'id' => __('Survey ID (required)', 'flowq'),
@@ -603,7 +602,7 @@ class FlowQ_Shortcode {
                     'auto_start' => __('Auto-scroll to survey (true/false)', 'flowq'),
                     'css_class' => __('Additional CSS class', 'flowq')
                 ),
-                'example' => '[dynamic_survey id="1" theme="modern" show_progress="true"]'
+                'example' => '[flowq_survey id="1" theme="modern" show_progress="true"]'
             ),
             'survey_list' => array(
                 'description' => __('Display a list of surveys', 'flowq'),

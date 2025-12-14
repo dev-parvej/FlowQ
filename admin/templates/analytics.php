@@ -49,7 +49,7 @@ if (!defined('ABSPATH')) {
             <!-- Survey Overview Stats -->
             <div class="analytics-overview">
                 <div class="stats-grid">
-                    <div class="stat-card stat-card-participants clickable-card" onclick="window.location.href='<?php echo esc_url(admin_url('admin.php?page=flowq-participants&survey_id=' . $selected_survey_id)); ?>'">
+                    <div class="stat-card stat-card-participants clickable-card" onclick="window.location.href='<?php echo esc_url($this->get_secure_admin_url('flowq-participants', array('survey_id' => $selected_survey_id))); ?>'">
                         <div class="stat-icon">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zM4 18v-4h3v-3c0-1.1.9-2 2-2h2c1.1 0 2 .9 2 2v3h3v4H4z"/>
