@@ -770,21 +770,26 @@ class FlowQ_Frontend {
      */
     private function format_completion_time($seconds) {
         if ($seconds < 60) {
+            /* translators: %d: number of seconds */
             return sprintf(_n('%d second', '%d seconds', $seconds, 'flowq'), $seconds);
         } elseif ($seconds < 3600) {
             $minutes = floor($seconds / 60);
             $remaining_seconds = $seconds % 60;
             if ($remaining_seconds > 0) {
-                return sprintf(__('%d minutes %d seconds', 'flowq'), $minutes, $remaining_seconds);
+                /* translators: 1: number of minutes, 2: number of seconds */
+                return sprintf(__('%1$d minutes %2$d seconds', 'flowq'), $minutes, $remaining_seconds);
             } else {
+                /* translators: %d: number of minutes */
                 return sprintf(_n('%d minute', '%d minutes', $minutes, 'flowq'), $minutes);
             }
         } else {
             $hours = floor($seconds / 3600);
             $remaining_minutes = floor(($seconds % 3600) / 60);
             if ($remaining_minutes > 0) {
-                return sprintf(__('%d hours %d minutes', 'flowq'), $hours, $remaining_minutes);
+                /* translators: 1: number of hours, 2: number of minutes */
+                return sprintf(__('%1$d hours %2$d minutes', 'flowq'), $hours, $remaining_minutes);
             } else {
+                /* translators: %d: number of hours */
                 return sprintf(_n('%d hour', '%d hours', $hours, 'flowq'), $hours);
             }
         }

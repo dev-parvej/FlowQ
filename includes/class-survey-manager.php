@@ -16,11 +16,6 @@ if (!defined('ABSPATH')) {
 class FlowQ_Survey_Manager {
 
     /**
-     * WordPress database object
-     */
-    private $wpdb;
-
-    /**
      * Plugin table prefix
      */
     private $table_prefix;
@@ -30,8 +25,7 @@ class FlowQ_Survey_Manager {
      */
     public function __construct() {
         global $wpdb;
-        $this->wpdb = $wpdb;
-        $this->table_prefix = $this->wpdb->prefix . 'flowq_';
+        $this->table_prefix = $wpdb->prefix . 'flowq_';
     }
 
     /**
@@ -41,6 +35,8 @@ class FlowQ_Survey_Manager {
      * @return int|WP_Error Survey ID on success, WP_Error on failure
      */
     public function create_survey($data) {
+        global $wpdb;
+
         // Validate required fields
         if (empty($data['title'])) {
             return new WP_Error('missing_title', __('Survey title is required.', 'flowq'));
@@ -69,13 +65,13 @@ class FlowQ_Survey_Manager {
 
         // Insert survey
         $table_name = $this->table_prefix . 'surveys';
-        $result = $this->wpdb->insert($table_name, $survey_data);
+        $result = $wpdb->insert($table_name, $survey_data);
 
         if ($result === false) {
             return new WP_Error('db_error', __('Failed to create survey.', 'flowq'));
         }
 
-        $survey_id = $this->wpdb->insert_id;
+        $survey_id = $wpdb->insert_id;
 
         // Trigger action hook
         do_action('flowq_survey_created', $survey_id, $survey_data);
@@ -91,10 +87,12 @@ class FlowQ_Survey_Manager {
      * @return array|null Survey data or null if not found
      */
     public function get_survey($survey_id, $include_questions = false) {
+        global $wpdb;
+
         $table_name = $this->table_prefix . 'surveys';
 
-        $survey = $this->wpdb->get_row(
-            $this->wpdb->prepare("SELECT * FROM {$table_name} WHERE id = %d", $survey_id),
+        $survey = $wpdb->get_row(
+            $wpdb->prepare("SELECT * FROM {$table_name} WHERE id = %d", $survey_id),
             ARRAY_A
         );
 
@@ -121,6 +119,8 @@ class FlowQ_Survey_Manager {
      * @return bool|WP_Error True on success, WP_Error on failure
      */
     public function update_survey($survey_id, $data) {
+        global $wpdb;
+
         // Check if survey exists
         if (!$this->get_survey($survey_id)) {
             return new WP_Error('survey_not_found', __('Survey not found.', 'flowq'));
@@ -175,7 +175,7 @@ class FlowQ_Survey_Manager {
 
         // Update survey
         $table_name = $this->table_prefix . 'surveys';
-        $result = $this->wpdb->update(
+        $result = $wpdb->update(
             $table_name,
             $update_data,
             array('id' => $survey_id)
@@ -198,6 +198,8 @@ class FlowQ_Survey_Manager {
      * @return bool|WP_Error True on success, WP_Error on failure
      */
     public function delete_survey($survey_id) {
+        global $wpdb;
+
         // Check if survey exists
         if (!$this->get_survey($survey_id)) {
             return new WP_Error('survey_not_found', __('Survey not found.', 'flowq'));
@@ -210,7 +212,7 @@ class FlowQ_Survey_Manager {
 
         // Delete survey
         $table_name = $this->table_prefix . 'surveys';
-        $result = $this->wpdb->delete(
+        $result = $wpdb->delete(
             $table_name,
             array('id' => $survey_id),
             array('%d')
@@ -264,6 +266,7 @@ class FlowQ_Survey_Manager {
         foreach ($orphaned_refs as $orphaned_id) {
             $issues[] = array(
                 'type' => 'error',
+                /* translators: %d: question ID */
                 'message' => sprintf(__('Reference to non-existent question ID: %d', 'flowq'), $orphaned_id)
             );
         }
@@ -281,10 +284,12 @@ class FlowQ_Survey_Manager {
      * @return array|null First question data or null
      */
     public function get_first_question($survey_id) {
+        global $wpdb;
+
         $questions_table = $this->table_prefix . 'questions';
 
-        $first_question = $this->wpdb->get_row(
-            $this->wpdb->prepare(
+        $first_question = $wpdb->get_row(
+            $wpdb->prepare(
                 "SELECT * FROM {$questions_table}
                 WHERE survey_id = %d
                 ORDER BY id ASC
@@ -311,19 +316,21 @@ class FlowQ_Survey_Manager {
      * @return array Statistics data
      */
     public function get_survey_statistics($survey_id) {
+        global $wpdb;
+
         $participants_table = $this->table_prefix . 'participants';
         $responses_table = $this->table_prefix . 'responses';
 
         // Get participant counts
-        $total_participants = $this->wpdb->get_var(
-            $this->wpdb->prepare(
+        $total_participants = $wpdb->get_var(
+            $wpdb->prepare(
                 "SELECT COUNT(*) FROM {$participants_table} WHERE survey_id = %d",
                 $survey_id
             )
         );
 
-        $completed_participants = $this->wpdb->get_var(
-            $this->wpdb->prepare(
+        $completed_participants = $wpdb->get_var(
+            $wpdb->prepare(
                 "SELECT COUNT(*) FROM {$participants_table}
                 WHERE survey_id = %d AND completed_at IS NOT NULL",
                 $survey_id
@@ -331,8 +338,8 @@ class FlowQ_Survey_Manager {
         );
 
         // Get response counts
-        $total_responses = $this->wpdb->get_var(
-            $this->wpdb->prepare(
+        $total_responses = $wpdb->get_var(
+            $wpdb->prepare(
                 "SELECT COUNT(*) FROM {$responses_table} WHERE survey_id = %d",
                 $survey_id
             )
@@ -343,8 +350,8 @@ class FlowQ_Survey_Manager {
             round(($completed_participants / $total_participants) * 100, 2) : 0;
 
         // Get average completion time
-        $avg_completion_time = $this->wpdb->get_var(
-            $this->wpdb->prepare(
+        $avg_completion_time = $wpdb->get_var(
+            $wpdb->prepare(
                 "SELECT AVG(TIMESTAMPDIFF(MINUTE, started_at, completed_at))
                 FROM {$participants_table}
                 WHERE survey_id = %d AND completed_at IS NOT NULL",
@@ -369,6 +376,8 @@ class FlowQ_Survey_Manager {
      * @return array Surveys list
      */
     public function get_surveys($args = array()) {
+        global $wpdb;
+
         $defaults = array(
             'status' => null,
             'limit' => 50,
@@ -382,54 +391,67 @@ class FlowQ_Survey_Manager {
         $table_name = $this->table_prefix . 'surveys';
         $questions_table = $this->table_prefix . 'questions';
 
-        // Whitelist allowed orderby columns to prevent SQL injection
+        // SECURITY: Whitelist validation for ORDER BY column (cannot use prepare() placeholders for column names)
         $allowed_orderby = array('created_at', 'updated_at', 'title', 'status', 'id');
         if (!in_array($args['orderby'], $allowed_orderby, true)) {
-            $args['orderby'] = 'created_at';
+            $args['orderby'] = 'created_at'; // Safe default
         }
 
-        // Whitelist allowed order directions
+        // SECURITY: Whitelist validation for ORDER direction (ASC/DESC keywords cannot use placeholders)
         $args['order'] = strtoupper($args['order']);
         if (!in_array($args['order'], array('ASC', 'DESC'), true)) {
-            $args['order'] = 'DESC';
+            $args['order'] = 'DESC'; // Safe default
         }
 
-        // Escape validated values for extra security (already whitelisted above)
-        $orderby = esc_sql($args['orderby']);
-        $order = esc_sql($args['order']);
+        // After whitelist validation, escape values for SQL (defense in depth)
+        $orderby = esc_sql($args['orderby']); // Whitelisted then escaped
+        $order = esc_sql($args['order']); // Whitelisted then escaped
 
+        // Build WHERE clause with prepare() placeholders
         $where_clauses = array();
-        $where_values = array();
+        $prepare_values = array();
 
         if ($args['status']) {
             $where_clauses[] = 's.status = %s';
-            $where_values[] = $args['status'];
+            $prepare_values[] = sanitize_text_field($args['status']);
         }
 
         $where_sql = !empty($where_clauses) ? 'WHERE ' . implode(' AND ', $where_clauses) : '';
 
+        // Add LIMIT and OFFSET to prepare values
+        $prepare_values[] = absint($args['limit']);
+        $prepare_values[] = absint($args['offset']);
+
         // Include question count if requested
         if ($args['include_question_count']) {
-            $sql = "SELECT s.*, COUNT(q.id) as question_count
+            // Execute query - ORDER BY uses whitelisted+escaped values, other params use prepare()
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- ORDER BY column/direction are whitelisted and escaped
+            $surveys = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT s.*, COUNT(q.id) as question_count
                     FROM {$table_name} s
                     LEFT JOIN {$questions_table} q ON s.id = q.survey_id
                     {$where_sql}
                     GROUP BY s.id
                     ORDER BY s.{$orderby} {$order}
-                    LIMIT %d OFFSET %d";
+                    LIMIT %d OFFSET %d",
+                    $prepare_values
+                ),
+                ARRAY_A
+            );
         } else {
-            $sql = "SELECT s.* FROM {$table_name} s {$where_sql}
+            // Execute query - ORDER BY uses whitelisted+escaped values, other params use prepare()
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- ORDER BY column/direction are whitelisted and escaped
+            $surveys = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT s.* FROM {$table_name} s {$where_sql}
                     ORDER BY s.{$orderby} {$order}
-                    LIMIT %d OFFSET %d";
+                    LIMIT %d OFFSET %d",
+                    $prepare_values
+                ),
+                ARRAY_A
+            );
         }
-
-        $where_values[] = $args['limit'];
-        $where_values[] = $args['offset'];
-
-        $surveys = $this->wpdb->get_results(
-            $this->wpdb->prepare($sql, $where_values),
-            ARRAY_A
-        );
 
         // Parse settings for each survey
         foreach ($surveys as &$survey) {
@@ -449,10 +471,12 @@ class FlowQ_Survey_Manager {
      * @return array Questions list
      */
     private function get_survey_questions($survey_id) {
+        global $wpdb;
+
         $questions_table = $this->table_prefix . 'questions';
 
-        return $this->wpdb->get_results(
-            $this->wpdb->prepare(
+        return $wpdb->get_results(
+            $wpdb->prepare(
                 "SELECT * FROM {$questions_table}
                 WHERE survey_id = %d
                 ORDER BY id ASC",
@@ -469,10 +493,12 @@ class FlowQ_Survey_Manager {
      * @return array Answers list
      */
     private function get_question_answers($question_id) {
+        global $wpdb;
+
         $answers_table = $this->table_prefix . 'answers';
 
-        return $this->wpdb->get_results(
-            $this->wpdb->prepare(
+        return $wpdb->get_results(
+            $wpdb->prepare(
                 "SELECT * FROM {$answers_table}
                 WHERE question_id = %d
                 ORDER BY answer_order ASC, id ASC",
@@ -488,12 +514,14 @@ class FlowQ_Survey_Manager {
      * @param int $survey_id Survey ID
      */
     private function delete_survey_questions($survey_id) {
+        global $wpdb;
+
         $questions_table = $this->table_prefix . 'questions';
         $answers_table = $this->table_prefix . 'answers';
 
         // Get question IDs
-        $question_ids = $this->wpdb->get_col(
-            $this->wpdb->prepare(
+        $question_ids = $wpdb->get_col(
+            $wpdb->prepare(
                 "SELECT id FROM {$questions_table} WHERE survey_id = %d",
                 $survey_id
             )
@@ -503,8 +531,8 @@ class FlowQ_Survey_Manager {
             $placeholders = implode(',', array_fill(0, count($question_ids), '%d'));
 
             // Delete answers
-            $this->wpdb->query(
-                $this->wpdb->prepare(
+            $wpdb->query(
+                $wpdb->prepare(
                     "DELETE FROM {$answers_table} WHERE question_id IN ($placeholders)",
                     $question_ids
                 )
@@ -512,7 +540,7 @@ class FlowQ_Survey_Manager {
         }
 
         // Delete questions
-        $this->wpdb->delete(
+        $wpdb->delete(
             $questions_table,
             array('survey_id' => $survey_id),
             array('%d')
@@ -525,9 +553,11 @@ class FlowQ_Survey_Manager {
      * @param int $survey_id Survey ID
      */
     private function delete_survey_responses($survey_id) {
+        global $wpdb;
+
         $responses_table = $this->table_prefix . 'responses';
 
-        $this->wpdb->delete(
+        $wpdb->delete(
             $responses_table,
             array('survey_id' => $survey_id),
             array('%d')
@@ -540,9 +570,11 @@ class FlowQ_Survey_Manager {
      * @param int $survey_id Survey ID
      */
     private function delete_survey_participants($survey_id) {
+        global $wpdb;
+
         $participants_table = $this->table_prefix . 'participants';
 
-        $this->wpdb->delete(
+        $wpdb->delete(
             $participants_table,
             array('survey_id' => $survey_id),
             array('%d')
@@ -574,6 +606,7 @@ class FlowQ_Survey_Manager {
         if (in_array($question_id, $visited)) {
             $issues[] = array(
                 'type' => 'error',
+                /* translators: %d: question ID */
                 'message' => sprintf(__('Circular reference detected involving question ID: %d', 'flowq'), $question_id)
             );
             return;

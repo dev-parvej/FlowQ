@@ -16,11 +16,6 @@ if (!defined('ABSPATH')) {
 class FlowQ_Session_Manager {
 
     /**
-     * WordPress database object
-     */
-    private $wpdb;
-
-    /**
      * Plugin table prefix
      */
     private $table_prefix;
@@ -35,8 +30,7 @@ class FlowQ_Session_Manager {
      */
     public function __construct() {
         global $wpdb;
-        $this->wpdb = $wpdb;
-        $this->table_prefix = $this->wpdb->prefix . 'flowq_';
+        $this->table_prefix = $wpdb->prefix . 'flowq_';
         $this->participant_manager = new FlowQ_Participant_Manager();
     }
 
@@ -49,6 +43,8 @@ class FlowQ_Session_Manager {
      * @return bool|WP_Error True on success, WP_Error on failure
      */
     public function record_response($participant, $question, $answer_data) {
+        global $wpdb;
+
         // Validate session
         $session_id = $participant['session_id'];
 
@@ -87,7 +83,7 @@ class FlowQ_Session_Manager {
 
         if ($existing_response) {
             // Update existing response
-            $result = $this->wpdb->update(
+            $result = $wpdb->update(
                 $table_name,
                 $response_data,
                 array('id' => $existing_response['id']),
@@ -96,7 +92,7 @@ class FlowQ_Session_Manager {
             );
         } else {
             // Insert new response
-            $result = $this->wpdb->insert($table_name, $response_data);
+            $result = $wpdb->insert($table_name, $response_data);
         }
 
         if ($result === false) {
@@ -120,6 +116,8 @@ class FlowQ_Session_Manager {
      * @return array|WP_Error Responses array or WP_Error
      */
     public function get_session_responses($session_id) {
+        global $wpdb;
+
         // Validate session
         $participant = $this->participant_manager->validate_session($session_id);
         if (is_wp_error($participant)) {
@@ -128,8 +126,8 @@ class FlowQ_Session_Manager {
 
         $table_name = $this->table_prefix . 'responses';
 
-        $responses = $this->wpdb->get_results(
-            $this->wpdb->prepare(
+        $responses = $wpdb->get_results(
+            $wpdb->prepare(
                 "SELECT * FROM {$table_name}
                 WHERE session_id = %s
                 ORDER BY responded_at ASC",
@@ -148,6 +146,8 @@ class FlowQ_Session_Manager {
      * @return array Associative array with session_id as key and responses as value
      */
     public function get_multiple_session_responses($session_ids) {
+        global $wpdb;
+
         if (empty($session_ids)) {
             return array();
         }
@@ -155,8 +155,8 @@ class FlowQ_Session_Manager {
         $table_name = $this->table_prefix . 'responses';
         $placeholders = implode(',', array_fill(0, count($session_ids), '%s'));
 
-        $responses = $this->wpdb->get_results(
-            $this->wpdb->prepare(
+        $responses = $wpdb->get_results(
+            $wpdb->prepare(
                 "SELECT * FROM {$table_name}
                 WHERE session_id IN ($placeholders)
                 ORDER BY session_id, responded_at ASC",
@@ -294,6 +294,8 @@ class FlowQ_Session_Manager {
      * @return array Responses summary
      */
     public function get_survey_responses_summary($survey_id, $args = array()) {
+        global $wpdb;
+
         $defaults = array(
             'completed_only' => true,
             'question_id' => null,
@@ -303,37 +305,55 @@ class FlowQ_Session_Manager {
 
         $args = wp_parse_args($args, $defaults);
 
-        $responses_table = $this->table_prefix . 'responses';
-        $participants_table = $this->table_prefix . 'participants';
+        // Table names: escape for extra safety (constructed from WordPress prefix + plugin prefix)
+        $responses_table    = esc_sql($this->table_prefix . 'responses');
+        $participants_table = esc_sql($this->table_prefix . 'participants');
 
-        $where_clauses = array("r.survey_id = %d");
-        $where_values = array($survey_id);
+        $where   = [];
+        $values  = [];
 
-        if ($args['completed_only']) {
-            $where_clauses[] = "p.completed_at IS NOT NULL";
+        // Required condition
+        $where[]  = 'r.survey_id = %d';
+        $values[] = absint($survey_id);
+
+        // Optional filters
+        if (!empty($args['completed_only'])) {
+            $where[] = 'p.completed_at IS NOT NULL';
         }
 
-        if ($args['question_id']) {
-            $where_clauses[] = "r.question_id = %d";
-            $where_values[] = $args['question_id'];
+        if (!empty($args['question_id'])) {
+            $where[]  = 'r.question_id = %d';
+            $values[] = absint($args['question_id']);
         }
 
-        $where_sql = 'WHERE ' . implode(' AND ', $where_clauses);
+        // Build WHERE
+        $where_sql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
-        $sql = "SELECT r.*, p.participant_name, p.participant_email, p.completed_at as survey_completed_at
+        // Pagination
+        $values[] = absint($args['limit']);
+        $values[] = absint($args['offset']);
+
+        // Execute query - table names are escaped, ORDER BY uses hardcoded column, other params use prepare()
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names are escaped, ORDER BY is hardcoded
+        return $wpdb->get_results(
+            $wpdb->prepare(
+                "
+                SELECT
+                    r.*,
+                    p.participant_name,
+                    p.participant_email,
+                    p.completed_at AS survey_completed_at
                 FROM {$responses_table} r
                 LEFT JOIN {$participants_table} p ON r.participant_id = p.id
                 {$where_sql}
                 ORDER BY r.responded_at DESC
-                LIMIT %d OFFSET %d";
-
-        $where_values[] = $args['limit'];
-        $where_values[] = $args['offset'];
-
-        return $this->wpdb->get_results(
-            $this->wpdb->prepare($sql, $where_values),
+                LIMIT %d OFFSET %d
+                ",
+                ...$values
+            ),
             ARRAY_A
         );
+
     }
 
     /**
@@ -344,10 +364,12 @@ class FlowQ_Session_Manager {
      * @return bool True if valid
      */
     private function validate_answer_for_question($answer_id, $question_id) {
+        global $wpdb;
+
         $answers_table = $this->table_prefix . 'answers';
 
-        $count = $this->wpdb->get_var(
-            $this->wpdb->prepare(
+        $count = $wpdb->get_var(
+            $wpdb->prepare(
                 "SELECT COUNT(*) FROM {$answers_table}
                 WHERE id = %d AND question_id = %d",
                 $answer_id,
@@ -366,10 +388,12 @@ class FlowQ_Session_Manager {
      * @return array|null Existing response or null
      */
     private function get_existing_response($session_id, $question_id) {
+        global $wpdb;
+
         $table_name = $this->table_prefix . 'responses';
 
-        return $this->wpdb->get_row(
-            $this->wpdb->prepare(
+        return $wpdb->get_row(
+            $wpdb->prepare(
                 "SELECT * FROM {$table_name}
                 WHERE session_id = %s AND question_id = %d",
                 $session_id,
@@ -387,11 +411,13 @@ class FlowQ_Session_Manager {
      * @return bool|WP_Error True if valid, WP_Error if not
      */
     private function validate_survey_completion($session_id, $survey_id) {
+        global $wpdb;
+
         // Get all required questions
         $questions_table = $this->table_prefix . 'questions';
         // Since is_required column doesn't exist, treat all questions as required
-        $required_questions = $this->wpdb->get_col(
-            $this->wpdb->prepare(
+        $required_questions = $wpdb->get_col(
+            $wpdb->prepare(
                 "SELECT id FROM {$questions_table}
                 WHERE survey_id = %d",
                 $survey_id
@@ -404,8 +430,8 @@ class FlowQ_Session_Manager {
 
         // Get answered question IDs
         $responses_table = $this->table_prefix . 'responses';
-        $answered_questions = $this->wpdb->get_col(
-            $this->wpdb->prepare(
+        $answered_questions = $wpdb->get_col(
+            $wpdb->prepare(
                 "SELECT DISTINCT question_id FROM {$responses_table}
                 WHERE session_id = %s",
                 $session_id
@@ -419,6 +445,7 @@ class FlowQ_Session_Manager {
             return new WP_Error(
                 'incomplete_survey',
                 sprintf(
+                    /* translators: %s: comma-separated list of question IDs */
                     __('Required questions not answered: %s', 'flowq'),
                     implode(', ', $unanswered_required)
                 )
@@ -435,12 +462,14 @@ class FlowQ_Session_Manager {
      * @return array Statistics
      */
     public function get_question_statistics($question_id) {
+        global $wpdb;
+
         $responses_table = $this->table_prefix . 'responses';
         $participants_table = $this->table_prefix . 'participants';
 
         // Total responses (include all responses, not just from completed surveys)
-        $total_responses = $this->wpdb->get_var(
-            $this->wpdb->prepare(
+        $total_responses = $wpdb->get_var(
+            $wpdb->prepare(
                 "SELECT COUNT(*) FROM {$responses_table} r
                 WHERE r.question_id = %d",
                 $question_id
@@ -448,8 +477,8 @@ class FlowQ_Session_Manager {
         );
 
         // Answer distribution (include all responses, not just from completed surveys)
-        $answer_distribution = $this->wpdb->get_results(
-            $this->wpdb->prepare(
+        $answer_distribution = $wpdb->get_results(
+            $wpdb->prepare(
                 "SELECT r.answer_id, a.answer_text, COUNT(*) as count
                 FROM {$responses_table} r
                 LEFT JOIN {$this->table_prefix}answers a ON r.answer_id = a.id
@@ -462,8 +491,8 @@ class FlowQ_Session_Manager {
         );
 
         // Text responses (for text/textarea questions) - include all responses
-        $text_responses = $this->wpdb->get_results(
-            $this->wpdb->prepare(
+        $text_responses = $wpdb->get_results(
+            $wpdb->prepare(
                 "SELECT r.answer_text, r.responded_at
                 FROM {$responses_table} r
                 WHERE r.question_id = %d

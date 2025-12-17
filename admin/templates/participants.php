@@ -216,12 +216,14 @@ if (!defined('ABSPATH')) {
 
                         if ($pagination['per_page'] === 'all') {
                             echo sprintf(
+                                /* translators: %d: total number of participants */
                                 esc_html__('Showing all %d participants', 'flowq'),
                                 absint($pagination['total_items'])
                             );
                         } else {
                             echo sprintf(
-                                esc_html__('Showing %d-%d of %d participants', 'flowq'),
+                                /* translators: 1: starting participant number, 2: ending participant number, 3: total participants */
+                                esc_html__('Showing %1$d-%2$d of %3$d participants', 'flowq'),
                                 absint($start),
                                 absint($end),
                                 absint($pagination['total_items'])

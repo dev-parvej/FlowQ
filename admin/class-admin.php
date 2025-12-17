@@ -88,8 +88,9 @@ class FlowQ_Admin {
         $url = add_query_arg($all_args, admin_url('admin.php'));
 
         // Add nonce for survey-specific operations
+        // Use add_query_arg instead of wp_nonce_url to avoid HTML-encoding for redirects
         if (isset($args['survey_id']) || isset($args['question_id'])) {
-            $url = wp_nonce_url($url, 'flowq_admin_view');
+            $url = add_query_arg('_wpnonce', wp_create_nonce('flowq_admin_view'), $url);
         }
 
         return $url;
@@ -586,13 +587,17 @@ class FlowQ_Admin {
                 global $wpdb;
                 $table_name = $wpdb->prefix . 'flowq_participants';
 
-                $result = $wpdb->get_row($wpdb->prepare(
-                    "SELECT
-                        COUNT(*) as total,
-                        SUM(CASE WHEN completed_at IS NOT NULL THEN 1 ELSE 0 END) as completed
-                     FROM {$table_name} WHERE survey_id = %d",
-                    $selected_survey_id
-                ), ARRAY_A);
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name interpolation for custom table, parameters via prepare() placeholders
+                $result = $wpdb->get_row(
+                    $wpdb->prepare(
+                        "SELECT
+                            COUNT(*) as total,
+                            SUM(CASE WHEN completed_at IS NOT NULL THEN 1 ELSE 0 END) as completed
+                         FROM {$table_name} WHERE survey_id = %d",
+                        $selected_survey_id
+                    ),
+                    ARRAY_A
+                );
 
                 $stats['total'] = (int) $result['total'];
                 $stats['completed'] = (int) $result['completed'];
@@ -600,16 +605,22 @@ class FlowQ_Admin {
                 $stats['in_progress'] = $stats['total'] - $stats['completed'];
 
                 // Calculate pagination for filtered results
-                $filtered_count_query = "SELECT COUNT(*) FROM {$table_name} WHERE survey_id = %d";
-                $count_params = array($selected_survey_id);
-
                 if ($status_filter === 'completed') {
-                    $filtered_count_query .= " AND completed_at IS NOT NULL";
+                    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name interpolation for custom table, parameters via prepare() placeholders
+                    $total_filtered_items = $wpdb->get_var(
+                        $wpdb->prepare("SELECT COUNT(*) FROM {$table_name} WHERE survey_id = %d AND completed_at IS NOT NULL", $selected_survey_id)
+                    );
                 } elseif ($status_filter === 'in_progress') {
-                    $filtered_count_query .= " AND completed_at IS NULL";
+                    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name interpolation for custom table, parameters via prepare() placeholders
+                    $total_filtered_items = $wpdb->get_var(
+                        $wpdb->prepare("SELECT COUNT(*) FROM {$table_name} WHERE survey_id = %d AND completed_at IS NULL", $selected_survey_id)
+                    );
+                } else {
+                    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name interpolation for custom table, parameters via prepare() placeholders
+                    $total_filtered_items = $wpdb->get_var(
+                        $wpdb->prepare("SELECT COUNT(*) FROM {$table_name} WHERE survey_id = %d", $selected_survey_id)
+                    );
                 }
-
-                $total_filtered_items = $wpdb->get_var($wpdb->prepare($filtered_count_query, $count_params));
 
                 // Set up pagination
                 if ($per_page === 'all') {
@@ -712,8 +723,8 @@ class FlowQ_Admin {
 
         // Process header fields
         $show_header = isset($_POST['show_header']) ? 1 : 0;
-        $form_header = sanitize_text_field($_POST['form_header'] ?? '');
-        $form_subtitle = wp_kses_post($_POST['form_subtitle'] ?? '');
+        $form_header = isset($_POST['form_header']) ? sanitize_text_field(wp_unslash($_POST['form_header'])) : '';
+        $form_subtitle = isset($_POST['form_subtitle']) ? wp_kses_post(wp_unslash($_POST['form_subtitle'])) : '';
 
         // Validation: If show_header is enabled, form_header must not be empty
         if ($show_header && empty(trim($form_header))) {
@@ -729,10 +740,10 @@ class FlowQ_Admin {
         }
 
         $survey_data = array(
-            'title' => sanitize_text_field($_POST['survey_title']),
-            'description' => sanitize_textarea_field($_POST['survey_description']),
-            'thank_you_page_slug' => sanitize_text_field($_POST['thank_you_page_slug'] ?? ''),
-            'status' => sanitize_text_field($_POST['survey_status']),
+            'title' => isset($_POST['survey_title']) ? sanitize_text_field(wp_unslash($_POST['survey_title'])) : '',
+            'description' => isset($_POST['survey_description']) ? sanitize_textarea_field(wp_unslash($_POST['survey_description'])) : '',
+            'thank_you_page_slug' => isset($_POST['thank_you_page_slug']) ? sanitize_text_field(wp_unslash($_POST['thank_you_page_slug'])) : '',
+            'status' => isset($_POST['survey_status']) ? sanitize_text_field(wp_unslash($_POST['survey_status'])) : 'draft',
             'show_header' => $show_header,
             'form_header' => $form_header,
             'form_subtitle' => wp_kses_post($form_subtitle),
@@ -847,7 +858,6 @@ class FlowQ_Admin {
         // Get selected survey ID from URL parameter - sanitized with absint()
         $selected_survey_id = isset($_GET['survey_id']) ? absint($_GET['survey_id']) : 0;
         $selected_question_id = isset($_GET['question_id']) ? absint($_GET['question_id']) : 0;
-
         // Get survey and questions data if survey is selected
         $survey = null;
         $questions = array();
@@ -876,7 +886,7 @@ class FlowQ_Admin {
     private function handle_question_form_submission() {
         // Verify nonce
         if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['_wpnonce'])), 'flowq_question_action')) {
-            wp_die(__('Security check failed.', 'flowq'));
+            wp_die(esc_html__('Security check failed.', 'flowq'));
         }
 
         $question_manager = new FlowQ_Question_Manager();
@@ -904,8 +914,12 @@ class FlowQ_Admin {
             }
 
             // Redirect to prevent form resubmission
-            $redirect_url = $this->get_secure_admin_url('flowq-questions', array('survey_id' => $survey_id));
-            wp_redirect($redirect_url);
+            // Add timestamp to prevent browser caching issues
+            $redirect_url = $this->get_secure_admin_url('flowq-questions', array(
+                'survey_id' => $survey_id,
+                'updated' => time()
+            ));
+            wp_safe_redirect($redirect_url);
             exit;
 
         } catch (Exception $e) {
@@ -919,19 +933,19 @@ class FlowQ_Admin {
     private function handle_question_delete_action() {
         // Check user permissions
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have sufficient permissions to perform this action.', 'flowq'));
+            wp_die(esc_html__('You do not have sufficient permissions to perform this action.', 'flowq'));
         }
 
         // Verify nonce
         if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'flowq_question_action')) {
-            wp_die(__('Security check failed.', 'flowq'));
+            wp_die(esc_html__('Security check failed.', 'flowq'));
         }
 
         $question_id = absint($_GET['question_id']);
         $survey_id = absint($_GET['survey_id']);
 
         if (!$question_id || !$survey_id) {
-            wp_die(__('Invalid question or survey ID.', 'flowq'));
+            wp_die(esc_html__('Invalid question or survey ID.', 'flowq'));
         }
 
         $question_manager = new FlowQ_Question_Manager();
@@ -942,16 +956,16 @@ class FlowQ_Admin {
             $survey = $survey_manager->get_survey($survey_id);
             if (!$survey) {
                 $this->add_admin_notice(__('Survey not found.', 'flowq'), 'error');
-                $redirect_url = $this->get_secure_admin_url('flowq-questions', array('survey_id' => $survey_id));
-                wp_redirect($redirect_url);
+                $redirect_url = $this->get_secure_admin_url('flowq-questions', array('survey_id' => $survey_id, 'updated' => time()));
+                wp_safe_redirect($redirect_url);
                 exit;
             }
 
             // Check if survey is in draft status
             if ($survey['status'] !== 'draft') {
                 $this->add_admin_notice(__('Questions can only be deleted from draft surveys. Please set the survey to draft status first.', 'flowq'), 'error');
-                $redirect_url = $this->get_secure_admin_url('flowq-questions', array('survey_id' => $survey_id));
-                wp_redirect($redirect_url);
+                $redirect_url = $this->get_secure_admin_url('flowq-questions', array('survey_id' => $survey_id, 'updated' => time()));
+                wp_safe_redirect($redirect_url);
                 exit;
             }
 
@@ -961,13 +975,14 @@ class FlowQ_Admin {
             if ($response_count > 0) {
                 $this->add_admin_notice(
                     sprintf(
+                        /* translators: %d: number of responses */
                         __('Cannot delete question: It has %d response(s). Questions with responses cannot be deleted to maintain data integrity.', 'flowq'),
                         $response_count
                     ),
                     'error'
                 );
-                $redirect_url = $this->get_secure_admin_url('flowq-questions', array('survey_id' => $survey_id));
-                wp_redirect($redirect_url);
+                $redirect_url = $this->get_secure_admin_url('flowq-questions', array('survey_id' => $survey_id, 'updated' => time()));
+                wp_safe_redirect($redirect_url);
                 exit;
             }
 
@@ -985,8 +1000,8 @@ class FlowQ_Admin {
         }
 
         // Redirect to prevent re-execution
-        $redirect_url = $this->get_secure_admin_url('flowq-questions', array('survey_id' => $survey_id));
-        wp_redirect($redirect_url);
+        $redirect_url = $this->get_secure_admin_url('flowq-questions', array('survey_id' => $survey_id, 'updated' => time()));
+        wp_safe_redirect($redirect_url);
         exit;
     }
 
@@ -995,10 +1010,10 @@ class FlowQ_Admin {
      */
     private function create_question_from_form($question_manager, $survey_id) {
         $question_data = array(
-            'title' => sanitize_textarea_field($_POST['question_title']),
-            'description' => sanitize_textarea_field($_POST['question_description']),
-            'extra_message' => sanitize_textarea_field($_POST['question_extra_message'] ?? ''),
-            'is_required' => rest_sanitize_boolean($_POST['question_is_required'])
+            'title' => isset($_POST['question_title']) ? sanitize_textarea_field(wp_unslash($_POST['question_title'])) : '',
+            'description' => isset($_POST['question_description']) ? sanitize_textarea_field(wp_unslash($_POST['question_description'])) : '',
+            'extra_message' => isset($_POST['question_extra_message']) ? sanitize_textarea_field(wp_unslash($_POST['question_extra_message'])) : '',
+            'is_required' => isset($_POST['question_is_required']) ? rest_sanitize_boolean($_POST['question_is_required']) : false
         );
 
         $question_id = $question_manager->create_question($survey_id, $question_data);
@@ -1022,9 +1037,9 @@ class FlowQ_Admin {
      */
     private function update_question_from_form($question_manager, $question_id) {
         $question_data = array(
-            'title' => sanitize_textarea_field($_POST['question_title']),
-            'description' => sanitize_textarea_field($_POST['question_description']),
-            'extra_message' => sanitize_textarea_field($_POST['question_extra_message'] ?? ''),
+            'title' => isset($_POST['question_title']) ? sanitize_textarea_field(wp_unslash($_POST['question_title'])) : '',
+            'description' => isset($_POST['question_description']) ? sanitize_textarea_field(wp_unslash($_POST['question_description'])) : '',
+            'extra_message' => isset($_POST['question_extra_message']) ? sanitize_textarea_field(wp_unslash($_POST['question_extra_message'])) : '',
             'is_required' => isset($_POST['question_is_required']) ? 1 : 0
         );
 
@@ -1169,6 +1184,7 @@ class FlowQ_Admin {
 
         $table_name = $wpdb->prefix . 'flowq_responses';
 
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name interpolation for custom table, parameters via prepare() placeholders
         $count = $wpdb->get_var(
             $wpdb->prepare(
                 "SELECT COUNT(*) FROM {$table_name} WHERE question_id = %d",
@@ -1185,12 +1201,12 @@ class FlowQ_Admin {
     public function handle_save_survey_action() {
         // Check user permissions
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have sufficient permissions to perform this action.', 'flowq'));
+            wp_die(esc_html__('You do not have sufficient permissions to perform this action.', 'flowq'));
         }
 
         // Verify nonce
         if (!check_admin_referer('flowq_save_survey')) {
-            wp_die(__('Security check failed.', 'flowq'));
+            wp_die(esc_html__('Security check failed.', 'flowq'));
         }
 
         // Call the existing handler
@@ -1203,12 +1219,12 @@ class FlowQ_Admin {
     public function handle_save_question_action() {
         // Check user permissions
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have sufficient permissions to perform this action.', 'flowq'));
+            wp_die(esc_html__('You do not have sufficient permissions to perform this action.', 'flowq'));
         }
 
         // Verify nonce - the form uses flowq_question_action
         if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['_wpnonce'])), 'flowq_question_action')) {
-            wp_die(__('Security check failed.', 'flowq'));
+            wp_die(esc_html__('Security check failed.', 'flowq'));
         }
 
         // Call the existing handler
@@ -1221,12 +1237,12 @@ class FlowQ_Admin {
     public function handle_delete_question_action() {
         // Check user permissions
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have sufficient permissions to perform this action.', 'flowq'));
+            wp_die(esc_html__('You do not have sufficient permissions to perform this action.', 'flowq'));
         }
 
         // Verify nonce
         if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'flowq_question_action')) {
-            wp_die(__('Security check failed.', 'flowq'));
+            wp_die(esc_html__('Security check failed.', 'flowq'));
         }
 
         // Call the existing handler
@@ -1239,12 +1255,12 @@ class FlowQ_Admin {
     public function handle_survey_action() {
         // Check user permissions
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have sufficient permissions to perform this action.', 'flowq'));
+            wp_die(esc_html__('You do not have sufficient permissions to perform this action.', 'flowq'));
         }
 
         // Verify nonce
         if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'survey_action')) {
-            wp_die(__('Security check failed.', 'flowq'));
+            wp_die(esc_html__('Security check failed.', 'flowq'));
         }
 
         // Call the existing handler

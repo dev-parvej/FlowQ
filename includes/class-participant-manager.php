@@ -16,11 +16,6 @@ if (!defined('ABSPATH')) {
 class FlowQ_Participant_Manager {
 
     /**
-     * WordPress database object
-     */
-    private $wpdb;
-
-    /**
      * Plugin table prefix
      */
     private $table_prefix;
@@ -35,8 +30,7 @@ class FlowQ_Participant_Manager {
      */
     public function __construct() {
         global $wpdb;
-        $this->wpdb = $wpdb;
-        $this->table_prefix = $this->wpdb->prefix . 'flowq_';
+        $this->table_prefix = $wpdb->prefix . 'flowq_';
         $this->session_timeout = flowq_plugin()->get_option('session_timeout', 3600);
     }
 
@@ -48,12 +42,14 @@ class FlowQ_Participant_Manager {
      * @return array|WP_Error Array with session_id and participant_id on success, WP_Error on failure
      */
     public function create_participant($survey_id, $participant_data) {
+        global $wpdb;
         // Validate required fields (phone is now optional for staged registration)
         $required_fields = ['name', 'email'];
         foreach ($required_fields as $field) {
             if (empty($participant_data[$field])) {
                 return new WP_Error(
                     'missing_field',
+                    /* translators: %s: field name */
                     sprintf(__('Required field missing: %s', 'flowq'), $field)
                 );
             }
@@ -112,13 +108,13 @@ class FlowQ_Participant_Manager {
 
         // Insert participant
         $table_name = $this->table_prefix . 'participants';
-        $result = $this->wpdb->insert($table_name, $participant_record);
+        $result = $wpdb->insert($table_name, $participant_record);
 
         if ($result === false) {
             return new WP_Error('db_error', __('Failed to create participant record.', 'flowq'));
         }
 
-        $participant_id = $this->wpdb->insert_id;
+        $participant_id = $wpdb->insert_id;
 
         // Trigger action hook
         do_action('flowq_participant_registered', $participant_id, $participant_data, $survey_id);
@@ -136,10 +132,11 @@ class FlowQ_Participant_Manager {
      * @return array|null Participant data or null if not found
      */
     public function get_participant($session_id) {
+        global $wpdb;
         $table_name = $this->table_prefix . 'participants';
 
-        $participant = $this->wpdb->get_row(
-            $this->wpdb->prepare(
+        $participant = $wpdb->get_row(
+            $wpdb->prepare(
                 "SELECT * FROM {$table_name} WHERE session_id = %s",
                 $session_id
             ),
@@ -169,6 +166,7 @@ class FlowQ_Participant_Manager {
      * @return bool|WP_Error True on success, WP_Error on failure
      */
     public function update_current_question($session_id, $question_id) {
+        global $wpdb;
         // Validate session
         $participant = $this->get_participant($session_id);
         if (!$participant) {
@@ -177,7 +175,7 @@ class FlowQ_Participant_Manager {
 
         // Update current question
         $table_name = $this->table_prefix . 'participants';
-        $result = $this->wpdb->update(
+        $result = $wpdb->update(
             $table_name,
             array('current_question_id' => $question_id),
             array('session_id' => $session_id),
@@ -200,6 +198,7 @@ class FlowQ_Participant_Manager {
      * @return bool|WP_Error True on success, WP_Error on failure
      */
     public function add_to_question_chain($session_id, $question_id) {
+        global $wpdb;
         // Get current participant
         $participant = $this->get_participant($session_id);
         if (!$participant) {
@@ -214,7 +213,7 @@ class FlowQ_Participant_Manager {
 
         // Update question chain
         $table_name = $this->table_prefix . 'participants';
-        $result = $this->wpdb->update(
+        $result = $wpdb->update(
             $table_name,
             array('question_chain' => wp_json_encode($question_chain)),
             array('session_id' => $session_id),
@@ -235,6 +234,7 @@ class FlowQ_Participant_Manager {
      * @return string Session ID
      */
     public function generate_session_id() {
+        global $wpdb;
         $attempts = 0;
         $max_attempts = 10;
 
@@ -244,9 +244,10 @@ class FlowQ_Participant_Manager {
             $attempts++;
 
             // Check if session ID already exists
-            $exists = $this->wpdb->get_var(
-                $this->wpdb->prepare(
-                    "SELECT COUNT(*) FROM {$this->table_prefix}participants WHERE session_id = %s",
+            $table_name = $this->table_prefix . 'participants';
+            $exists = $wpdb->get_var(
+                $wpdb->prepare(
+                    "SELECT COUNT(*) FROM {$table_name} WHERE session_id = %s",
                     $session_id
                 )
             );
@@ -310,6 +311,7 @@ class FlowQ_Participant_Manager {
      * @return bool|WP_Error True on success, WP_Error on failure
      */
     public function mark_completed($session_id) {
+        global $wpdb;
         // Validate session
         $participant = $this->get_participant($session_id);
         if (!$participant) {
@@ -318,7 +320,7 @@ class FlowQ_Participant_Manager {
 
         // Update completion timestamp
         $table_name = $this->table_prefix . 'participants';
-        $result = $this->wpdb->update(
+        $result = $wpdb->update(
             $table_name,
             array('completed_at' => current_time('mysql')),
             array('session_id' => $session_id),
@@ -341,6 +343,7 @@ class FlowQ_Participant_Manager {
      * @return bool|WP_Error True on success, WP_Error on failure
      */
     public function update_phone_number($session_id, $phone_number) {
+        global $wpdb;
         // Validate session exists
         $participant = $this->get_participant($session_id);
         if (!$participant) {
@@ -354,7 +357,7 @@ class FlowQ_Participant_Manager {
 
         // Update phone number
         $table_name = $this->table_prefix . 'participants';
-        $result = $this->wpdb->update(
+        $result = $wpdb->update(
             $table_name,
             array('participant_phone' => sanitize_text_field($phone_number)),
             array('session_id' => $session_id),
@@ -412,10 +415,11 @@ class FlowQ_Participant_Manager {
      * @return array|null Participant data or null
      */
     public function get_participant_by_id($participant_id) {
+        global $wpdb;
         $table_name = $this->table_prefix . 'participants';
 
-        $participant = $this->wpdb->get_row(
-            $this->wpdb->prepare(
+        $participant = $wpdb->get_row(
+            $wpdb->prepare(
                 "SELECT * FROM {$table_name} WHERE id = %d",
                 $participant_id
             ),
@@ -437,6 +441,7 @@ class FlowQ_Participant_Manager {
      * @return array Participants list
      */
     public function get_survey_participants($survey_id, $args = array()) {
+        global $wpdb;
         $defaults = array(
             'status' => null, // 'completed', 'in_progress'
             'limit' => 50,
@@ -448,42 +453,51 @@ class FlowQ_Participant_Manager {
         $args = wp_parse_args($args, $defaults);
         $table_name = $this->table_prefix . 'participants';
 
-        // Whitelist allowed orderby columns to prevent SQL injection
+        // SECURITY: Whitelist validation for ORDER BY column (cannot use prepare() placeholders for column names)
         $allowed_orderby = array('started_at', 'completed_at', 'updated_at', 'id');
         if (!in_array($args['orderby'], $allowed_orderby, true)) {
-            $args['orderby'] = 'started_at';
+            $args['orderby'] = 'started_at'; // Safe default
         }
 
-        // Whitelist allowed order directions
+        // SECURITY: Whitelist validation for ORDER direction (ASC/DESC keywords cannot use placeholders)
         $args['order'] = strtoupper($args['order']);
         if (!in_array($args['order'], array('ASC', 'DESC'), true)) {
-            $args['order'] = 'DESC';
+            $args['order'] = 'DESC'; // Safe default
         }
 
-        // Escape validated values for extra security (already whitelisted above)
-        $orderby = esc_sql($args['orderby']);
-        $order = esc_sql($args['order']);
+        // After whitelist validation, escape values for SQL (defense in depth)
+        $orderby = esc_sql($args['orderby']); // Whitelisted then escaped
+        $order = esc_sql($args['order']); // Whitelisted then escaped
 
-        $where_clauses = array('survey_id = %d');
-        $where_values = array($survey_id);
+        // Build WHERE clause with prepare() placeholders
+        $where_clauses = array();
+        $prepare_values = array();
 
+        // Always filter by survey_id
+        $where_clauses[] = 'survey_id = %d';
+        $prepare_values[] = absint($survey_id);
+
+        // Optional status filter
         if ($args['status'] === 'completed') {
             $where_clauses[] = 'completed_at IS NOT NULL';
         } elseif ($args['status'] === 'in_progress') {
             $where_clauses[] = 'completed_at IS NULL';
         }
 
+        // Construct WHERE clause
         $where_sql = 'WHERE ' . implode(' AND ', $where_clauses);
 
-        $sql = "SELECT * FROM {$table_name} {$where_sql}
-                ORDER BY {$orderby} {$order}
-                LIMIT %d OFFSET %d";
+        // Add LIMIT and OFFSET to prepare values
+        $prepare_values[] = absint($args['limit']);
+        $prepare_values[] = absint($args['offset']);
 
-        $where_values[] = $args['limit'];
-        $where_values[] = $args['offset'];
-
-        $participants = $this->wpdb->get_results(
-            $this->wpdb->prepare($sql, $where_values),
+        // Execute query - ORDER BY uses whitelisted+escaped values, other params use prepare()
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- ORDER BY column/direction are whitelisted and escaped
+        $participants = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM {$table_name} {$where_sql} ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d",
+                $prepare_values
+            ),
             ARRAY_A
         );
 
@@ -513,6 +527,7 @@ class FlowQ_Participant_Manager {
      * @return string|WP_Error Token on success, WP_Error on failure
      */
     public function generate_completion_token($session_id) {
+        global $wpdb;
         // Validate session exists
         $participant = $this->get_participant($session_id);
         if (!$participant) {
@@ -525,7 +540,7 @@ class FlowQ_Participant_Manager {
 
         // Update participant with token
         $table_name = $this->table_prefix . 'participants';
-        $result = $this->wpdb->update(
+        $result = $wpdb->update(
             $table_name,
             array(
                 'completion_token' => $token,
@@ -550,13 +565,15 @@ class FlowQ_Participant_Manager {
      * @return array|WP_Error Participant data on success, WP_Error on failure
      */
     public function validate_completion_token($token) {
+        global $wpdb;
         if (empty($token)) {
             return new WP_Error('missing_token', __('Token is required.', 'flowq'));
         }
 
         $table_name = $this->table_prefix . 'participants';
-        $participant = $this->wpdb->get_row(
-            $this->wpdb->prepare(
+
+        $participant = $wpdb->get_row(
+            $wpdb->prepare(
                 "SELECT * FROM {$table_name} WHERE completion_token = %s AND token_expires_at > NOW()",
                 $token
             ),
@@ -581,10 +598,11 @@ class FlowQ_Participant_Manager {
      * @return bool True if email exists, false otherwise
      */
     public function email_exists_for_survey($survey_id, $email) {
+        global $wpdb;
         $table_name = $this->table_prefix . 'participants';
 
-        $count = $this->wpdb->get_var(
-            $this->wpdb->prepare(
+        $count = $wpdb->get_var(
+            $wpdb->prepare(
                 "SELECT COUNT(*) FROM {$table_name} WHERE survey_id = %d AND participant_email = %s",
                 $survey_id,
                 $email

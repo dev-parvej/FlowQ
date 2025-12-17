@@ -155,6 +155,8 @@ class FlowQ_Settings_Admin {
         $table_name = $wpdb->prefix . 'flowq_templates';
 
         // Get all templates
+        // Note: No prepare() needed as query has no user input (table name is hardcoded, ORDER BY uses literal column/direction)
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table query with no user input
         $templates = $wpdb->get_results("SELECT * FROM {$table_name} ORDER BY id ASC", ARRAY_A);
 
         // Get active template ID
@@ -170,12 +172,12 @@ class FlowQ_Settings_Admin {
     public function handle_save_settings() {
         // Check user permissions
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have sufficient permissions to perform this action.', 'flowq'));
+            wp_die(esc_html__('You do not have sufficient permissions to perform this action.', 'flowq'));
         }
 
         // Verify nonce
         if (!check_admin_referer('flowq_save_settings')) {
-            wp_die(__('Security check failed.', 'flowq'));
+            wp_die(esc_html__('Security check failed.', 'flowq'));
         }
 
         // Get current tab

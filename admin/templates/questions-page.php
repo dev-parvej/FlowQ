@@ -19,6 +19,7 @@ $page_title = $is_editing ? __('Edit Question', 'flowq') : __('Manage Questions'
         // Determine back button URL and text
         if ($selected_survey_id && !empty($survey)) {
             $back_url = $this->get_secure_admin_url('flowq-add', array('survey_id' => $selected_survey_id));
+            /* translators: %s: survey title */
             $back_text = sprintf(__('← Back to Edit "%s"', 'flowq'), esc_html($survey['title']));
         } else {
             $back_url = admin_url('admin.php?page=flowq');

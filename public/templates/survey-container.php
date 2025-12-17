@@ -18,7 +18,10 @@ $template_styles = $template_handler->get_template_styles();
 <div class="flowq-container" data-survey-id="<?php echo esc_attr($survey['id']); ?>" data-theme="<?php echo esc_attr($theme); ?>">
     <!-- Participant Information Form (Initially Visible) -->
     <div id="participant-form-step" class="survey-step active">
-        <?php echo $this->render_participant_form($survey); ?>
+        <?php
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- render_participant_form() handles escaping internally
+        echo $this->render_participant_form($survey);
+        ?>
     </div>
 
     <div class="hidden" id="flowq-question-template-wrapper">

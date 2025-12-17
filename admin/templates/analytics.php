@@ -190,6 +190,7 @@ if (!defined('ABSPATH')) {
                                     <p class="more-responses">
                                         <?php
                                         echo esc_html(sprintf(
+                                            /* translators: %d: number of additional responses */
                                             __('+ %d more responses (export CSV to see all)', 'flowq'),
                                             count($question_stat['text_responses']) - 10
                                         ));

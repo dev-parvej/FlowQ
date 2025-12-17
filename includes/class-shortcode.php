@@ -180,6 +180,7 @@ class FlowQ_Shortcode {
                 <?php
                 // Include the actual survey interface
                 $frontend = new FlowQ_Frontend();
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- render_survey() handles escaping internally
                 echo $frontend->render_survey($survey_id, $theme);
                 ?>
             </div>
@@ -566,14 +567,17 @@ class FlowQ_Shortcode {
      */
     private function format_duration($seconds) {
         if ($seconds < 60) {
+            /* translators: %d: number of seconds */
             return sprintf(__('%d seconds', 'flowq'), $seconds);
         } elseif ($seconds < 3600) {
             $minutes = floor($seconds / 60);
+            /* translators: %d: number of minutes */
             return sprintf(__('%d minutes', 'flowq'), $minutes);
         } else {
             $hours = floor($seconds / 3600);
             $minutes = floor(($seconds % 3600) / 60);
-            return sprintf(__('%d hours %d minutes', 'flowq'), $hours, $minutes);
+            /* translators: 1: number of hours, 2: number of minutes */
+            return sprintf(__('%1$d hours %2$d minutes', 'flowq'), $hours, $minutes);
         }
     }
 

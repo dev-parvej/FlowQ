@@ -16,11 +16,6 @@ if (!defined('ABSPATH')) {
 class FlowQ_Question_Manager {
 
     /**
-     * WordPress database object
-     */
-    private $wpdb;
-
-    /**
      * Plugin table prefix
      */
     private $table_prefix;
@@ -30,8 +25,7 @@ class FlowQ_Question_Manager {
      */
     public function __construct() {
         global $wpdb;
-        $this->wpdb = $wpdb;
-        $this->table_prefix = $this->wpdb->prefix . 'flowq_';
+        $this->table_prefix = $wpdb->prefix . 'flowq_';
     }
 
     /**
@@ -42,6 +36,8 @@ class FlowQ_Question_Manager {
      * @return int|WP_Error Question ID on success, WP_Error on failure
      */
     public function create_question($survey_id, $question_data) {
+        global $wpdb;
+
         // Validate required fields
         if (empty($question_data['title'])) {
             return new WP_Error('missing_title', __('Question title is required.', 'flowq'));
@@ -69,13 +65,13 @@ class FlowQ_Question_Manager {
 
         // Insert question
         $table_name = $this->table_prefix . 'questions';
-        $result = $this->wpdb->insert($table_name, $question_record);
+        $result = $wpdb->insert($table_name, $question_record);
 
         if ($result === false) {
             return new WP_Error('db_error', __('Failed to create question.', 'flowq'));
         }
 
-        $question_id = $this->wpdb->insert_id;
+        $question_id = $wpdb->insert_id;
 
         // Trigger action hook
         do_action('flowq_question_created', $question_id, $question_data, $survey_id);
@@ -91,10 +87,12 @@ class FlowQ_Question_Manager {
      * @return array|null Question data or null if not found
      */
     public function get_question($question_id, $include_answers = false) {
+        global $wpdb;
+
         $table_name = $this->table_prefix . 'questions';
 
-        $question = $this->wpdb->get_row(
-            $this->wpdb->prepare("SELECT * FROM {$table_name} WHERE id = %d", $question_id),
+        $question = $wpdb->get_row(
+            $wpdb->prepare("SELECT * FROM {$table_name} WHERE id = %d", $question_id),
             ARRAY_A
         );
 
@@ -118,6 +116,8 @@ class FlowQ_Question_Manager {
      * @return bool|WP_Error True on success, WP_Error on failure
      */
     public function update_question($question_id, $data) {
+        global $wpdb;
+
         // Check if question exists
         if (!$this->get_question($question_id)) {
             return new WP_Error('question_not_found', __('Question not found.', 'flowq'));
@@ -137,7 +137,7 @@ class FlowQ_Question_Manager {
         if (isset($data['extra_message'])) {
             $update_data['extra_message'] = sanitize_textarea_field($data['extra_message']);
         }
-        
+
         if (!isset($data['is_required'])) {
             $update_data['is_required'] = 0;
         } else {
@@ -153,7 +153,7 @@ class FlowQ_Question_Manager {
 
         // Update question
         $table_name = $this->table_prefix . 'questions';
-        $result = $this->wpdb->update(
+        $result = $wpdb->update(
             $table_name,
             $update_data,
             array('id' => $question_id)
@@ -176,6 +176,8 @@ class FlowQ_Question_Manager {
      * @return bool|WP_Error True on success, WP_Error on failure
      */
     public function delete_question($question_id) {
+        global $wpdb;
+
         // Check if question exists
         if (!$this->get_question($question_id)) {
             return new WP_Error('question_not_found', __('Question not found.', 'flowq'));
@@ -189,7 +191,7 @@ class FlowQ_Question_Manager {
 
         // Delete question
         $table_name = $this->table_prefix . 'questions';
-        $result = $this->wpdb->delete(
+        $result = $wpdb->delete(
             $table_name,
             array('id' => $question_id),
             array('%d')
@@ -213,10 +215,12 @@ class FlowQ_Question_Manager {
      * @return array Questions with answers
      */
     public function get_survey_questions($survey_id, $include_answers = true) {
+        global $wpdb;
+
         $questions_table = $this->table_prefix . 'questions';
 
-        $questions = $this->wpdb->get_results(
-            $this->wpdb->prepare(
+        $questions = $wpdb->get_results(
+            $wpdb->prepare(
                 "SELECT * FROM {$questions_table}
                 WHERE survey_id = %d
                 ORDER BY id ASC",
@@ -240,6 +244,8 @@ class FlowQ_Question_Manager {
      * @return int|WP_Error Answer ID on success, WP_Error on failure
      */
     public function create_answer($question_id, $answer_data) {
+        global $wpdb;
+
         // Validate required fields
         if (empty($answer_data['answer_text'])) {
             return new WP_Error('missing_text', __('Answer text is required.', 'flowq'));
@@ -272,13 +278,13 @@ class FlowQ_Question_Manager {
 
         // Insert answer
         $table_name = $this->table_prefix . 'answers';
-        $result = $this->wpdb->insert($table_name, $answer_record);
+        $result = $wpdb->insert($table_name, $answer_record);
 
         if ($result === false) {
             return new WP_Error('db_error', __('Failed to create answer.', 'flowq'));
         }
 
-        $answer_id = $this->wpdb->insert_id;
+        $answer_id = $wpdb->insert_id;
 
         // Trigger action hook
         do_action('flowq_answer_created', $answer_id, $answer_data, $question_id);
@@ -293,10 +299,12 @@ class FlowQ_Question_Manager {
      * @return array Answers list
      */
     public function get_question_answers($question_id) {
+        global $wpdb;
+
         $table_name = $this->table_prefix . 'answers';
 
-        return $this->wpdb->get_results(
-            $this->wpdb->prepare(
+        return $wpdb->get_results(
+            $wpdb->prepare(
                 "SELECT * FROM {$table_name}
                 WHERE question_id = %d
                 ORDER BY answer_order ASC, id ASC",
@@ -314,6 +322,8 @@ class FlowQ_Question_Manager {
      * @return array Associative array with question_id as key and question data as value
      */
     public function get_multiple_questions($question_ids, $include_answers = false) {
+        global $wpdb;
+
         if (empty($question_ids)) {
             return array();
         }
@@ -321,8 +331,8 @@ class FlowQ_Question_Manager {
         $questions_table = $this->table_prefix . 'questions';
         $placeholders = implode(',', array_fill(0, count($question_ids), '%d'));
 
-        $questions = $this->wpdb->get_results(
-            $this->wpdb->prepare(
+        $questions = $wpdb->get_results(
+            $wpdb->prepare(
                 "SELECT * FROM {$questions_table}
                 WHERE id IN ($placeholders)",
                 ...$question_ids
@@ -340,8 +350,8 @@ class FlowQ_Question_Manager {
         if ($include_answers && !empty($questions)) {
             $answers_table = $this->table_prefix . 'answers';
 
-            $all_answers = $this->wpdb->get_results(
-                $this->wpdb->prepare(
+            $all_answers = $wpdb->get_results(
+                $wpdb->prepare(
                     "SELECT * FROM {$answers_table}
                     WHERE question_id IN ($placeholders)
                     ORDER BY question_id, answer_order ASC, id ASC",
@@ -373,6 +383,8 @@ class FlowQ_Question_Manager {
      * @return bool|WP_Error True on success, WP_Error on failure
      */
     public function update_answer($answer_id, $data) {
+        global $wpdb;
+
         // Check if answer exists
         if (!$this->get_answer($answer_id)) {
             return new WP_Error('answer_not_found', __('Answer not found.', 'flowq'));
@@ -409,7 +421,7 @@ class FlowQ_Question_Manager {
 
         // Update answer
         $table_name = $this->table_prefix . 'answers';
-        $result = $this->wpdb->update(
+        $result = $wpdb->update(
             $table_name,
             $update_data,
             array('id' => $answer_id)
@@ -432,6 +444,8 @@ class FlowQ_Question_Manager {
      * @return bool|WP_Error True on success, WP_Error on failure
      */
     public function delete_answer($answer_id) {
+        global $wpdb;
+
         // Check if answer exists
         if (!$this->get_answer($answer_id)) {
             return new WP_Error('answer_not_found', __('Answer not found.', 'flowq'));
@@ -442,7 +456,7 @@ class FlowQ_Question_Manager {
 
         // Delete answer
         $table_name = $this->table_prefix . 'answers';
-        $result = $this->wpdb->delete(
+        $result = $wpdb->delete(
             $table_name,
             array('id' => $answer_id),
             array('%d')
@@ -466,10 +480,12 @@ class FlowQ_Question_Manager {
      * @return bool|WP_Error True on success, WP_Error on failure
      */
     public function reorder_answers($answer_orders) {
+        global $wpdb;
+
         $table_name = $this->table_prefix . 'answers';
 
         foreach ($answer_orders as $answer_id => $order) {
-            $result = $this->wpdb->update(
+            $result = $wpdb->update(
                 $table_name,
                 array('answer_order' => intval($order)),
                 array('id' => intval($answer_id)),
@@ -492,10 +508,12 @@ class FlowQ_Question_Manager {
      * @return array|null Answer data or null
      */
     private function get_answer($answer_id) {
+        global $wpdb;
+
         $table_name = $this->table_prefix . 'answers';
 
-        return $this->wpdb->get_row(
-            $this->wpdb->prepare("SELECT * FROM {$table_name} WHERE id = %d", $answer_id),
+        return $wpdb->get_row(
+            $wpdb->prepare("SELECT * FROM {$table_name} WHERE id = %d", $answer_id),
             ARRAY_A
         );
     }
@@ -508,10 +526,12 @@ class FlowQ_Question_Manager {
      * @return int Next order number
      */
     private function get_next_answer_order($question_id) {
+        global $wpdb;
+
         $table_name = $this->table_prefix . 'answers';
 
-        $max_order = $this->wpdb->get_var(
-            $this->wpdb->prepare(
+        $max_order = $wpdb->get_var(
+            $wpdb->prepare(
                 "SELECT MAX(answer_order) FROM {$table_name} WHERE question_id = %d",
                 $question_id
             )
@@ -526,9 +546,11 @@ class FlowQ_Question_Manager {
      * @param int $question_id Question ID
      */
     private function delete_question_answers($question_id) {
+        global $wpdb;
+
         $table_name = $this->table_prefix . 'answers';
 
-        $this->wpdb->delete(
+        $wpdb->delete(
             $table_name,
             array('question_id' => $question_id),
             array('%d')
@@ -541,9 +563,11 @@ class FlowQ_Question_Manager {
      * @param int $question_id Question ID
      */
     private function delete_question_responses($question_id) {
+        global $wpdb;
+
         $table_name = $this->table_prefix . 'responses';
 
-        $this->wpdb->delete(
+        $wpdb->delete(
             $table_name,
             array('question_id' => $question_id),
             array('%d')
@@ -556,9 +580,11 @@ class FlowQ_Question_Manager {
      * @param int $answer_id Answer ID
      */
     private function delete_answer_responses($answer_id) {
+        global $wpdb;
+
         $table_name = $this->table_prefix . 'responses';
 
-        $this->wpdb->delete(
+        $wpdb->delete(
             $table_name,
             array('answer_id' => $answer_id),
             array('%d')
@@ -573,11 +599,13 @@ class FlowQ_Question_Manager {
      * @return array Questions with response counts
      */
     public function get_survey_questions_with_response_count($survey_id, $include_answers = true) {
+        global $wpdb;
+
         $questions_table = $this->table_prefix . 'questions';
         $responses_table = $this->table_prefix . 'responses';
 
-        $questions = $this->wpdb->get_results(
-            $this->wpdb->prepare(
+        $questions = $wpdb->get_results(
+            $wpdb->prepare(
                 "SELECT q.*, COALESCE(COUNT(r.id), 0) as response_count
                 FROM {$questions_table} q
                 LEFT JOIN {$responses_table} r ON q.id = r.question_id
@@ -603,6 +631,8 @@ class FlowQ_Question_Manager {
      * @return array Questions with answers loaded
      */
     private function load_answers_for_questions($questions) {
+        global $wpdb;
+
         if (empty($questions)) {
             return $questions;
         }
@@ -614,8 +644,8 @@ class FlowQ_Question_Manager {
         $answers_table = $this->table_prefix . 'answers';
         $placeholders = implode(',', array_fill(0, count($question_ids), '%d'));
 
-        $all_answers = $this->wpdb->get_results(
-            $this->wpdb->prepare(
+        $all_answers = $wpdb->get_results(
+            $wpdb->prepare(
                 "SELECT * FROM {$answers_table}
                 WHERE question_id IN ({$placeholders})
                 ORDER BY question_id ASC, answer_order ASC, id ASC",

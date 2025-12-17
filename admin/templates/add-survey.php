@@ -178,7 +178,7 @@ wp_localize_script('flowq-add-survey', 'flowqAddSurvey', array(
                                 $selected = ($page_slug === $current_slug) ? 'selected' : '';
                             ?>
                                 <option value="<?php echo esc_attr($page_slug); ?>"
-                                        <?php echo $selected; ?>
+                                        <?php echo esc_attr($selected); ?>
                                         data-is-thank-you="<?php echo $is_thank_you ? '1' : '0'; ?>">
                                     <?php echo esc_html($display_title); ?>
                                 </option>

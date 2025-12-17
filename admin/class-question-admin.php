@@ -369,6 +369,7 @@ class FlowQ_Question_Admin {
 
         if ($responses_count > 0) {
             wp_send_json_error(sprintf(
+                /* translators: %d: number of responses */
                 __('Cannot delete this question because it has %d response(s). Deleting it would affect survey analytics.', 'flowq'),
                 $responses_count
             ));

@@ -334,10 +334,11 @@ class FlowQ_Plugin {
             $files = glob($survey_dir . '/*');
             foreach ($files as $file) {
                 if (is_file($file)) {
-                    unlink($file);
+                    wp_delete_file($file);
                 }
             }
-            // Remove directory
+            // Remove directory - using rmdir as WP_Filesystem requires complex initialization
+            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Safe usage during plugin deactivation
             rmdir($survey_dir);
         }
 
