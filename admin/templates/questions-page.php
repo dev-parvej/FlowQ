@@ -286,7 +286,11 @@ $page_title = $is_editing ? __('Edit Question', 'flowq') : __('Manage Questions'
                 </div>
             <?php endif; ?>
 
-            <?php if (!$is_editing && isset($_GET['action']) && sanitize_text_field($_GET['action']) === 'add'): ?>
+            <?php
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce not required for displaying add question form
+            $action_param = isset($_GET['action']) ? sanitize_text_field(wp_unslash($_GET['action'])) : '';
+            if (!$is_editing && $action_param === 'add'):
+            ?>
                 <!-- Add Question Form -->
                 <hr>
                 <div class="question-form-section">

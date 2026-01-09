@@ -503,7 +503,7 @@ class FlowQ_Shortcode_Builder {
     public function ajax_preview_shortcode() {
         check_ajax_referer('flowq_shortcode_nonce', 'nonce');
 
-        $shortcode = sanitize_text_field($_POST['shortcode'] ?? '');
+        $shortcode = isset($_POST['shortcode']) ? sanitize_text_field(wp_unslash($_POST['shortcode'])) : '';
 
         if (empty($shortcode)) {
             wp_send_json_error(__('No shortcode provided.', 'flowq'));

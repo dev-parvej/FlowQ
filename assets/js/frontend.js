@@ -1242,7 +1242,7 @@
             if (errorContainer.length) {
                 errorContainer.find('.error-text').text(message);
                 errorContainer.show();
-               $('.form-actions').css('cssText', 'margin-top: 0px !important');
+               $('.form-actions').css('cssText', 'margin-top: 10px !important');
                 this.scrollToError();
             } else {
                 alert(message);

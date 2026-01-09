@@ -17,7 +17,11 @@ if (!defined('ABSPATH')) {
         <!-- Survey Selection -->
         <div class="analytics-header">
             <form method="get" action="" class="survey-selector">
-                <input type="hidden" name="page" value="<?php echo esc_attr(sanitize_text_field($_GET['page'])); ?>">
+                <?php
+                // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce not required for page parameter in GET form
+                $page_param = isset($_GET['page']) ? sanitize_text_field(wp_unslash($_GET['page'])) : '';
+                ?>
+                <input type="hidden" name="page" value="<?php echo esc_attr($page_param); ?>">
 
                 <label for="survey_id"><?php echo esc_html__('Select Survey:', 'flowq'); ?></label>
                 <select name="survey_id" id="survey_id" onchange="this.form.submit()">

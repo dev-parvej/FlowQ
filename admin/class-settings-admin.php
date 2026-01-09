@@ -111,7 +111,8 @@ class FlowQ_Settings_Admin {
         );
 
         // Get current tab from URL parameter, default to 'general'
-        $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'general';
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Nonce not required for tab display, input is sanitized
+        $current_tab = isset($_GET['tab']) ? sanitize_text_field(wp_unslash($_GET['tab'])) : 'general';
 
         // Validate tab exists in allowed tabs
         if (!array_key_exists($current_tab, $tabs)) {
@@ -156,7 +157,7 @@ class FlowQ_Settings_Admin {
 
         // Get all templates
         // Note: No prepare() needed as query has no user input (table name is hardcoded, ORDER BY uses literal column/direction)
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table query with no user input
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Custom table query with no user input, table name is safe
         $templates = $wpdb->get_results("SELECT * FROM {$table_name} ORDER BY id ASC", ARRAY_A);
 
         // Get active template ID
@@ -181,7 +182,7 @@ class FlowQ_Settings_Admin {
         }
 
         // Get current tab
-        $tab = isset($_POST['current_tab']) ? sanitize_text_field($_POST['current_tab']) : 'templates';
+        $tab = isset($_POST['current_tab']) ? sanitize_text_field(wp_unslash($_POST['current_tab'])) : 'templates';
 
         // Handle different tab settings
         switch ($tab) {
@@ -209,8 +210,12 @@ class FlowQ_Settings_Admin {
 
     /**
      * Save general settings
+     *
+     * Note: Nonce verification is performed in handle_save_settings() before this method is called
      */
     private function save_general_settings() {
+        // phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce verified in handle_save_settings()
+
         // Setting 1: Two-Stage Form
         $two_stage_form = isset($_POST['two_stage_form']) ? 1 : 0;
         update_option('flowq_two_stage_form', $two_stage_form);
@@ -235,18 +240,20 @@ class FlowQ_Settings_Admin {
 
         // Setting 5: Privacy Policy Text
         // Sanitize HTML using wp_kses_post to allow safe HTML tags
-        $privacy_policy = isset($_POST['privacy_policy']) ? wp_kses_post($_POST['privacy_policy']) : '';
+        $privacy_policy = isset($_POST['privacy_policy']) ? wp_kses_post(wp_unslash($_POST['privacy_policy'])) : '';
         update_option('flowq_privacy_policy', $privacy_policy);
 
-        $privacy_policy_stage1 = isset($_POST['privacy_policy_stage1']) ? wp_kses_post($_POST['privacy_policy_stage1']) : '';
+        $privacy_policy_stage1 = isset($_POST['privacy_policy_stage1']) ? wp_kses_post(wp_unslash($_POST['privacy_policy_stage1'])) : '';
         update_option('flowq_privacy_policy_stage1', $privacy_policy_stage1);
 
-        $privacy_policy_stage2 = isset($_POST['privacy_policy_stage2']) ? wp_kses_post($_POST['privacy_policy_stage2']) : '';
+        $privacy_policy_stage2 = isset($_POST['privacy_policy_stage2']) ? wp_kses_post(wp_unslash($_POST['privacy_policy_stage2'])) : '';
         update_option('flowq_privacy_policy_stage2', $privacy_policy_stage2);
 
         // Setting 6: Optional Phone Number Stage
         $phone_optional = isset($_POST['phone_optional']) ? 1 : 0;
         update_option('flowq_phone_optional', $phone_optional);
+
+        // phpcs:enable WordPress.Security.NonceVerification.Missing
     }
 
     /**

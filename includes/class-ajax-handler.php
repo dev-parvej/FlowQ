@@ -110,7 +110,7 @@ class FlowQ_Ajax_Handler {
         $this->check_rate_limit('validate_session', 30, 60);
         check_ajax_referer('flowq_frontend_nonce', 'nonce');
 
-        $session_id = sanitize_text_field($_POST['session_id'] ?? '');
+        $session_id = isset($_POST['session_id']) ? sanitize_text_field(wp_unslash($_POST['session_id'])) : '';
 
         if (empty($session_id)) {
             wp_send_json_error(__('Session ID is required.', 'flowq'));
@@ -168,7 +168,7 @@ class FlowQ_Ajax_Handler {
         $this->check_rate_limit('heartbeat', 10, 60);
         check_ajax_referer('flowq_frontend_nonce', 'nonce');
 
-        $session_id = sanitize_text_field($_POST['session_id'] ?? '');
+        $session_id = isset($_POST['session_id']) ? sanitize_text_field(wp_unslash($_POST['session_id'])) : '';
 
         if (!empty($session_id)) {
             $participant_manager = new FlowQ_Participant_Manager();
@@ -235,7 +235,7 @@ class FlowQ_Ajax_Handler {
         check_ajax_referer('flowq_admin_nonce', 'nonce');
 
         $survey_ids = array_map('intval', $_POST['survey_ids'] ?? array());
-        $format = sanitize_text_field($_POST['format'] ?? 'csv');
+        $format = isset($_POST['format']) ? sanitize_text_field(wp_unslash($_POST['format'])) : 'csv';
 
         if (empty($survey_ids)) {
             wp_send_json_error(__('At least one survey must be selected.', 'flowq'));
@@ -287,10 +287,13 @@ class FlowQ_Ajax_Handler {
         // Verify template exists
         global $wpdb;
         $table_name = $wpdb->prefix . 'flowq_templates';
+
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $template = $wpdb->get_row($wpdb->prepare(
             "SELECT * FROM {$table_name} WHERE id = %d",
             $template_id
         ), ARRAY_A);
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
         if (!$template) {
             wp_send_json_error(__('Template not found.', 'flowq'));
@@ -298,6 +301,10 @@ class FlowQ_Ajax_Handler {
 
         // Update active template option
         update_option('flowq_active_template', $template_id);
+
+        // Invalidate template cache
+        $template_handler = new FlowQ_Template_Handler();
+        $template_handler->invalidate_cache();
 
         wp_send_json_success(array(
             'message' => __('Template activated successfully.', 'flowq'),
@@ -311,7 +318,7 @@ class FlowQ_Ajax_Handler {
      */
     public function check_permissions() {
         check_ajax_referer('flowq_frontend_nonce', 'nonce');
-        $action = sanitize_text_field($_POST['action_check'] ?? '');
+        $action = isset($_POST['action_check']) ? sanitize_text_field(wp_unslash($_POST['action_check'])) : '';
 
         $permissions = array(
             'manage_surveys' => current_user_can('manage_flowq_surveys'),
@@ -328,6 +335,7 @@ class FlowQ_Ajax_Handler {
      */
     public static function log_ajax_error($action, $error_message, $data = array()) {
         if (defined('WP_DEBUG') && WP_DEBUG) {
+            // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Intentional debug logging when WP_DEBUG is enabled
             error_log(sprintf(
                 '[WP Dynamic Survey AJAX] Action: %s, Error: %s, Data: %s',
                 $action,

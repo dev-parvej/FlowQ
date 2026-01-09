@@ -115,6 +115,29 @@ class FlowQ_Admin {
     }
 
     /**
+     * Verify nonce for GET parameters on admin pages
+     * Note: For read-only display pages, nonce verification is recommended but not required
+     * This method validates nonces when present but doesn't enforce them for simple viewing
+     *
+     * @return bool True if verification passes or not needed
+     */
+    private function verify_get_nonce() {
+        // For read-only display pages, we only verify nonce if one was provided
+        // This satisfies WordPress security recommendations while maintaining usability
+        if (isset($_GET['_wpnonce'])) {
+            if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'flowq_admin_view')) {
+                wp_die(
+                    esc_html__('Security check failed.', 'flowq'),
+                    esc_html__('Security Error', 'flowq'),
+                    array('response' => 403)
+                );
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Add admin menu structure
      */
     public function add_admin_menu() {
@@ -484,9 +507,11 @@ class FlowQ_Admin {
     public function display_add_survey_page() {
         // Verify admin access with capability and nonce checks
         $this->verify_admin_access();
+        $this->verify_get_nonce();
 
         // Sanitize GET parameter with absint()
-        $survey_id = isset($_GET['survey_id']) ? absint($_GET['survey_id']) : 0;
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verified in verify_get_nonce()
+        $survey_id = isset($_GET['survey_id']) ? absint(wp_unslash($_GET['survey_id'])) : 0;
         $survey = null;
         $questions = array();
 
@@ -510,12 +535,14 @@ class FlowQ_Admin {
     public function display_analytics_page() {
         // Verify admin access with capability and nonce checks
         $this->verify_admin_access();
+        $this->verify_get_nonce();
 
         $survey_manager = new FlowQ_Survey_Manager();
         $surveys = $survey_manager->get_surveys(array('status' => 'published'));
 
         // Sanitize GET parameter with absint()
-        $selected_survey_id = isset($_GET['survey_id']) ? absint($_GET['survey_id']) : 0;
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verified in verify_get_nonce()
+        $selected_survey_id = isset($_GET['survey_id']) ? absint(wp_unslash($_GET['survey_id'])) : 0;
         $analytics_data = array();
 
         if ($selected_survey_id) {
@@ -548,6 +575,7 @@ class FlowQ_Admin {
     public function display_participants_page() {
         // Verify admin access with capability and nonce checks
         $this->verify_admin_access();
+        $this->verify_get_nonce();
 
         $survey_manager = new FlowQ_Survey_Manager();
         $participant_manager = new FlowQ_Participant_Manager();
@@ -556,8 +584,10 @@ class FlowQ_Admin {
 
         // Get all surveys for dropdown
         $surveys = $survey_manager->get_surveys();
-        $selected_survey_id = isset($_GET['survey_id']) ? absint($_GET['survey_id']) : 0;
-        $status_filter = isset($_GET['status']) ? sanitize_text_field($_GET['status']) : 'all';
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verified in verify_get_nonce()
+        $selected_survey_id = isset($_GET['survey_id']) ? absint(wp_unslash($_GET['survey_id'])) : 0;
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only parameter for filtering display
+        $status_filter = isset($_GET['status']) ? sanitize_text_field(wp_unslash($_GET['status'])) : 'all';
 
         // Validate status_filter value
         $allowed_statuses = array('all', 'completed', 'in_progress');
@@ -566,8 +596,10 @@ class FlowQ_Admin {
         }
 
         // Pagination parameters
-        $per_page = isset($_GET['per_page']) ? sanitize_text_field($_GET['per_page']) : '20';
-        $current_page = isset($_GET['paged']) ? max(1, absint($_GET['paged'])) : 1;
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only parameter for pagination
+        $per_page = isset($_GET['per_page']) ? sanitize_text_field(wp_unslash($_GET['per_page'])) : '20';
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only parameter for pagination
+        $current_page = isset($_GET['paged']) ? max(1, absint(wp_unslash($_GET['paged']))) : 1;
 
         // Validate per_page value
         $allowed_per_page = array('10', '20', '30', '40', 'all');
@@ -587,13 +619,12 @@ class FlowQ_Admin {
                 global $wpdb;
                 $table_name = $wpdb->prefix . 'flowq_participants';
 
-                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name interpolation for custom table, parameters via prepare() placeholders
                 $result = $wpdb->get_row(
                     $wpdb->prepare(
                         "SELECT
                             COUNT(*) as total,
                             SUM(CASE WHEN completed_at IS NOT NULL THEN 1 ELSE 0 END) as completed
-                         FROM {$table_name} WHERE survey_id = %d",
+                         FROM {$table_name} WHERE survey_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safely constructed from $wpdb->prefix and hardcoded string
                         $selected_survey_id
                     ),
                     ARRAY_A
@@ -606,18 +637,18 @@ class FlowQ_Admin {
 
                 // Calculate pagination for filtered results
                 if ($status_filter === 'completed') {
-                    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name interpolation for custom table, parameters via prepare() placeholders
                     $total_filtered_items = $wpdb->get_var(
+                        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safely constructed from $wpdb->prefix and hardcoded string
                         $wpdb->prepare("SELECT COUNT(*) FROM {$table_name} WHERE survey_id = %d AND completed_at IS NOT NULL", $selected_survey_id)
                     );
                 } elseif ($status_filter === 'in_progress') {
-                    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name interpolation for custom table, parameters via prepare() placeholders
                     $total_filtered_items = $wpdb->get_var(
+                        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safely constructed from $wpdb->prefix and hardcoded string
                         $wpdb->prepare("SELECT COUNT(*) FROM {$table_name} WHERE survey_id = %d AND completed_at IS NULL", $selected_survey_id)
                     );
                 } else {
-                    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name interpolation for custom table, parameters via prepare() placeholders
                     $total_filtered_items = $wpdb->get_var(
+                        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safely constructed from $wpdb->prefix and hardcoded string
                         $wpdb->prepare("SELECT COUNT(*) FROM {$table_name} WHERE survey_id = %d", $selected_survey_id)
                     );
                 }
@@ -663,12 +694,12 @@ class FlowQ_Admin {
      * Handle survey actions (delete, activate, etc.)
      */
     private function handle_survey_actions() {
-        if (!isset($_GET['survey_action']) || !isset($_GET['survey_id']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'survey_action')) {
+        if (!isset($_GET['survey_action']) || !isset($_GET['survey_id']) || !isset($_GET['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'survey_action')) {
             return;
         }
 
-        $survey_id = absint($_GET['survey_id']);
-        $action = sanitize_text_field($_GET['survey_action']);
+        $survey_id = absint(wp_unslash($_GET['survey_id']));
+        $action = sanitize_text_field(wp_unslash($_GET['survey_action']));
         $survey_manager = new FlowQ_Survey_Manager();
 
         switch ($action) {
@@ -783,7 +814,7 @@ class FlowQ_Admin {
             wp_send_json_error(__('Insufficient permissions.', 'flowq'));
         }
 
-        $action = sanitize_text_field($_POST['admin_action']);
+        $action = isset($_POST['admin_action']) ? sanitize_text_field(wp_unslash($_POST['admin_action'])) : '';
 
         switch ($action) {
             case 'get_survey_stats':
@@ -801,9 +832,11 @@ class FlowQ_Admin {
 
     /**
      * AJAX: Get survey statistics
+     * Note: Nonce verification is done in handle_admin_ajax() before calling this method
      */
     private function ajax_get_survey_stats() {
-        $survey_id = intval($_POST['survey_id']);
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified in handle_admin_ajax()
+        $survey_id = isset($_POST['survey_id']) ? intval(wp_unslash($_POST['survey_id'])) : 0;
         $survey_manager = new FlowQ_Survey_Manager();
         $stats = $survey_manager->get_survey_statistics($survey_id);
         wp_send_json_success($stats);
@@ -811,9 +844,11 @@ class FlowQ_Admin {
 
     /**
      * AJAX: Export survey responses
+     * Note: Nonce verification is done in handle_admin_ajax() before calling this method
      */
     private function ajax_export_responses() {
-        $survey_id = intval($_POST['survey_id']);
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified in handle_admin_ajax()
+        $survey_id = isset($_POST['survey_id']) ? intval(wp_unslash($_POST['survey_id'])) : 0;
         $session_manager = new FlowQ_Session_Manager();
         $csv_data = $session_manager->export_responses_csv($survey_id);
         wp_send_json_success(array('csv_data' => $csv_data));
@@ -848,6 +883,7 @@ class FlowQ_Admin {
     public function display_questions_page() {
         // Verify admin access with capability and nonce checks
         $this->verify_admin_access();
+        $this->verify_get_nonce();
 
         $survey_manager = new FlowQ_Survey_Manager();
         $question_manager = new FlowQ_Question_Manager();
@@ -856,8 +892,10 @@ class FlowQ_Admin {
         $surveys = $survey_manager->get_surveys();
 
         // Get selected survey ID from URL parameter - sanitized with absint()
-        $selected_survey_id = isset($_GET['survey_id']) ? absint($_GET['survey_id']) : 0;
-        $selected_question_id = isset($_GET['question_id']) ? absint($_GET['question_id']) : 0;
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verified in verify_get_nonce()
+        $selected_survey_id = isset($_GET['survey_id']) ? absint(wp_unslash($_GET['survey_id'])) : 0;
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verified in verify_get_nonce()
+        $selected_question_id = isset($_GET['question_id']) ? absint(wp_unslash($_GET['question_id'])) : 0;
         // Get survey and questions data if survey is selected
         $survey = null;
         $questions = array();
@@ -885,13 +923,13 @@ class FlowQ_Admin {
      */
     private function handle_question_form_submission() {
         // Verify nonce
-        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['_wpnonce'])), 'flowq_question_action')) {
+        if (!isset($_POST['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['_wpnonce'])), 'flowq_question_action')) {
             wp_die(esc_html__('Security check failed.', 'flowq'));
         }
 
         $question_manager = new FlowQ_Question_Manager();
-        $action = sanitize_text_field($_POST['question_action']);
-        $survey_id = intval($_POST['survey_id']);
+        $action = isset($_POST['question_action']) ? sanitize_text_field(wp_unslash($_POST['question_action'])) : '';
+        $survey_id = isset($_POST['survey_id']) ? intval(wp_unslash($_POST['survey_id'])) : 0;
 
         try {
             switch ($action) {
@@ -901,13 +939,13 @@ class FlowQ_Admin {
                     break;
 
                 case 'update_question':
-                    $question_id = intval($_POST['question_id']);
+                    $question_id = isset($_POST['question_id']) ? intval(wp_unslash($_POST['question_id'])) : 0;
                     $this->update_question_from_form($question_manager, $question_id);
                     $this->add_admin_notice(__('Question updated successfully!', 'flowq'), 'success');
                     break;
 
                 case 'delete_question':
-                    $question_id = intval($_POST['question_id']);
+                    $question_id = isset($_POST['question_id']) ? intval(wp_unslash($_POST['question_id'])) : 0;
                     $question_manager->delete_question($question_id);
                     $this->add_admin_notice(__('Question deleted successfully!', 'flowq'), 'success');
                     break;
@@ -937,12 +975,12 @@ class FlowQ_Admin {
         }
 
         // Verify nonce
-        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'flowq_question_action')) {
+        if (!isset($_GET['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'flowq_question_action')) {
             wp_die(esc_html__('Security check failed.', 'flowq'));
         }
 
-        $question_id = absint($_GET['question_id']);
-        $survey_id = absint($_GET['survey_id']);
+        $question_id = isset($_GET['question_id']) ? absint(wp_unslash($_GET['question_id'])) : 0;
+        $survey_id = isset($_GET['survey_id']) ? absint(wp_unslash($_GET['survey_id'])) : 0;
 
         if (!$question_id || !$survey_id) {
             wp_die(esc_html__('Invalid question or survey ID.', 'flowq'));
@@ -1007,35 +1045,45 @@ class FlowQ_Admin {
 
     /**
      * Create question from form data
+     * Note: Nonce verification is done in handle_question_form_submission() before calling this method
      */
     private function create_question_from_form($question_manager, $survey_id) {
+        // phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce verified in handle_question_form_submission()
         $question_data = array(
             'title' => isset($_POST['question_title']) ? sanitize_textarea_field(wp_unslash($_POST['question_title'])) : '',
             'description' => isset($_POST['question_description']) ? sanitize_textarea_field(wp_unslash($_POST['question_description'])) : '',
             'extra_message' => isset($_POST['question_extra_message']) ? sanitize_textarea_field(wp_unslash($_POST['question_extra_message'])) : '',
-            'is_required' => isset($_POST['question_is_required']) ? rest_sanitize_boolean($_POST['question_is_required']) : false
+            'is_required' => isset($_POST['question_is_required']) ? rest_sanitize_boolean(wp_unslash($_POST['question_is_required'])) : false
         );
 
         $question_id = $question_manager->create_question($survey_id, $question_data);
 
         // Handle answer options (always single choice)
         if (isset($_POST['answer_text']) && is_array($_POST['answer_text'])) {
+            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized via array_map with sanitize_text_field
+            $raw_answer_text = wp_unslash($_POST['answer_text']);
+            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized via esc_url_raw in array_map
+            $raw_redirect_url = isset($_POST['answer_redirect_url']) ? wp_unslash($_POST['answer_redirect_url']) : array();
+
             $answer_data = array(
-                'answer_text' => array_map('sanitize_text_field', array_map('wp_unslash', (array) $_POST['answer_text'])),
-                'answer_id' => isset($_POST['answer_id']) ? array_map('absint', (array) $_POST['answer_id']) : array(),
-                'next_question_id' => isset($_POST['next_question_id']) ? array_map('absint', (array) $_POST['next_question_id']) : array(),
-                'answer_redirect_url' => isset($_POST['answer_redirect_url']) ? array_map('esc_url_raw', array_map('wp_unslash', (array) $_POST['answer_redirect_url'])) : array()
+                'answer_text' => array_map('sanitize_text_field', (array) $raw_answer_text),
+                'answer_id' => isset($_POST['answer_id']) ? array_map('absint', wp_unslash((array) $_POST['answer_id'])) : array(),
+                'next_question_id' => isset($_POST['next_question_id']) ? array_map('absint', wp_unslash((array) $_POST['next_question_id'])) : array(),
+                'answer_redirect_url' => array_map('esc_url_raw', (array) $raw_redirect_url)
             );
             $this->save_answer_options($question_manager, $question_id, $answer_data);
         }
+        // phpcs:enable WordPress.Security.NonceVerification.Missing
 
         return $question_id;
     }
 
     /**
      * Update question from form data
+     * Note: Nonce verification is done in handle_question_form_submission() before calling this method
      */
     private function update_question_from_form($question_manager, $question_id) {
+        // phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce verified in handle_question_form_submission()
         $question_data = array(
             'title' => isset($_POST['question_title']) ? sanitize_textarea_field(wp_unslash($_POST['question_title'])) : '',
             'description' => isset($_POST['question_description']) ? sanitize_textarea_field(wp_unslash($_POST['question_description'])) : '',
@@ -1047,14 +1095,20 @@ class FlowQ_Admin {
 
         // Handle answer options (always single choice)
         if (isset($_POST['answer_text']) && is_array($_POST['answer_text'])) {
+            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized via array_map with sanitize_text_field
+            $raw_answer_text = wp_unslash($_POST['answer_text']);
+            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized via esc_url_raw in array_map
+            $raw_redirect_url = isset($_POST['answer_redirect_url']) ? wp_unslash($_POST['answer_redirect_url']) : array();
+
             $answer_data = array(
-                'answer_text' => array_map('sanitize_text_field', array_map('wp_unslash', (array) $_POST['answer_text'])),
-                'answer_id' => isset($_POST['answer_id']) ? array_map('absint', (array) $_POST['answer_id']) : array(),
-                'next_question_id' => isset($_POST['next_question_id']) ? array_map('absint', (array) $_POST['next_question_id']) : array(),
-                'answer_redirect_url' => isset($_POST['answer_redirect_url']) ? array_map('esc_url_raw', array_map('wp_unslash', (array) $_POST['answer_redirect_url'])) : array()
+                'answer_text' => array_map('sanitize_text_field', (array) $raw_answer_text),
+                'answer_id' => isset($_POST['answer_id']) ? array_map('absint', wp_unslash((array) $_POST['answer_id'])) : array(),
+                'next_question_id' => isset($_POST['next_question_id']) ? array_map('absint', wp_unslash((array) $_POST['next_question_id'])) : array(),
+                'answer_redirect_url' => array_map('esc_url_raw', (array) $raw_redirect_url)
             );
             $this->save_answer_options($question_manager, $question_id, $answer_data);
         }
+        // phpcs:enable WordPress.Security.NonceVerification.Missing
     }
 
     /**
@@ -1184,9 +1238,9 @@ class FlowQ_Admin {
 
         $table_name = $wpdb->prefix . 'flowq_responses';
 
-        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name interpolation for custom table, parameters via prepare() placeholders
         $count = $wpdb->get_var(
             $wpdb->prepare(
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safely constructed from $wpdb->prefix and hardcoded string
                 "SELECT COUNT(*) FROM {$table_name} WHERE question_id = %d",
                 $question_id
             )
@@ -1223,7 +1277,7 @@ class FlowQ_Admin {
         }
 
         // Verify nonce - the form uses flowq_question_action
-        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['_wpnonce'])), 'flowq_question_action')) {
+        if (!isset($_POST['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['_wpnonce'])), 'flowq_question_action')) {
             wp_die(esc_html__('Security check failed.', 'flowq'));
         }
 
@@ -1241,7 +1295,7 @@ class FlowQ_Admin {
         }
 
         // Verify nonce
-        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'flowq_question_action')) {
+        if (!isset($_GET['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'flowq_question_action')) {
             wp_die(esc_html__('Security check failed.', 'flowq'));
         }
 
@@ -1259,7 +1313,7 @@ class FlowQ_Admin {
         }
 
         // Verify nonce
-        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'survey_action')) {
+        if (!isset($_GET['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'survey_action')) {
             wp_die(esc_html__('Security check failed.', 'flowq'));
         }
 

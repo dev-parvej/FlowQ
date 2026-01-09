@@ -135,6 +135,7 @@ class FlowQ_Participant_Manager {
         global $wpdb;
         $table_name = $this->table_prefix . 'participants';
 
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $participant = $wpdb->get_row(
             $wpdb->prepare(
                 "SELECT * FROM {$table_name} WHERE session_id = %s",
@@ -142,6 +143,7 @@ class FlowQ_Participant_Manager {
             ),
             ARRAY_A
         );
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
         if (!$participant) {
             return null;
@@ -245,12 +247,14 @@ class FlowQ_Participant_Manager {
 
             // Check if session ID already exists
             $table_name = $this->table_prefix . 'participants';
+            // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
             $exists = $wpdb->get_var(
                 $wpdb->prepare(
                     "SELECT COUNT(*) FROM {$table_name} WHERE session_id = %s",
                     $session_id
                 )
             );
+            // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
         } while ($exists > 0 && $attempts < $max_attempts);
 
@@ -418,6 +422,7 @@ class FlowQ_Participant_Manager {
         global $wpdb;
         $table_name = $this->table_prefix . 'participants';
 
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $participant = $wpdb->get_row(
             $wpdb->prepare(
                 "SELECT * FROM {$table_name} WHERE id = %d",
@@ -425,6 +430,7 @@ class FlowQ_Participant_Manager {
             ),
             ARRAY_A
         );
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
         if ($participant) {
             $participant['question_chain'] = json_decode($participant['question_chain'], true) ?? array();
@@ -492,7 +498,7 @@ class FlowQ_Participant_Manager {
         $prepare_values[] = absint($args['offset']);
 
         // Execute query - ORDER BY uses whitelisted+escaped values, other params use prepare()
-        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- ORDER BY column/direction are whitelisted and escaped
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
         $participants = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT * FROM {$table_name} {$where_sql} ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d",
@@ -500,6 +506,7 @@ class FlowQ_Participant_Manager {
             ),
             ARRAY_A
         );
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 
         // Parse question chains
         foreach ($participants as &$participant) {
@@ -572,6 +579,7 @@ class FlowQ_Participant_Manager {
 
         $table_name = $this->table_prefix . 'participants';
 
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $participant = $wpdb->get_row(
             $wpdb->prepare(
                 "SELECT * FROM {$table_name} WHERE completion_token = %s AND token_expires_at > NOW()",
@@ -579,6 +587,7 @@ class FlowQ_Participant_Manager {
             ),
             ARRAY_A
         );
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
         if (!$participant) {
             return new WP_Error('invalid_token', __('Invalid or expired token.', 'flowq'));
@@ -601,6 +610,7 @@ class FlowQ_Participant_Manager {
         global $wpdb;
         $table_name = $this->table_prefix . 'participants';
 
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $count = $wpdb->get_var(
             $wpdb->prepare(
                 "SELECT COUNT(*) FROM {$table_name} WHERE survey_id = %d AND participant_email = %s",
@@ -608,6 +618,7 @@ class FlowQ_Participant_Manager {
                 $email
             )
         );
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
         return $count > 0;
     }

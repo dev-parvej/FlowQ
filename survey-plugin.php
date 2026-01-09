@@ -356,27 +356,43 @@ function flowq_plugin() {
             return;
         }
 
-        // Static variable for memoization - persists across function calls
+        // Static variable for per-request memoization
         static $exclude_ids = null;
 
         if ($exclude_ids === null) {
-            // Get thank you page IDs from database (only once per request)
-            global $wpdb;
-            $thank_you_slugs = $wpdb->get_col("SELECT DISTINCT thank_you_page_slug FROM {$wpdb->prefix}flowq_surveys WHERE thank_you_page_slug IS NOT NULL AND thank_you_page_slug != ''");
+            // Try to get from object cache first
+            $cache_key = 'flowq_thank_you_page_ids';
+            $cache_group = 'flowq';
+            $exclude_ids = wp_cache_get($cache_key, $cache_group);
 
-            if (empty($thank_you_slugs)) {
-                $exclude_ids = array(); // Cache empty result
-            } else {
-                // Get page IDs for these slugs
-                $placeholders = implode(',', array_fill(0, count($thank_you_slugs), '%s'));
-                $exclude_ids = $wpdb->get_col($wpdb->prepare(
-                    "SELECT ID FROM {$wpdb->posts} WHERE post_name IN ($placeholders) AND post_type = 'page'",
-                    ...$thank_you_slugs
-                ));
+            if ($exclude_ids === false) {
+                // Cache miss - query database
+                global $wpdb;
 
-                if (empty($exclude_ids)) {
-                    $exclude_ids = array(); // Cache empty result
+                // Get thank you page slugs
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Custom table requires direct query
+                $thank_you_slugs = $wpdb->get_col(
+                    "SELECT DISTINCT thank_you_page_slug FROM {$wpdb->prefix}flowq_surveys WHERE thank_you_page_slug IS NOT NULL AND thank_you_page_slug != ''"
+                );
+
+                if (empty($thank_you_slugs)) {
+                    $exclude_ids = array();
+                } else {
+                    // Get page IDs for these slugs
+                    $placeholders = implode(',', array_fill(0, count($thank_you_slugs), '%s'));
+                    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Need to query wp_posts for page IDs
+                    $exclude_ids = $wpdb->get_col($wpdb->prepare(
+                        "SELECT ID FROM {$wpdb->posts} WHERE post_name IN ($placeholders) AND post_type = 'page'",
+                        ...$thank_you_slugs
+                    ));
+
+                    if (empty($exclude_ids)) {
+                        $exclude_ids = array();
+                    }
                 }
+
+                // Store in cache for 12 hours (cache is invalidated when surveys are updated)
+                wp_cache_set($cache_key, $exclude_ids, $cache_group, 12 * HOUR_IN_SECONDS);
             }
         }
 
@@ -395,7 +411,21 @@ function flowq_plugin() {
 
     });
 
+    // Invalidate cache when surveys are modified
+    add_action('flowq_survey_created', 'flowq_invalidate_thank_you_cache');
+    add_action('flowq_survey_updated', 'flowq_invalidate_thank_you_cache');
+    add_action('flowq_survey_deleted', 'flowq_invalidate_thank_you_cache');
+
     return FlowQ_Plugin::get_instance();
+}
+
+/**
+ * Invalidate thank you page cache when surveys are modified
+ *
+ * @return void
+ */
+function flowq_invalidate_thank_you_cache() {
+    wp_cache_delete('flowq_thank_you_page_ids', 'flowq');
 }
 
 // Register uninstall hook

@@ -52,6 +52,51 @@ class FlowQ_Builder_Admin {
     }
 
     /**
+     * Safely get and sanitize POST parameter
+     *
+     * Note: Nonce verification is performed in the calling AJAX handler methods
+     * before this helper method is called.
+     *
+     * @param string $key The POST parameter key
+     * @param string $sanitize_callback The sanitization function to use (default: sanitize_text_field)
+     * @return mixed The sanitized value or empty string if not set
+     */
+    private function get_post_value($key, $sanitize_callback = 'sanitize_text_field') {
+        // phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verified in calling method, sanitization happens after unslashing
+        if (!isset($_POST[$key])) {
+            return '';
+        }
+
+        $value = wp_unslash($_POST[$key]);
+        // phpcs:enable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+        if (is_callable($sanitize_callback)) {
+            return call_user_func($sanitize_callback, $value);
+        }
+
+        return sanitize_text_field($value);
+    }
+
+    /**
+     * Safely get and sanitize POST integer parameter
+     *
+     * Note: Nonce verification is performed in the calling AJAX handler methods
+     * before this helper method is called.
+     *
+     * @param string $key The POST parameter key
+     * @return int The integer value or 0 if not set
+     */
+    private function get_post_int($key) {
+        // phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce verified in calling method
+        if (!isset($_POST[$key])) {
+            return 0;
+        }
+
+        return intval($_POST[$key]);
+        // phpcs:enable WordPress.Security.NonceVerification.Missing
+    }
+
+    /**
      * Render survey builder interface
      *
      * @param int $survey_id Survey ID
@@ -131,12 +176,12 @@ class FlowQ_Builder_Admin {
             wp_send_json_error('Permission denied');
         }
 
-        $question_id = intval($_POST['question_id']);
-        $survey_id = intval($_POST['survey_id']);
+        $question_id = $this->get_post_int('question_id');
+        $survey_id = $this->get_post_int('survey_id');
 
         $question_data = array(
-            'title' => sanitize_textarea_field($_POST['question_title']),
-            'description' => sanitize_textarea_field($_POST['question_description']),
+            'title' => $this->get_post_value('question_title', 'sanitize_textarea_field'),
+            'description' => $this->get_post_value('question_description', 'sanitize_textarea_field'),
             // Note: question_order and next_question_id removed from questions table
             // redirect_url is only for answers, not questions
         );
@@ -175,7 +220,7 @@ class FlowQ_Builder_Admin {
             wp_send_json_error('Permission denied');
         }
 
-        $question_id = intval($_POST['question_id']);
+        $question_id = $this->get_post_int('question_id');
         $result = $this->question_manager->delete_question($question_id);
 
         if (is_wp_error($result)) {
@@ -197,15 +242,15 @@ class FlowQ_Builder_Admin {
             wp_send_json_error('Permission denied');
         }
 
-        $answer_id = intval($_POST['answer_id']);
-        $question_id = intval($_POST['question_id']);
+        $answer_id = $this->get_post_int('answer_id');
+        $question_id = $this->get_post_int('question_id');
 
         $answer_data = array(
-            'answer_text' => sanitize_textarea_field($_POST['answer_text']),
-            'answer_value' => sanitize_text_field($_POST['answer_value']),
-            'answer_order' => intval($_POST['answer_order']),
-            'next_question_id' => !empty($_POST['next_question_id']) ? intval($_POST['next_question_id']) : null,
-            'redirect_url' => !empty($_POST['redirect_url']) ? esc_url_raw($_POST['redirect_url']) : null
+            'answer_text' => $this->get_post_value('answer_text', 'sanitize_textarea_field'),
+            'answer_value' => $this->get_post_value('answer_value'),
+            'answer_order' => $this->get_post_int('answer_order'),
+            'next_question_id' => $this->get_post_int('next_question_id') ?: null,
+            'redirect_url' => $this->get_post_value('redirect_url', 'esc_url_raw') ?: null
         );
 
         if ($answer_id) {
@@ -243,7 +288,7 @@ class FlowQ_Builder_Admin {
             wp_send_json_error('Permission denied');
         }
 
-        $answer_id = intval($_POST['answer_id']);
+        $answer_id = $this->get_post_int('answer_id');
         $result = $this->question_manager->delete_answer($answer_id);
 
         if (is_wp_error($result)) {
@@ -324,7 +369,7 @@ class FlowQ_Builder_Admin {
             wp_send_json_error('Permission denied');
         }
 
-        $survey_id = intval($_POST['survey_id']);
+        $survey_id = $this->get_post_int('survey_id');
         $survey = $this->survey_manager->get_survey($survey_id);
         $questions = $this->question_manager->get_survey_questions($survey_id, true);
 

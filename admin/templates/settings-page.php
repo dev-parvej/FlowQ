@@ -24,7 +24,11 @@ if (!defined('ABSPATH')) {
             </div>
         </div>
 
-        <?php if (isset($_GET['settings-updated']) && sanitize_text_field($_GET['settings-updated']) === 'true'): ?>
+        <?php
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce not required for displaying success message
+        $settings_updated = isset($_GET['settings-updated']) ? sanitize_text_field(wp_unslash($_GET['settings-updated'])) : '';
+        if ($settings_updated === 'true'):
+        ?>
             <div class="notice notice-success is-dismissible">
                 <p><?php echo esc_html__('Settings saved successfully.', 'flowq'); ?></p>
             </div>
