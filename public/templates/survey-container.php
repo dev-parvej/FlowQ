@@ -28,13 +28,16 @@ $template_styles = $template_handler->get_template_styles();
         <div class="question-container">
             <!-- Question Content -->
             <div class="question-content">
-                <h2 class="question-title">{{questionTitle}}</h2>
+                <!-- Question Header -->
+                <div class="question-header">
+                    <h2 class="question-title">{{questionTitle}}</h2>
 
-                {{#if questionDescription}}
-                <div class="question-description">
-                    <p>{{questionDescription}}</p>
+                    {{#if questionDescription}}
+                    <div class="question-description">
+                        <p>{{questionDescription}}</p>
+                    </div>
+                    {{/if}}
                 </div>
-                {{/if}}
 
                 <!-- Question Type: Single Choice -->
                 {{#if isSingleChoice}}
@@ -54,8 +57,9 @@ $template_styles = $template_handler->get_template_styles();
                     {{/each}}
                 </div>
                 {{/if}}
+
                 {{#if extraMessage}}
-                    <div class="question-extra-message">{{extraMessage}}</div>
+                <div class="question-extra-message">{{extraMessage}}</div>
                 {{/if}}
 
                 <!-- Skip Button for Optional Questions -->

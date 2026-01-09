@@ -237,6 +237,7 @@ class FlowQ_DB_Migrator {
         $table_name = $this->table_prefix . 'templates';
 
         // Check if templates already exist
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe, built from $wpdb->prefix
         $count = $this->wpdb->get_var("SELECT COUNT(*) FROM {$table_name}");
         if ($count > 0) {
             return; // Templates already seeded
@@ -340,7 +341,9 @@ class FlowQ_DB_Migrator {
 
         // Log any errors
         if ($this->wpdb->last_error) {
+            // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Intentional error logging for database migration debugging
             error_log('WP Dynamic Survey DB Error: ' . $this->wpdb->last_error);
+            // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Intentional error logging for database migration debugging
             error_log('SQL: ' . $sql);
         }
 
@@ -354,6 +357,7 @@ class FlowQ_DB_Migrator {
         $tables = $this->get_table_names();
 
         foreach ($tables as $table) {
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe, built from $wpdb->prefix
             if ($this->wpdb->get_var("SHOW TABLES LIKE '{$table}'") !== $table) {
                 return false;
             }
@@ -383,6 +387,7 @@ class FlowQ_DB_Migrator {
         $tables = $this->get_table_names();
 
         foreach ($tables as $table) {
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe, built from $wpdb->prefix
             $this->wpdb->query("DROP TABLE IF EXISTS {$table}");
         }
 
@@ -428,6 +433,7 @@ class FlowQ_DB_Migrator {
         $tables = $this->get_table_names();
 
         foreach ($tables as $table) {
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe, built from $wpdb->prefix
             $count = $this->wpdb->get_var("SELECT COUNT(*) FROM {$table}");
             $table_name = str_replace($this->table_prefix, '', $table);
             $stats[$table_name] = intval($count);
@@ -443,6 +449,7 @@ class FlowQ_DB_Migrator {
         $tables = $this->get_table_names();
 
         foreach ($tables as $table) {
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe, built from $wpdb->prefix
             $this->wpdb->query("OPTIMIZE TABLE {$table}");
         }
     }

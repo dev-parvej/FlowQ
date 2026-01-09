@@ -18,7 +18,11 @@ if (!defined('ABSPATH')) {
         <div class="participants-header">
             <div class="header-top-row">
                 <form method="get" action="" class="survey-selector">
-                    <input type="hidden" name="page" value="<?php echo esc_attr(sanitize_key($_GET['page'])); ?>">
+                    <?php
+                    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce not required for page parameter in GET form
+                    $page_param = isset($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : '';
+                    ?>
+                    <input type="hidden" name="page" value="<?php echo esc_attr($page_param); ?>">
 
                     <div class="filter-group">
                         <svg class="filter-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -234,8 +238,10 @@ if (!defined('ABSPATH')) {
 
                     <div class="pagination-nav">
                         <?php
+                        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce not required for page parameter in GET URL
+                        $page_param = isset($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : '';
                         $base_url = add_query_arg(array(
-                            'page' => sanitize_key($_GET['page']),
+                            'page' => $page_param,
                             'survey_id' => $selected_survey_id,
                             'status' => $status_filter,
                             'per_page' => $pagination['per_page']

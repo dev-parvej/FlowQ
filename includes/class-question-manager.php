@@ -91,10 +91,12 @@ class FlowQ_Question_Manager {
 
         $table_name = $this->table_prefix . 'questions';
 
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $question = $wpdb->get_row(
             $wpdb->prepare("SELECT * FROM {$table_name} WHERE id = %d", $question_id),
             ARRAY_A
         );
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
         if (!$question) {
             return null;
@@ -219,6 +221,7 @@ class FlowQ_Question_Manager {
 
         $questions_table = $this->table_prefix . 'questions';
 
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $questions = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT * FROM {$questions_table}
@@ -226,6 +229,7 @@ class FlowQ_Question_Manager {
                 ORDER BY id ASC",
                 $survey_id
             ),
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
             ARRAY_A
         );
 
@@ -303,6 +307,7 @@ class FlowQ_Question_Manager {
 
         $table_name = $this->table_prefix . 'answers';
 
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         return $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT * FROM {$table_name}
@@ -312,6 +317,7 @@ class FlowQ_Question_Manager {
             ),
             ARRAY_A
         );
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
     }
 
     /**
@@ -331,6 +337,7 @@ class FlowQ_Question_Manager {
         $questions_table = $this->table_prefix . 'questions';
         $placeholders = implode(',', array_fill(0, count($question_ids), '%d'));
 
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
         $questions = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT * FROM {$questions_table}
@@ -339,6 +346,7 @@ class FlowQ_Question_Manager {
             ),
             ARRAY_A
         );
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
         // Index questions by ID
         $indexed_questions = array();
@@ -350,6 +358,7 @@ class FlowQ_Question_Manager {
         if ($include_answers && !empty($questions)) {
             $answers_table = $this->table_prefix . 'answers';
 
+            // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
             $all_answers = $wpdb->get_results(
                 $wpdb->prepare(
                     "SELECT * FROM {$answers_table}
@@ -359,6 +368,7 @@ class FlowQ_Question_Manager {
                 ),
                 ARRAY_A
             );
+            // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
             // Group answers by question_id
             foreach ($all_answers as $answer) {
@@ -512,10 +522,12 @@ class FlowQ_Question_Manager {
 
         $table_name = $this->table_prefix . 'answers';
 
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         return $wpdb->get_row(
             $wpdb->prepare("SELECT * FROM {$table_name} WHERE id = %d", $answer_id),
             ARRAY_A
         );
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
     }
 
 
@@ -530,12 +542,14 @@ class FlowQ_Question_Manager {
 
         $table_name = $this->table_prefix . 'answers';
 
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $max_order = $wpdb->get_var(
             $wpdb->prepare(
                 "SELECT MAX(answer_order) FROM {$table_name} WHERE question_id = %d",
                 $question_id
             )
         );
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
         return intval($max_order) + 1;
     }
@@ -604,6 +618,7 @@ class FlowQ_Question_Manager {
         $questions_table = $this->table_prefix . 'questions';
         $responses_table = $this->table_prefix . 'responses';
 
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $questions = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT q.*, COALESCE(COUNT(r.id), 0) as response_count
@@ -616,6 +631,7 @@ class FlowQ_Question_Manager {
             ),
             ARRAY_A
         );
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
         if ($include_answers && !empty($questions)) {
             $questions = $this->load_answers_for_questions($questions);
@@ -644,6 +660,7 @@ class FlowQ_Question_Manager {
         $answers_table = $this->table_prefix . 'answers';
         $placeholders = implode(',', array_fill(0, count($question_ids), '%d'));
 
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
         $all_answers = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT * FROM {$answers_table}
@@ -653,6 +670,7 @@ class FlowQ_Question_Manager {
             ),
             ARRAY_A
         );
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
         // Group answers by question_id
         $answers_by_question = array();

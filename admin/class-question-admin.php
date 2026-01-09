@@ -38,6 +38,79 @@ class FlowQ_Question_Admin {
     }
 
     /**
+     * Safely get and sanitize POST parameter
+     *
+     * Note: Nonce verification is performed in the calling AJAX handler methods
+     * before this helper method is called.
+     *
+     * @param string $key The POST parameter key
+     * @param string $sanitize_callback The sanitization function to use (default: sanitize_text_field)
+     * @return mixed The sanitized value or empty string if not set
+     */
+    private function get_post_value($key, $sanitize_callback = 'sanitize_text_field') {
+        // phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verified in calling method, sanitization happens after unslashing
+        if (!isset($_POST[$key])) {
+            return '';
+        }
+
+        $value = wp_unslash($_POST[$key]);
+        // phpcs:enable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+        if (is_callable($sanitize_callback)) {
+            return call_user_func($sanitize_callback, $value);
+        }
+
+        return sanitize_text_field($value);
+    }
+
+    /**
+     * Safely get and sanitize POST integer parameter
+     *
+     * Note: Nonce verification is performed in the calling AJAX handler methods
+     * before this helper method is called.
+     *
+     * @param string $key The POST parameter key
+     * @return int The integer value or 0 if not set
+     */
+    private function get_post_int($key) {
+        // phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce verified in calling method
+        if (!isset($_POST[$key])) {
+            return 0;
+        }
+
+        return intval($_POST[$key]);
+        // phpcs:enable WordPress.Security.NonceVerification.Missing
+    }
+
+    /**
+     * Safely get and sanitize POST array parameter
+     *
+     * Note: Nonce verification is performed in the calling AJAX handler methods
+     * before this helper method is called.
+     *
+     * @param string $key The POST parameter key
+     * @param string $sanitize_callback The sanitization function to use
+     * @return array The sanitized array or empty array if not set
+     */
+    private function get_post_array($key, $sanitize_callback = 'sanitize_text_field') {
+        // phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verified in calling method, array is unslashed and sanitized in subsequent array_map calls
+        if (!isset($_POST[$key]) || !is_array($_POST[$key])) {
+            return array();
+        }
+
+        $values = array_map('wp_unslash', $_POST[$key]);
+        // phpcs:enable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+        if ($sanitize_callback === 'absint') {
+            return array_map('absint', $values);
+        } elseif ($sanitize_callback === 'esc_url_raw') {
+            return array_map('esc_url_raw', $values);
+        } else {
+            return array_map('sanitize_text_field', $values);
+        }
+    }
+
+    /**
      * AJAX: Get question data
      */
     public function ajax_get_question() {
@@ -47,7 +120,7 @@ class FlowQ_Question_Admin {
             wp_send_json_error(__('Insufficient permissions.', 'flowq'));
         }
 
-        $question_id = intval($_POST['question_id']);
+        $question_id = $this->get_post_int('question_id');
         if (!$question_id) {
             wp_send_json_error(__('Invalid question ID.', 'flowq'));
         }
@@ -76,18 +149,18 @@ class FlowQ_Question_Admin {
             wp_send_json_error(__('Insufficient permissions.', 'flowq'));
         }
 
-        $survey_id = intval($_POST['survey_id']);
+        $survey_id = $this->get_post_int('survey_id');
         if (!$survey_id) {
             wp_send_json_error(__('Invalid survey ID.', 'flowq'));
         }
 
         // Prepare question data
         $question_data = array(
-            'title' => sanitize_textarea_field($_POST['question_title']),
-            'description' => sanitize_textarea_field($_POST['question_description']),
-            'extra_message' => sanitize_textarea_field($_POST['question_extra_message'] ?? ''),
-            'is_required' => isset($_POST['question_is_required']) ? intval($_POST['question_is_required']) : 1,
-            'skip_next_question_id' => !empty($_POST['question_skip_next_question_id']) ? intval($_POST['question_skip_next_question_id']) : null
+            'title' => $this->get_post_value('question_title', 'sanitize_textarea_field'),
+            'description' => $this->get_post_value('question_description', 'sanitize_textarea_field'),
+            'extra_message' => $this->get_post_value('question_extra_message', 'sanitize_textarea_field'),
+            'is_required' => $this->get_post_int('question_is_required') ?: 1,
+            'skip_next_question_id' => $this->get_post_int('question_skip_next_question_id') ?: null
         );
 
         $question_manager = new FlowQ_Question_Manager();
@@ -99,10 +172,10 @@ class FlowQ_Question_Admin {
 
         // Create answer options if provided - sanitize arrays from POST
         $answer_data = array(
-            'answer_text' => isset($_POST['answer_text']) ? array_map('sanitize_text_field', array_map('wp_unslash', (array) $_POST['answer_text'])) : array(),
-            'answer_id' => isset($_POST['answer_id']) ? array_map('absint', (array) $_POST['answer_id']) : array(),
-            'next_question_id' => isset($_POST['next_question_id']) ? array_map('absint', (array) $_POST['next_question_id']) : array(),
-            'answer_redirect_url' => isset($_POST['answer_redirect_url']) ? array_map('esc_url_raw', array_map('wp_unslash', (array) $_POST['answer_redirect_url'])) : array()
+            'answer_text' => $this->get_post_array('answer_text', 'sanitize_text_field'),
+            'answer_id' => $this->get_post_array('answer_id', 'absint'),
+            'next_question_id' => $this->get_post_array('next_question_id', 'absint'),
+            'answer_redirect_url' => $this->get_post_array('answer_redirect_url', 'esc_url_raw')
         );
         $this->save_answer_options($question_id, $answer_data);
 
@@ -122,18 +195,18 @@ class FlowQ_Question_Admin {
             wp_send_json_error(__('Insufficient permissions.', 'flowq'));
         }
 
-        $question_id = intval($_POST['question_id']);
+        $question_id = $this->get_post_int('question_id');
         if (!$question_id) {
             wp_send_json_error(__('Invalid question ID.', 'flowq'));
         }
 
         // Prepare question data
         $question_data = array(
-            'title' => sanitize_textarea_field($_POST['question_title']),
-            'description' => sanitize_textarea_field($_POST['question_description']),
-            'extra_message' => sanitize_textarea_field($_POST['question_extra_message'] ?? ''),
-            'is_required' => isset($_POST['question_is_required']) ? intval($_POST['question_is_required']) : 1,
-            'skip_next_question_id' => !empty($_POST['question_skip_next_question_id']) ? intval($_POST['question_skip_next_question_id']) : null
+            'title' => $this->get_post_value('question_title', 'sanitize_textarea_field'),
+            'description' => $this->get_post_value('question_description', 'sanitize_textarea_field'),
+            'extra_message' => $this->get_post_value('question_extra_message', 'sanitize_textarea_field'),
+            'is_required' => $this->get_post_int('question_is_required') ?: 1,
+            'skip_next_question_id' => $this->get_post_int('question_skip_next_question_id') ?: null
         );
 
         $question_manager = new FlowQ_Question_Manager();
@@ -145,10 +218,10 @@ class FlowQ_Question_Admin {
 
         // Update answer options - sanitize arrays from POST
         $answer_data = array(
-            'answer_text' => isset($_POST['answer_text']) ? array_map('sanitize_text_field', array_map('wp_unslash', (array) $_POST['answer_text'])) : array(),
-            'answer_id' => isset($_POST['answer_id']) ? array_map('absint', (array) $_POST['answer_id']) : array(),
-            'next_question_id' => isset($_POST['next_question_id']) ? array_map('absint', (array) $_POST['next_question_id']) : array(),
-            'answer_redirect_url' => isset($_POST['answer_redirect_url']) ? array_map('esc_url_raw', array_map('wp_unslash', (array) $_POST['answer_redirect_url'])) : array()
+            'answer_text' => $this->get_post_array('answer_text', 'sanitize_text_field'),
+            'answer_id' => $this->get_post_array('answer_id', 'absint'),
+            'next_question_id' => $this->get_post_array('next_question_id', 'absint'),
+            'answer_redirect_url' => $this->get_post_array('answer_redirect_url', 'esc_url_raw')
         );
         $this->save_answer_options($question_id, $answer_data);
 
@@ -167,7 +240,7 @@ class FlowQ_Question_Admin {
             wp_send_json_error(__('Insufficient permissions.', 'flowq'));
         }
 
-        $question_id = intval($_POST['question_id']);
+        $question_id = $this->get_post_int('question_id');
         if (!$question_id) {
             wp_send_json_error(__('Invalid question ID.', 'flowq'));
         }
@@ -197,7 +270,7 @@ class FlowQ_Question_Admin {
             wp_send_json_error(__('Insufficient permissions.', 'flowq'));
         }
 
-        $question_id = intval($_POST['question_id']);
+        $question_id = $this->get_post_int('question_id');
         if (!$question_id) {
             wp_send_json_error(__('Invalid question ID.', 'flowq'));
         }
@@ -253,10 +326,10 @@ class FlowQ_Question_Admin {
             wp_send_json_error(__('Insufficient permissions.', 'flowq'));
         }
 
-        $survey_id = intval($_POST['survey_id']);
+        $survey_id = $this->get_post_int('survey_id');
 
         // Sanitize and decode JSON data
-        $question_orders_json = isset($_POST['question_orders']) ? sanitize_text_field(wp_unslash($_POST['question_orders'])) : '';
+        $question_orders_json = $this->get_post_value('question_orders');
         $question_orders = json_decode($question_orders_json, true);
 
         if (!$survey_id || !is_array($question_orders)) {
@@ -339,33 +412,42 @@ class FlowQ_Question_Admin {
     private function check_question_dependencies($question_id) {
         global $wpdb;
 
-        $table_prefix = $wpdb->prefix . 'flowq_';
+        // Build table names - these are safe as they use $wpdb->prefix
+        $answers_table = $wpdb->prefix . 'flowq_answers';
+        $questions_table = $wpdb->prefix . 'flowq_questions';
+        $responses_table = $wpdb->prefix . 'flowq_responses';
 
         // Check if any answers point to this question as next question
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe, built from $wpdb->prefix
         $dependent_answers = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM {$table_prefix}answers WHERE next_question_id = %d",
+            "SELECT COUNT(*) FROM $answers_table WHERE next_question_id = %d",
             $question_id
         ));
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
         if ($dependent_answers > 0) {
             wp_send_json_error(__('Cannot delete this question because other questions reference it in their flow logic. Please update the question flow first.', 'flowq'));
         }
 
         // Check if any questions point to this question as skip destination
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe, built from $wpdb->prefix
         $dependent_questions = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM {$table_prefix}questions WHERE skip_next_question_id = %d",
+            "SELECT COUNT(*) FROM $questions_table WHERE skip_next_question_id = %d",
             $question_id
         ));
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
         if ($dependent_questions > 0) {
             wp_send_json_error(__('Cannot delete this question because other questions reference it as a skip destination. Please update the question skip settings first.', 'flowq'));
         }
 
         // Check if there are any responses for this question
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe, built from $wpdb->prefix
         $responses_count = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM {$table_prefix}responses WHERE question_id = %d",
+            "SELECT COUNT(*) FROM $responses_table WHERE question_id = %d",
             $question_id
         ));
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
         if ($responses_count > 0) {
             wp_send_json_error(sprintf(
@@ -386,8 +468,8 @@ class FlowQ_Question_Admin {
             wp_send_json_error(__('Insufficient permissions.', 'flowq'));
         }
 
-        $answer_id = intval($_POST['answer_id']);
-        $next_question_id = !empty($_POST['next_question_id']) ? intval($_POST['next_question_id']) : null;
+        $answer_id = $this->get_post_int('answer_id');
+        $next_question_id = $this->get_post_int('next_question_id') ?: null;
 
         if (!$answer_id) {
             wp_send_json_error(__('Invalid answer ID.', 'flowq'));
@@ -420,8 +502,8 @@ class FlowQ_Question_Admin {
             wp_send_json_error(__('Insufficient permissions.', 'flowq'));
         }
 
-        $question_id = intval($_POST['question_id']);
-        $skip_next_question_id = !empty($_POST['skip_next_question_id']) ? intval($_POST['skip_next_question_id']) : null;
+        $question_id = $this->get_post_int('question_id');
+        $skip_next_question_id = $this->get_post_int('skip_next_question_id') ?: null;
 
         if (!$question_id) {
             wp_send_json_error(__('Invalid question ID.', 'flowq'));

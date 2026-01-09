@@ -16,24 +16,63 @@ if (!defined('ABSPATH')) {
 class FlowQ_Template_Handler {
 
     /**
+     * Templates table name
+     *
+     * @var string
+     */
+    private $table_name;
+
+    /**
+     * Constructor
+     */
+    public function __construct() {
+        global $wpdb;
+        $this->table_name = $wpdb->prefix . 'flowq_templates';
+    }
+
+    /**
      * Get active template from database
      *
      * @return array|null Template data or null if not found
      */
     public function get_active_template() {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'flowq_templates';
-
         // Get active template ID
         $active_template_id = get_option('flowq_active_template', 1);
 
-        // Fetch template from database
-        $template = $wpdb->get_row(
-            $wpdb->prepare("SELECT * FROM {$table_name} WHERE id = %d", $active_template_id),
-            ARRAY_A
-        );
+        // Try to get from object cache first
+        $cache_key = 'flowq_active_template_' . $active_template_id;
+        $cache_group = 'flowq_templates';
+        $template = wp_cache_get($cache_key, $cache_group);
+
+        if ($template === false) {
+            // Cache miss - query database
+            global $wpdb;
+
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table with object caching
+            $template = $wpdb->get_row(
+                $wpdb->prepare("SELECT * FROM {$this->table_name} WHERE id = %d", $active_template_id),
+                ARRAY_A
+            );
+
+            // Store in cache for 24 hours (cache is invalidated when active template changes)
+            if ($template) {
+                wp_cache_set($cache_key, $template, $cache_group, 24 * HOUR_IN_SECONDS);
+            }
+        }
 
         return $template;
+    }
+
+    /**
+     * Invalidate active template cache
+     *
+     * @return void
+     */
+    public function invalidate_cache() {
+        $active_template_id = get_option('flowq_active_template', 1);
+        $cache_key = 'flowq_active_template_' . $active_template_id;
+        $cache_group = 'flowq_templates';
+        wp_cache_delete($cache_key, $cache_group);
     }
 
     /**
