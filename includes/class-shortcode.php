@@ -200,8 +200,12 @@ class FlowQ_Shortcode {
         if (!empty($custom_css)) {
             // Sanitize container ID for use in CSS selector (alphanumeric and hyphens only)
             $safe_container_id = preg_replace('/[^a-zA-Z0-9\-_]/', '', $container_id);
-            $inline_css = '#' . esc_attr($safe_container_id) . ' {' . wp_strip_all_tags($custom_css) . '}';
-            wp_add_inline_style('flowq-shortcode', $inline_css);
+            // Use security helper to sanitize CSS (removes dangerous patterns like expression(), javascript:, etc.)
+            $sanitized_css = FlowQ_Security_Helper::sanitize_css($custom_css);
+            if (!empty($sanitized_css)) {
+                $inline_css = '#' . esc_attr($safe_container_id) . ' {' . $sanitized_css . '}';
+                wp_add_inline_style('flowq-shortcode', $inline_css);
+            }
         }
 
         // Add inline initialization script using WordPress function

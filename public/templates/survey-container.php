@@ -19,7 +19,7 @@ $template_styles = $template_handler->get_template_styles();
     <!-- Participant Information Form (Initially Visible) -->
     <div id="participant-form-step" class="survey-step active">
         <?php
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- render_participant_form() handles escaping internally
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- render_participant_form() includes participant-form.php which uses esc_html(), esc_attr(), wp_kses_post() for all outputs
         echo $this->render_participant_form($survey);
         ?>
     </div>

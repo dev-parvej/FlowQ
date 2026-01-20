@@ -173,22 +173,40 @@ class FlowQ_REST_API {
 
     /**
      * Validate session
+     *
+     * Public endpoint with rate limiting and format validation.
      */
     public function validate_session($request) {
-        $session_id = $request->get_param('session_id');
-        $participant_manager = new FlowQ_Participant_Manager();
+        // Rate limiting: max 10 requests per minute per IP
+        $rate_check = FlowQ_Security_Helper::check_rate_limit('session_validate', 10, MINUTE_IN_SECONDS);
+        if (is_wp_error($rate_check)) {
+            return $rate_check;
+        }
 
+        $session_id = $request->get_param('session_id');
+
+        // Validate session ID format before database lookup
+        if (!FlowQ_Security_Helper::validate_session_format($session_id)) {
+            return new WP_Error(
+                'invalid_session',
+                __('Invalid session.', 'flowq'),
+                array('status' => 400)
+            );
+        }
+
+        $participant_manager = new FlowQ_Participant_Manager();
         $participant = $participant_manager->validate_session($session_id);
 
         if (is_wp_error($participant)) {
             return $participant;
         }
 
+        // Return only minimal necessary data (no PII)
         return rest_ensure_response(array(
             'valid' => true,
-            'session_id' => $session_id,
-            'survey_id' => $participant['survey_id'],
-            'participant_id' => $participant['id']
+            'session_id' => sanitize_text_field($session_id),
+            'survey_id' => intval($participant['survey_id']),
+            'participant_id' => intval($participant['id'])
         ));
     }
 

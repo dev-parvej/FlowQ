@@ -111,13 +111,13 @@ class FlowQ_Template_Handler {
 
         $css = '';
 
-        // Extract styles with defaults
-        $primary_color = $styles['primary_color'] ?? '#2271b1';
-        $background_color = $styles['background_color'] ?? '#ffffff';
-        $text_color = $styles['text_color'] ?? '#1d2327';
-        $border_radius = $styles['border_radius'] ?? '6px';
-        $font_family = $styles['font_family'] ?? 'system-ui, sans-serif';
-        $button_style = $styles['button_style'] ?? 'solid';
+        // Extract and sanitize styles with defaults
+        $primary_color = FlowQ_Security_Helper::sanitize_hex_color($styles['primary_color'] ?? '#2271b1');
+        $background_color = FlowQ_Security_Helper::sanitize_hex_color($styles['background_color'] ?? '#ffffff');
+        $text_color = FlowQ_Security_Helper::sanitize_hex_color($styles['text_color'] ?? '#1d2327');
+        $border_radius = $this->sanitize_border_radius($styles['border_radius'] ?? '6px');
+        $font_family = $this->sanitize_font_family($styles['font_family'] ?? 'system-ui, sans-serif');
+        $button_style = in_array($styles['button_style'] ?? 'solid', array('solid', 'gradient', 'elevated'), true) ? $styles['button_style'] : 'solid';
 
         // Base styles
         $css .= ".flowq-participant-form, .flowq-container {";
@@ -151,10 +151,14 @@ class FlowQ_Template_Handler {
         $css .= "color: {$text_color};";
         $css .= "}";
 
+        // Sanitize gradient colors if present
+        $gradient_start = isset($styles['gradient_start']) ? FlowQ_Security_Helper::sanitize_hex_color($styles['gradient_start']) : null;
+        $gradient_end = isset($styles['gradient_end']) ? FlowQ_Security_Helper::sanitize_hex_color($styles['gradient_end']) : null;
+
         // Primary buttons
         $css .= ".flowq-participant-form .btn-primary, .flowq-container .btn-primary {";
-        if ($button_style === 'gradient' && isset($styles['gradient_start']) && isset($styles['gradient_end'])) {
-            $css .= "background: linear-gradient(135deg, {$styles['gradient_start']}, {$styles['gradient_end']});";
+        if ($button_style === 'gradient' && $gradient_start && $gradient_end) {
+            $css .= "background: linear-gradient(135deg, {$gradient_start}, {$gradient_end});";
         } else {
             $css .= "background: {$primary_color};";
         }
@@ -163,33 +167,38 @@ class FlowQ_Template_Handler {
 
         // Primary button hover
         $css .= ".flowq-participant-form .btn-primary:hover:not(:disabled), .flowq-container .btn-primary:hover:not(:disabled) {";
-        if ($button_style === 'gradient' && isset($styles['gradient_start']) && isset($styles['gradient_end'])) {
-            $css .= "background: linear-gradient(135deg, {$styles['gradient_start']}, {$styles['gradient_end']});";
+        if ($button_style === 'gradient' && $gradient_start && $gradient_end) {
+            $css .= "background: linear-gradient(135deg, {$gradient_start}, {$gradient_end});";
             $css .= "opacity: 0.9;";
         } else {
             $css .= "background: " . $this->darken_color($primary_color, 10) . ";";
         }
         $css .= "}";
 
+        // Sanitize input colors if present
+        $input_bg_color = isset($styles['input_bg_color']) ? FlowQ_Security_Helper::sanitize_hex_color($styles['input_bg_color']) : null;
+        $input_border_color = isset($styles['input_border_color']) ? FlowQ_Security_Helper::sanitize_hex_color($styles['input_border_color']) : null;
+        $input_text_color = isset($styles['input_text_color']) ? FlowQ_Security_Helper::sanitize_hex_color($styles['input_text_color']) : null;
+
         // Form controls
         $css .= ".flowq-participant-form .form-control {";
         $css .= "border-radius: {$border_radius};";
         // Apply dark theme input styles if available
-        if (isset($styles['input_bg_color'])) {
-            $css .= "background-color: {$styles['input_bg_color']};";
+        if ($input_bg_color) {
+            $css .= "background-color: {$input_bg_color};";
         }
-        if (isset($styles['input_border_color'])) {
-            $css .= "border-color: {$styles['input_border_color']};";
+        if ($input_border_color) {
+            $css .= "border-color: {$input_border_color};";
         }
-        if (isset($styles['input_text_color'])) {
-            $css .= "color: {$styles['input_text_color']};";
+        if ($input_text_color) {
+            $css .= "color: {$input_text_color};";
         }
         $css .= "}";
 
         // Form control placeholder
-        if (isset($styles['input_text_color'])) {
+        if ($input_text_color) {
             $css .= ".flowq-participant-form .form-control::placeholder {";
-            $css .= "color: rgba(" . $this->hex_to_rgb($styles['input_text_color']) . ", 0.5);";
+            $css .= "color: rgba(" . $this->hex_to_rgb($input_text_color) . ", 0.5);";
             $css .= "}";
         }
 
@@ -200,10 +209,10 @@ class FlowQ_Template_Handler {
         $css .= "}";
 
         // Answer options
-        if (isset($styles['input_bg_color'])) {
+        if ($input_bg_color) {
             $css .= ".flowq-container .single-choice .answer-label {";
-            $css .= "background-color: {$styles['input_bg_color']};";
-            $css .= "border-color: {$styles['input_border_color']};";
+            $css .= "background-color: {$input_bg_color};";
+            $css .= "border-color: {$input_border_color};";
             $css .= "}";
         }
 
@@ -213,7 +222,7 @@ class FlowQ_Template_Handler {
         $css .= "}";
 
         // Answer text color on hover (white for dark themes)
-        if (isset($styles['input_bg_color'])) {
+        if ($input_bg_color) {
             $css .= ".flowq-container .single-choice .answer-label:hover .answer-text, .flowq-container .single-choice .answer-input:checked + .answer-label .answer-text {";
             $css .= "color: #ffffff;";
             $css .= "}";
@@ -226,8 +235,8 @@ class FlowQ_Template_Handler {
 
         // Progress bar
         $css .= ".flowq-container .progress-fill {";
-        if ($button_style === 'gradient' && isset($styles['gradient_start']) && isset($styles['gradient_end'])) {
-            $css .= "background: linear-gradient(90deg, {$styles['gradient_start']}, {$styles['gradient_end']});";
+        if ($button_style === 'gradient' && $gradient_start && $gradient_end) {
+            $css .= "background: linear-gradient(90deg, {$gradient_start}, {$gradient_end});";
         } else {
             $css .= "background: linear-gradient(90deg, {$primary_color}, " . $this->darken_color($primary_color, 15) . ");";
         }
@@ -235,17 +244,20 @@ class FlowQ_Template_Handler {
 
         // Card shadow for elevated button style
         if ($button_style === 'elevated' && isset($styles['card_shadow'])) {
-            $css .= ".flowq-participant-form .participant-form-container, .flowq-container .question-container {";
-            $css .= "box-shadow: {$styles['card_shadow']};";
-            $css .= "}";
+            $card_shadow = $this->sanitize_box_shadow($styles['card_shadow']);
+            if ($card_shadow) {
+                $css .= ".flowq-participant-form .participant-form-container, .flowq-container .question-container {";
+                $css .= "box-shadow: {$card_shadow};";
+                $css .= "}";
+            }
         }
 
         // Skip button styling
-        if (isset($styles['input_bg_color'])) {
+        if ($input_bg_color) {
             // Dark theme skip button
             $css .= ".flowq-container .skip-question-btn {";
-            $css .= "background: {$styles['input_bg_color']};";
-            $css .= "border-color: {$styles['input_border_color']};";
+            $css .= "background: {$input_bg_color};";
+            $css .= "border-color: {$input_border_color};";
             $css .= "color: {$text_color};";
             $css .= "}";
         }
@@ -253,7 +265,7 @@ class FlowQ_Template_Handler {
         $css .= ".flowq-container .skip-question-btn:hover {";
         $css .= "border-color: {$primary_color};";
         $css .= "background: rgba(" . $this->hex_to_rgb($primary_color) . ", 0.05);";
-        if (isset($styles['input_bg_color'])) {
+        if ($input_bg_color) {
             $css .= "color: #ffffff;";
         }
         $css .= "}";
@@ -279,6 +291,51 @@ class FlowQ_Template_Handler {
         $b = hexdec(substr($hex, 4, 2));
 
         return "{$r}, {$g}, {$b}";
+    }
+
+    /**
+     * Sanitize border radius value
+     *
+     * @param string $value Border radius value
+     * @return string Sanitized border radius
+     */
+    private function sanitize_border_radius($value) {
+        // Only allow numeric values with px, rem, em, or %
+        if (preg_match('/^\d+(\.\d+)?(px|rem|em|%)$/', $value)) {
+            return $value;
+        }
+        return '6px';
+    }
+
+    /**
+     * Sanitize font family value
+     *
+     * @param string $value Font family value
+     * @return string Sanitized font family
+     */
+    private function sanitize_font_family($value) {
+        // Remove potentially dangerous characters, allow letters, numbers, spaces, commas, quotes, hyphens
+        $sanitized = preg_replace('/[^a-zA-Z0-9\s,\'\"\-]/', '', $value);
+        return !empty($sanitized) ? $sanitized : 'system-ui, sans-serif';
+    }
+
+    /**
+     * Sanitize box shadow value
+     *
+     * @param string $value Box shadow value
+     * @return string Sanitized box shadow or empty string
+     */
+    private function sanitize_box_shadow($value) {
+        // Basic validation - only allow common box-shadow patterns
+        $value = FlowQ_Security_Helper::sanitize_css_value($value);
+        if (empty($value)) {
+            return '';
+        }
+        // Additional check for box-shadow specific patterns
+        if (preg_match('/^[\d\.\s]+(px|rem|em)[\s\d\.\-]*(px|rem|em)?[\s\d\.\-]*(px|rem|em)?[\s\d\.\-]*(px|rem|em)?[\s]*(rgba?\([^)]+\)|#[a-fA-F0-9]{3,6})?$/i', $value)) {
+            return $value;
+        }
+        return '';
     }
 
     /**
@@ -332,12 +389,12 @@ class FlowQ_Template_Handler {
             return;
         }
 
-        // Generate dynamic CSS
+        // Generate dynamic CSS (values are sanitized in generate_template_css)
         $css = $this->generate_template_css();
 
         // Add inline styles to the frontend stylesheet
-        // CSS is generated from admin-controlled template data and stripped of HTML tags
-        wp_add_inline_style('flowq-frontend', wp_strip_all_tags($css));
+        // CSS values are already sanitized in generate_template_css(), additional sanitization for safety
+        wp_add_inline_style('flowq-frontend', FlowQ_Security_Helper::sanitize_css($css));
     }
 
     /**

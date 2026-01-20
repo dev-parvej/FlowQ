@@ -878,7 +878,7 @@ class FlowQ_Frontend {
         // If there's an access error, show it instead of content
         if ($flowq_access_error) {
             return '<div class="flowq-access-denied">' .
-                   '<h2>' . __('Access Denied', 'flowq') . '</h2>' .
+                   '<h2>' . esc_html__('Access Denied', 'flowq') . '</h2>' .
                    '<p>' . esc_html($flowq_access_error) . '</p>' .
                    '</div>';
         }
